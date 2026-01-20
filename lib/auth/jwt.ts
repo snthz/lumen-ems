@@ -1,6 +1,6 @@
-import {ThingsBoardJwtClaims} from "@/lib/auth/types";
+import {UserJwtClaims} from "@/lib/auth/types";
 
-export function decodeJwt(token: string): ThingsBoardJwtClaims {
+export function decodeJwt(token: string): UserJwtClaims {
     const parts = token.split(".")
 
     if (parts.length !== 3) {
@@ -15,13 +15,13 @@ export function decodeJwt(token: string): ThingsBoardJwtClaims {
     ).toString("utf-8")
 
     try {
-        return JSON.parse(decoded) as ThingsBoardJwtClaims
+        return JSON.parse(decoded) as UserJwtClaims
     } catch {
         throw new Error("Invalid JWT payload")
     }
 }
 
-export function jwtIsExpired(claims: ThingsBoardJwtClaims): boolean {
+export function jwtIsExpired(claims: UserJwtClaims): boolean {
     const currentTime = Math.floor(Date.now() / 1000)
     return claims.exp < currentTime
 }

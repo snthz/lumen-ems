@@ -1,4 +1,4 @@
-export type ThingsBoardJwtClaims = {
+export type UserJwtClaims = {
     sub: string
     userId: string
     scopes: string[]
