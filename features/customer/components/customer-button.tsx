@@ -14,57 +14,12 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
     SidebarMenuSub,
-    SidebarMenuSubItem,
 } from '@/components/ui/sidebar'
 import { ChevronRight } from 'lucide-react'
 import { getCustomerRelationsAction } from '@/lib/thingsboard/actions/customer-relations.actions'
 import { Spinner } from '@/components/ui/spinner'
+import {AssetTreeItem} from "@/features/asset/components/asset-tree-item";
 
-function AssetTreeItem({ relation }: { relation: TbRelation }) {
-    const assetChildren =
-        relation.children?.filter(
-            child => child.to.entityType === 'ASSET'
-        ) ?? []
-
-    const hasChildren = assetChildren.length > 0
-    const [open, setOpen] = React.useState(false)
-
-    return (
-        <SidebarMenuSubItem className="pl-0">
-            <Collapsible open={open} onOpenChange={setOpen}>
-                <CollapsibleTrigger asChild>
-                    <SidebarMenuButton className="pl-0">
-            <span className="flex items-center gap-2 w-full">
-              <div className="w-4 h-px bg-neutral-200" />
-                {relation.additionalInfo?.name ?? relation.toName}
-            </span>
-
-                        {hasChildren && (
-                            <ChevronRight
-                                className={`transition-transform text-neutral-400 ${
-                                    open ? 'rotate-90' : ''
-                                }`}
-                            />
-                        )}
-                    </SidebarMenuButton>
-                </CollapsibleTrigger>
-
-                {hasChildren && (
-                    <CollapsibleContent>
-                        <SidebarMenuSub  className="pl-0">
-                            {assetChildren.map(child => (
-                                <AssetTreeItem
-                                    key={`${child.from.id}-${child.to.id}`}
-                                    relation={child}
-                                />
-                            ))}
-                        </SidebarMenuSub>
-                    </CollapsibleContent>
-                )}
-            </Collapsible>
-        </SidebarMenuSubItem>
-    )
-}
 
 export function CustomerButton({
                                    customer,

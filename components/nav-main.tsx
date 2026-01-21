@@ -5,7 +5,7 @@ import {
     SidebarMenu,
 } from "@/components/ui/sidebar"
 import {TbCustomersResponse} from "@/lib/thingsboard/thingsboard.types";
-import {CustomerButton} from "@/components/customer-button";
+import {CustomerButton} from "@/features/customer/components/customer-button";
 
 export function NavMain({
                             customers,
