@@ -1,12 +1,11 @@
+import { NextRequest, NextResponse } from "next/server";
 
-
-export async function GET(req: Request, res: Response) {
-
+export async function GET(req: NextRequest) {
     const forwardedFor = req.headers.get("x-forwarded-for");
     const ip =
         forwardedFor?.split(",")[0].trim() ??
         req.headers.get("x-real-ip") ??
-        "unknown"
+        "unknown";
 
-    return Response.json({ redis: "ok", ip })
+    return NextResponse.json({ redis: "ok", ip });
 }
