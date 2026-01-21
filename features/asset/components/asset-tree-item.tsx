@@ -49,7 +49,7 @@ export function AssetTreeItem({ relation }: { relation: TbRelation }) {
                     )}
                 >
                     <SidebarMenuButton
-                        className="pl-0 flex-1 cursor-pointer"
+                        className="pl-0 flex-1 cursor-pointer rounded-none"
                         onClick={handleSelect}
                     >
             <span className="flex items-center gap-2 w-full">

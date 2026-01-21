@@ -40,7 +40,7 @@ export function DeviceTreeItem({ relation }: { relation: TbRelation }) {
     }
 
     return (
-        <SidebarMenuSubItem className="pl-0">
+        <SidebarMenuSubItem className="pl-0 ">
             <Collapsible open={open} onOpenChange={setOpen}>
                 <div
                     className={clsx(
@@ -49,7 +49,7 @@ export function DeviceTreeItem({ relation }: { relation: TbRelation }) {
                     )}
                 >
                     <SidebarMenuButton
-                        className="pl-0 flex-1 cursor-pointer"
+                        className="pl-0 flex-1 cursor-pointer rounded-none"
                         onClick={handleSelect}
                     >
             <span className="flex items-center gap-2 w-full">
