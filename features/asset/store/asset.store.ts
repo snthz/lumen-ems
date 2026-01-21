@@ -1,8 +1,14 @@
 import { create } from 'zustand'
 import { TbRelation } from '@/lib/thingsboard/thingsboard.types'
 
+type SelectedAsset = TbRelation & {
+    parentId: string
+    parentType: string
+    parentName: string
+}
+
 interface AssetState {
-    selectedAssets: Record<string, TbRelation[]>
+    selectedAssets: Record<string, SelectedAsset>
     isAssetSelected: (assetId: string) => boolean
     toggleAssetSelected: (relation: TbRelation) => void
     setAssetSelected: (relation: TbRelation) => void
@@ -12,30 +18,40 @@ interface AssetState {
 export const useAssetStore = create<AssetState>((set, get) => ({
     selectedAssets: {},
 
-    isAssetSelected: (assetId: string) => {
+    isAssetSelected: assetId => {
         return assetId in get().selectedAssets
     },
-    toggleAssetSelected: (relation: TbRelation) => {
-        const isSelected = get().isAssetSelected(relation.to.id)
-        console.log(isSelected, relation.to.id, relation)
+
+    toggleAssetSelected: relation => {
+        const assetId = relation.to.id
+        const isSelected = get().isAssetSelected(assetId)
+
         if (isSelected) {
             set(state => {
-                const updatedSelectedAssets = { ...state.selectedAssets }
-                delete updatedSelectedAssets[relation.to.id]
-                return { selectedAssets: updatedSelectedAssets }
+                const next = { ...state.selectedAssets }
+                delete next[assetId]
+                return { selectedAssets: next }
             })
         } else {
             get().setAssetSelected(relation)
         }
     },
-    setAssetSelected: (relation: TbRelation) => {
-        const assetId = relation.to.id
-        const children = relation.children ?? []
+
+    setAssetSelected: relation => {
+        const selectedAsset: SelectedAsset = {
+            ...relation,
+            parentId: relation.from.id,
+            parentType: relation.from.entityType,
+            parentName:
+                relation.additionalInfo?.name ??
+                relation.toName ??
+                '',
+        }
 
         set(state => ({
             selectedAssets: {
                 ...state.selectedAssets,
-                [assetId]: children,
+                [relation.to.id]: selectedAsset,
             },
         }))
     },

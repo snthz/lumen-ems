@@ -48,7 +48,7 @@ export default async function RootLayout({
                                 </div>
                             </div>
                         </header>
-                        <div className="flex flex-1 flex-col gap-4 px-4 pt-0">
+                        <div className="flex flex-1 flex-col gap-4 pt-0">
                             {children}
                         </div>
                     </SidebarInset>
