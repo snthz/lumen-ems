@@ -3,3 +3,5 @@ export interface ActionResponse<T> {
     data?: T;
     error?: string;
 }
+
+export type ApiResponse<T> = Promise<ActionResponse<T>>;

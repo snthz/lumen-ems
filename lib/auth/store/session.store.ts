@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { UserJwtClaims } from "@/lib/auth/types";
+import { UserJwtClaims } from "@/lib/auth/auth.types";
 
 type SessionState = {
     user: UserJwtClaims | null;

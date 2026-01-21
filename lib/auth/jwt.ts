@@ -1,4 +1,4 @@
-import {UserJwtClaims} from "@/lib/auth/types";
+import {UserJwtClaims} from "@/lib/auth/auth.types";
 
 export function decodeJwt(token: string): UserJwtClaims {
     const parts = token.split(".")
