@@ -31,7 +31,7 @@ export function FilterSidebar() {
                     </Button>
                 </SheetTrigger>
 
-                <SheetContent side="right" className="w-[85vw] max-w-sm">
+                <SheetContent side="right" className="w-[85vw] max-w-sm overflow-auto">
                     <VisuallyHidden>
                         <SheetTitle>
                             Filtros
@@ -46,19 +46,21 @@ export function FilterSidebar() {
     return (
         <aside
             className={clsx(
-                'sticky top-0 h-screen border-l  transition-all duration-300 ease-in-out bg-background',
-                expanded ? 'w-80' : 'w-0'
+                'sticky top-0 h-full  bg-background transition-all duration-300 ease-in-out',
+                expanded ? 'w-80 border-l' : 'w-0 '
             )}
         >
+            {/* Toggle button */}
             <div
                 className={clsx(
-                    'absolute top-4 -left-5 z-20',
-                    expanded ? '' : '-left-2'
+                    'absolute top-8 z-20',
+                    expanded ? '-left-5' : '-left-5'
                 )}
             >
                 <Button
                     size="icon"
                     variant="outline"
+                    className={"cursor-pointer"}
                     onClick={() => setExpanded(v => !v)}
                 >
                     {expanded ? (
@@ -71,12 +73,15 @@ export function FilterSidebar() {
 
             <div
                 className={clsx(
-                    'h-full overflow-hidden  pt-4 transition-opacity duration-200',
+                    'flex h-full flex-col transition-opacity duration-200',
                     expanded ? 'opacity-100' : 'opacity-0 pointer-events-none'
                 )}
             >
-                <FilterContent />
+                <div className="flex-1 overflow-y-auto  ">
+                    <FilterContent />
+                </div>
             </div>
         </aside>
     )
+
 }
