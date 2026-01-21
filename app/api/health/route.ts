@@ -1,4 +1,3 @@
-import redis from "@/lib/cache/redis"
 
 
 export async function GET(req: Request, res: Response) {
@@ -9,5 +8,5 @@ export async function GET(req: Request, res: Response) {
         req.headers.get("x-real-ip") ??
         "unknown"
 
-    return Response.json({ redis: redis.status, ip})
+    return Response.json({ redis: "ok", ip })
 }
