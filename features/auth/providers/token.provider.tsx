@@ -56,6 +56,7 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
         if (existingToken) {
             hydrateFromToken(existingToken);
         }
+
     }, [searchToken, router, setCookie, setSession, clearSession, getCookie]);
 
     return <>{children}</>;

@@ -24,8 +24,6 @@ export async function loginAction(
         const claims = decodeJwt(token);
         const cookieStore = await cookies();
         cookieStore.set("auth_token", token, {
-            httpOnly: true,
-            secure: true,
             sameSite: "lax",
             expires: new Date(claims.exp * 1000),
             path: "/",
