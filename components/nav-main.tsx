@@ -2,11 +2,7 @@
 
 import {ChevronRight, type LucideIcon} from "lucide-react"
 
-import {
-    Collapsible,
-    CollapsibleContent,
-    CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+
 import {
     SidebarGroup,
     SidebarGroupLabel,
@@ -19,6 +15,7 @@ import {
     SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 import {TbCustomersResponse} from "@/lib/thingsboard/thingsboard.types";
+import {CustomerButton} from "@/components/customer-button";
 
 export function NavMain({
                             items,
@@ -43,17 +40,7 @@ export function NavMain({
                 {customers
                     .sort((a, b) => a.title.localeCompare(b.title))
                     .map((customer) => (
-                    <SidebarMenuItem key={customer.id.id}>
-                        <SidebarMenuButton className={"flex items-center justify-between"} tooltip={customer.title}>
-                            <div className={"flex items-center gap-2"}>
-                                <div className={"size-3 bg-neutral-200 rounded-md flex items-center justify-center p-3"}>
-                                    <span className={"uppercase text-xs"}>{customer.title.charAt(0)}</span>
-                                </div>
-                                <span>{customer.title}</span>
-                            </div>
-                            <ChevronRight/>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
+                    <CustomerButton key={customer.id.id} customer={customer}/>
                 ))}
                 {/*{items.map((item) => (*/}
                 {/*   <Collapsible key={item.title} asChild defaultOpen={item.isActive}>*/}

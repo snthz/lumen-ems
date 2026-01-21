@@ -45,3 +45,41 @@ export interface TbCustomerDto {
 }
 
 export type TbCustomersResponse = TbCustomerDto[];
+
+
+export type TbEntityType =
+    | 'DEVICE'
+    | 'ASSET'
+    | 'CUSTOMER'
+    | 'TENANT'
+    | 'DASHBOARD'
+    | 'USER';
+
+export interface TbEntityRef {
+    id: string;          // UUID
+    entityType: TbEntityType;
+}
+
+export type TbRelationTypeGroup =
+    | 'COMMON'
+    | 'ALARM'
+    | 'RULE_CHAIN';
+
+export interface TbRelation {
+    from: TbEntityRef;
+    to: TbEntityRef;
+
+    type: string;        // e.g. "Contains", "Manages"
+    typeGroup: TbRelationTypeGroup;
+
+    version: number;
+
+    fromName?: string;
+    toName?: string;
+
+    additionalInfo: Record<string, unknown>;
+    children?: TbRelation[];
+}
+
+
+export type TbRelationsResponse = TbRelation[];

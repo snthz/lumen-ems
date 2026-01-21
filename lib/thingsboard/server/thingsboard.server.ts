@@ -2,9 +2,9 @@ import {env} from "@/lib/config/env";
 import {getAuthToken} from "@/lib/utils";
 import {cookies} from "next/headers";
 import {ApiResponse} from "@/lib/services/types";
-import {TbCustomersResponse} from "@/lib/thingsboard/thingsboard.types";
+import {TbCustomersResponse, TbEntityType, TbRelation, TbRelationsResponse} from "@/lib/thingsboard/thingsboard.types";
 
-export async function getCustomersByEntityGroup():ApiResponse<TbCustomersResponse> {
+export async function getCustomersByEntityGroup(): ApiResponse<TbCustomersResponse> {
     const cookieStore = await cookies()
     const entityGroupId = env.EMS_GROUP_ID
     const response = await fetch(`${env.TB_API}/api/entityGroup/${entityGroupId}/customers?pageSize=1000&page=0&sortOrder=DESC`, {
@@ -22,5 +22,54 @@ export async function getCustomersByEntityGroup():ApiResponse<TbCustomersRespons
         success: true,
         data: json.data as TbCustomersResponse,
     }
+}
 
+export async function fetchAssetsRelationsRecursive(
+    fromId: string,
+    fromType: TbEntityType,
+    visited: Set<string>
+): Promise<TbRelation[]> {
+    const key = `${fromType}:${fromId}`
+
+    if (visited.has(key)) {
+        return []
+    }
+
+    visited.add(key)
+
+    const cookieStore = await cookies()
+
+    const res = await fetch(
+        `${env.TB_API}/api/relations/info?fromId=${fromId}&fromType=${fromType}`,
+        {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Authorization': `Bearer ${getAuthToken(cookieStore)}`,
+            },
+            next: {
+                revalidate: 120,
+            }
+        }
+    )
+
+    if (!res.ok) {
+        throw new Error(
+            `Error fetching relations for ${fromType}:${fromId}`
+        )
+    }
+
+
+    const json = await res.json()
+    const relations = (json ?? []) as TbRelation[]
+    let result: TbRelation[] = [...relations]
+
+    for (const rel of relations) {
+            rel.children = await fetchAssetsRelationsRecursive(
+                rel.to.id,
+                rel.to.entityType,
+                visited
+            )
+    }
+
+    return result
 }
