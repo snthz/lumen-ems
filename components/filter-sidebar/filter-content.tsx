@@ -9,12 +9,12 @@ export function FilterContent() {
     const devicesSelected = useDeviceStore(state => state.selectedDeviceId);
     return (
         <div className={"h-full relative"}>
-            <div className="px-6  py-4 border-b sticky  top-0 bg-white ">
+            <div className="px-6  py-4 border-b md:sticky  top-0 bg-white ">
                 <h2 className="text-sm font-medium text-neutral-600">
                     Filtros
                 </h2>
             </div>
-            <div className={"sticky top-0  left-0 p-4 "}>
+            <div className={"sticky top-0  left-0 p-4 bg-white"}>
                 <Button
                     disabled={!devicesSelected}
                     size="icon"

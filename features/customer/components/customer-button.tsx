@@ -20,7 +20,6 @@ import { getCustomerRelationsAction } from '@/lib/thingsboard/actions/customer-r
 import { Spinner } from '@/components/ui/spinner'
 import {AssetTreeItem} from "@/features/asset/components/asset-tree-item";
 
-
 export function CustomerButton({
                                    customer,
                                }: {
@@ -29,10 +28,8 @@ export function CustomerButton({
     const [isOpen, setIsOpen] = React.useState(false)
     const [relations, setRelations] = React.useState<TbRelation[] | null>(null)
     const [loading, setLoading] = React.useState(false)
-
     async function handleToggle(open: boolean) {
         setIsOpen(open)
-
         if (open && relations === null) {
             setLoading(true)
             const data = await getCustomerRelationsAction(customer.id.id)

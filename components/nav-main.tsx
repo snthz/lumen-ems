@@ -12,6 +12,7 @@ export function NavMain({
                         }: {
     customers: TbCustomersResponse
 }) {
+
     return (
         <SidebarGroup>
             <SidebarGroupLabel>Grupos</SidebarGroupLabel>
