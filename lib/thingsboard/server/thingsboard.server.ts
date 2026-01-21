@@ -2,7 +2,7 @@ import {env} from "@/lib/config/env";
 import {getAuthToken} from "@/lib/utils";
 import {cookies} from "next/headers";
 import {ApiResponse} from "@/lib/services/types";
-import {TbCustomersResponse, TbEntityType, TbRelation, TbRelationsResponse} from "@/lib/thingsboard/thingsboard.types";
+import {TbCustomersResponse, TbEntityType, TbRelation} from "@/lib/thingsboard/thingsboard.types";
 
 export async function getCustomersByEntityGroup(): ApiResponse<TbCustomersResponse> {
     const cookieStore = await cookies()

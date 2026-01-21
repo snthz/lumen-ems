@@ -5,7 +5,6 @@ import {TokenProvider} from "@/features/auth/providers/token.provider";
 import {Suspense} from "react";
 import {AppSidebar} from "@/components/app-sidebar";
 import {SidebarInset, SidebarProvider, SidebarTrigger} from "@/components/ui/sidebar";
-import {Separator} from "@/components/ui/separator";
 import {getCustomersByEntityGroup} from "@/lib/thingsboard/server/thingsboard.server";
 
 const geistSans = Geist({
@@ -39,14 +38,12 @@ export default async function RootLayout({
                 <SidebarProvider>
                     <AppSidebar customers={customers}/>
                     <SidebarInset>
-                        <header className="flex h-16 shrink-0 items-center gap-2">
+                        <header className="flex shrink-0 items-center gap-2 border-b">
                             <div className=" flex items-center justify-between gap-2 px-4">
                                 <div className={"flex items-center justify-center gap-1"}>
-                                    <SidebarTrigger className="-ml-1"/>
-                                    <Separator
-                                        orientation="vertical"
-                                        className="data-[orientation=vertical]:h-4"
-                                    />
+                                    <div className={"py-3 pr-2 border-r"}>
+                                        <SidebarTrigger className="-ml-1 cursor-pointer"/>
+                                    </div>
                                     <span className={"text-sm"}>Grafica</span>
                                 </div>
                             </div>

@@ -1,5 +1,5 @@
 import * as React from "react"
-import {LifeBuoy, type LucideIcon} from "lucide-react"
+import {CircleQuestionMark,  Settings} from "lucide-react"
 
 import {
   SidebarGroup,
@@ -17,11 +17,19 @@ export function NavSecondary({
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild size="sm">
+              <a href={"#"} >
+                <Settings/>
+                <span>Configuración</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem >
             <SidebarMenuButton asChild size="sm">
               <a href={"#"} >
-                <LifeBuoy/>
-                <span>Soporte</span>
+                <CircleQuestionMark/>
+                <span>Obtener ayuda</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

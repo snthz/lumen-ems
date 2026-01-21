@@ -65,6 +65,11 @@ export type TbRelationTypeGroup =
     | 'ALARM'
     | 'RULE_CHAIN';
 
+export interface TbRelationAdditionalInfo {
+    name?: string
+    default?: boolean
+}
+
 export interface TbRelation {
     from: TbEntityRef;
     to: TbEntityRef;
@@ -77,7 +82,7 @@ export interface TbRelation {
     fromName?: string;
     toName?: string;
 
-    additionalInfo: Record<string, unknown>;
+    additionalInfo: TbRelationAdditionalInfo | null;
     children?: TbRelation[];
 }
 
