@@ -28,10 +28,10 @@ export function AssetDevicesGroup({
         <SidebarMenuSubItem className="pl-0">
             <Collapsible open={open} onOpenChange={setOpen}>
                 <CollapsibleTrigger asChild>
-                    <SidebarMenuButton className="pl-0 font-medium">
+                    <SidebarMenuButton className="pl-0 font-medium rounded-none cursor-pointer">
             <span className="flex items-center gap-2 w-full">
               <div className="w-4 h-px bg-neutral-300 " />
-                <span className={"text-neutral-500 font-normal text-xs"}>{assetName}</span>
+                <span className={"text-neutral-500 font-normal text-xs"}>{assetName}s</span>
             </span>
 
                         <ChevronRight

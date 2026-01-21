@@ -54,7 +54,7 @@ export function AssetTreeItem({ relation }: { relation: TbRelation }) {
                     >
             <span className="flex items-center gap-2 w-full">
               <div className="w-4 h-px bg-neutral-200" />
-              <span className="text-xs">
+              <span className="text-xs ">
                 {relation.additionalInfo?.name ?? relation.toName}
               </span>
             </span>
