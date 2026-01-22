@@ -29,7 +29,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     {
         id: 'system_energy',
         label: 'Energía total',
-        keys: 'E',
+        keys: 'Edelta',
         unit: 'Wh',
         phaseScope: 'SYSTEM',
         category: 'ENERGY',

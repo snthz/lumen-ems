@@ -6,15 +6,18 @@ import { Button } from '@/components/ui/button'
 import { RefreshCcw } from 'lucide-react'
 import { TelemetryMetrics } from '@/features/telemetry/components/telemetry-metrics'
 import {useTelemetryFetcher} from "@/features/telemetry/hooks/use-telemetry-fetcher";
+import {useChartStore} from "@/features/chart/store/chart.store";
 
 export function FilterContent() {
     const { run } = useTelemetryFetcher()
     const [loading, setLoading] = React.useState(false)
+    const setSeries = useChartStore(state => state.setSeries)
 
     async function handleRefresh() {
         setLoading(true)
         try {
-            await run()
+            const result = await run()
+            setSeries(result)
         } finally {
             setLoading(false)
         }
