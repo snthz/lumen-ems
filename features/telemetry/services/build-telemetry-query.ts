@@ -29,7 +29,6 @@ export function buildTelemetryQuery(
         query.metricKeys.includes(g.keys)
     )
 
-    console.log('buildTelemetryQuery', selectedGroups, query)
     if (selectedGroups.length === 0) {
         throw new Error('No telemetry metrics selected')
     }

@@ -15,20 +15,26 @@ export function configureDateAxis(chart: am4charts.XYChart) {
 export function buildValueAxesByAxisKey(
     chart: am4charts.XYChart,
     axes: { axisKey: string; unit: string; factor: number }[],
-    series: any[]  // Pasa las series para detectar negativos
+    series: any[]
 ) {
     const axisMap = new Map<string, am4charts.ValueAxis>()
 
     axes.forEach((def, index) => {
         const axis = chart.yAxes.push(new am4charts.ValueAxis())
-
         axis.renderer.opposite = index % 2 === 1
         axis.renderer.labels.template.fontSize = 11
         axis.renderer.labels.template.fillOpacity = 0.6
 
-        axis.numberFormatter.numberFormat = `#,###.## '${def.unit}'`
+        axis.numberFormatter.numberFormat = `#,###.##`
 
-        // Detectar si hay valores negativos en este eje
+        axis.renderer.labels.template.adapter.add("text", (text, target) => {
+            if (text) {
+                const value = text.replace(/[^\d.,\-]/g, '')
+                return `${value} ${def.unit}`
+            }
+            return text
+        })
+
         const seriesForThisAxis = series.filter(s => s._resolvedAxisKey === def.axisKey)
         const hasNegatives = seriesForThisAxis.some(s =>
             s.data.some((p: any) => Number(p.value) < 0)
@@ -41,7 +47,6 @@ export function buildValueAxesByAxisKey(
         }
 
         axis.renderer.grid.template.strokeOpacity = index === 0 ? 0.15 : 0
-
         axisMap.set(def.axisKey, axis)
     })
 

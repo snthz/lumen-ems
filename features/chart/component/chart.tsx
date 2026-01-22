@@ -45,6 +45,15 @@ export function Chart() {
         const axisDefs = buildAxisDefinitions(sorted)
         const axisMap = buildValueAxesByAxisKey(chart, axisDefs, sorted)
 
+        console.log('🗺️ Series con escala:', sorted.map(s => ({
+            device: s.deviceName,
+            key: s.key,
+            originalUnit: s.unit,
+            resolvedAxisKey: s._resolvedAxisKey,
+            scaledUnit: s._scaledUnit,
+            factor: s._scaleFactor
+        })))
+
         const { bars, lines } = splitByChartType(sorted)
 
         bars.forEach(s => addSeriesToChart(chart, axisMap, s))

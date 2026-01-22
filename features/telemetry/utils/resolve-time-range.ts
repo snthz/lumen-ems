@@ -13,7 +13,7 @@ export function resolveTimeRange(
             return {
                 start,
                 end: now,
-                minIntervalSeconds: 900, // 15 min
+                minIntervalSeconds: 3600, // 15 min
             }
         }
 
@@ -28,7 +28,7 @@ export function resolveTimeRange(
             return {
                 start,
                 end,
-                minIntervalSeconds: 900, // 15 min
+                minIntervalSeconds: 3600, // 15 min
             }
         }
 

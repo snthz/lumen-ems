@@ -20,9 +20,8 @@ export function useTelemetryFetcher() {
             devices,
         })
 
-        const data = await  fetchTelemetryAction(built)
-            console.log(data)
-        return data
+        return await  fetchTelemetryAction(built)
+
     }
 
     return { run }
