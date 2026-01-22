@@ -105,7 +105,7 @@ export function addSeriesToChart(
     series.zIndex = s.chartType === "line" ? 10 : 1
 
     const color = getSeriesColor(`${s.deviceName}-${s.key}`)
-    series.name = `${s.deviceName} – ${s.key}`
+    series.name = `${s.deviceName}`
     series.stroke = color
     series.fill = color
 

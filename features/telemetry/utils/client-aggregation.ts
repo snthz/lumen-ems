@@ -12,8 +12,7 @@ export function aggregateClientSide(
     const buckets = new Map<number, number[]>()
 
     data.forEach(point => {
-        const ts = typeof point.ts === 'number' ? point.ts : new Date(point.ts).getTime()
-        const bucketKey = Math.floor(ts / intervalMs) * intervalMs
+        const bucketKey = Math.floor(point.ts / intervalMs) * intervalMs
 
         if (!buckets.has(bucketKey)) {
             buckets.set(bucketKey, [])
@@ -50,8 +49,6 @@ export function aggregateClientSide(
     })
 
     return result.sort((a, b) => {
-        const tsA = typeof a.ts === 'number' ? a.ts : new Date(a.ts).getTime()
-        const tsB = typeof b.ts === 'number' ? b.ts : new Date(b.ts).getTime()
-        return tsA - tsB
+        return a.ts - b.ts
     })
 }
