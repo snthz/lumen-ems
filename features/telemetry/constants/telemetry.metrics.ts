@@ -85,7 +85,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'FREQUENCY',
         chartType: 'line',
         agg: 'AVG',
-        favorite: true,
+        favorite: false,
     },
 
     // ───────── POWER FACTOR ─────────

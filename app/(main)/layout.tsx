@@ -6,6 +6,7 @@ import {Suspense} from "react";
 import {AppSidebar} from "@/components/sidebar/app-sidebar";
 import {SidebarInset, SidebarProvider, SidebarTrigger} from "@/components/ui/sidebar";
 import {getCustomersByEntityGroup} from "@/lib/thingsboard/server/thingsboard.server";
+import {Toaster} from "sonner";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -53,7 +54,9 @@ export default async function RootLayout({
                         </div>
                     </SidebarInset>
                 </SidebarProvider>
+
             </TokenProvider>
+            <Toaster/>
         </Suspense>
         </body>
         </html>
