@@ -3,7 +3,7 @@
 import React from 'react'
 import {
     TbCustomerDto,
-    TbRelation,
+    TbRelation, TbRelationsResponse,
 } from '@/lib/thingsboard/thingsboard.types'
 import {
     Collapsible,
@@ -35,7 +35,7 @@ export function CustomerButton({
 
         if (open && relations === null) {
             setLoading(true)
-            const data = await getCustomerRelationsAction(customer.id.id)
+            const data:TbRelationsResponse = await getCustomerRelationsAction(customer.id.id)
             setRelations(data)
             setLoading(false)
         }

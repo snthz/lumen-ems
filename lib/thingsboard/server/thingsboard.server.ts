@@ -121,7 +121,9 @@ export async function fetchTelemetryTimeseries(
             'Content-Type': 'application/json',
             'X-Authorization': `Bearer ${getAuthToken(cookieStore)}`,
         },
-        cache: 'no-store',
+        next: {
+            revalidate: 60,
+        }
     })
     if (!res.ok) {
         throw new Error(

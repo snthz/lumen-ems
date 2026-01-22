@@ -1,8 +1,7 @@
 'use server'
 
 import { fetchTelemetryTimeseries } from '@/lib/thingsboard/server/thingsboard.server'
-import { BuiltTelemetryQuery } from '@/features/telemetry/services/build-telemetry-query'
-import {AggregationType, TelemetrySeriesResult} from "@/features/telemetry/telemetry.types";
+import {AggregationType, BuiltTelemetryQuery, TelemetrySeriesResult} from "@/features/telemetry/telemetry.types";
 
 export async function fetchTelemetryAction(
     query: BuiltTelemetryQuery

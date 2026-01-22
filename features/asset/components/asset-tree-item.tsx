@@ -15,13 +15,13 @@ import {
 } from '@/components/ui/collapsible'
 import { useAssetStore } from '@/features/asset/store/asset.store'
 import clsx from 'clsx'
-import {Button} from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
+import { Spinner } from '@/components/ui/spinner'
 
 export function AssetTreeItem({ relation }: { relation: TbRelation }) {
     const selectedAssets = useAssetStore(state => state.selectedAssets)
-    const toggleAssetSelected = useAssetStore(
-        state => state.toggleAssetSelected
-    )
+    const loadingAssets = useAssetStore(state => state.loadingAssets)
+    const toggleAssetSelected = useAssetStore(state => state.toggleAssetSelected)
 
     const assetChildren =
         relation.children?.filter(
@@ -33,6 +33,7 @@ export function AssetTreeItem({ relation }: { relation: TbRelation }) {
 
     const assetId = relation.to.id
     const isSelected = Boolean(selectedAssets[assetId])
+    const isLoading = Boolean(loadingAssets[assetId])
 
     function handleSelect(e: React.MouseEvent) {
         e.stopPropagation()
@@ -51,15 +52,20 @@ export function AssetTreeItem({ relation }: { relation: TbRelation }) {
                     <SidebarMenuButton
                         className="pl-0 flex-1 cursor-pointer rounded-none"
                         onClick={handleSelect}
+                        disabled={isLoading}
                     >
-            <span className="flex items-center gap-2 w-full">
-              <div className="w-4 h-px bg-neutral-200" />
-              <span className="text-xs ">
-                {relation.additionalInfo?.name ?? relation.toName}
-              </span>
-            </span>
+                        <span className="flex items-center gap-2 w-full">
+                            <div className="w-4 h-px bg-neutral-200" />
+                            <span className="text-xs">
+                                {relation.additionalInfo?.name ?? relation.toName}
+                            </span>
+                        </span>
 
-                        {isSelected && (
+                        {isLoading && (
+                            <Spinner className="size-4 text-neutral-400 ml-2" />
+                        )}
+
+                        {isSelected && !isLoading && (
                             <Eye className="size-4 text-neutral-400 ml-2" />
                         )}
                     </SidebarMenuButton>
@@ -70,7 +76,7 @@ export function AssetTreeItem({ relation }: { relation: TbRelation }) {
                                 variant={"ghost"}
                                 size={"icon-sm"}
                                 onClick={e => e.stopPropagation()}
-                                className=" cursor-pointer "
+                                className="cursor-pointer"
                             >
                                 <ChevronRight
                                     className={clsx(

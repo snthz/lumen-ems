@@ -3,61 +3,100 @@ import { create } from 'zustand'
 export interface SelectedDevice {
     id: string
     name: string
+    assetId: string
+    assetName: string
 }
 
 interface DeviceState {
     /**
-     * assetId -> deviceId -> SelectedDevice
+     * Lista plana de devices seleccionados
      */
-    selectedDevices: Record<string, Record<string, SelectedDevice>>
+    selectedDevices: SelectedDevice[]
 
-    toggleDevice: (
-        assetId: string,
-        device: SelectedDevice
-    ) => void
+    /**
+     * Agregar un device (evita duplicados)
+     */
+    addDevice: (device: SelectedDevice) => void
 
+    /**
+     * Remover un device por ID
+     */
+    removeDevice: (deviceId: string) => void
+
+    /**
+     * Toggle device (agregar si no existe, remover si existe)
+     */
+    toggleDevice: (device: SelectedDevice) => void
+
+    /**
+     * Limpiar todos los devices de un asset específico
+     */
     clearDevicesByAsset: (assetId: string) => void
+
+    /**
+     * Limpiar todos los devices
+     */
     clearAllDevices: () => void
+
+    /**
+     * Verificar si un device está seleccionado
+     */
+    isDeviceSelected: (deviceId: string) => boolean
+
+    /**
+     * Obtener devices de un asset específico
+     */
+    getDevicesByAsset: (assetId: string) => SelectedDevice[]
 }
 
-export const useDeviceStore = create<DeviceState>((set) => ({
-    selectedDevices: {},
+export const useDeviceStore = create<DeviceState>((set, get) => ({
+    selectedDevices: [],
 
-    toggleDevice: (assetId, device) =>
+    addDevice: (device) =>
         set((state) => {
-            const assetDevices =
-                state.selectedDevices[assetId] ?? {}
-
-            const nextAssetDevices = { ...assetDevices }
-
-            if (nextAssetDevices[device.id]) {
-                // 🔴 ya existe → deseleccionar
-                delete nextAssetDevices[device.id]
-            } else {
-                // 🟢 no existe → seleccionar
-                nextAssetDevices[device.id] = device
+            // Evitar duplicados
+            if (state.selectedDevices.find(d => d.id === device.id)) {
+                return state
             }
 
             return {
-                selectedDevices: {
-                    ...state.selectedDevices,
-                    [assetId]: nextAssetDevices,
-                },
+                selectedDevices: [...state.selectedDevices, device]
+            }
+        }),
+
+    removeDevice: (deviceId) =>
+        set((state) => ({
+            selectedDevices: state.selectedDevices.filter(d => d.id !== deviceId)
+        })),
+
+    toggleDevice: (device) =>
+        set((state) => {
+            const exists = state.selectedDevices.find(d => d.id === device.id)
+
+            if (exists) {
+                // Ya existe → remover
+                return {
+                    selectedDevices: state.selectedDevices.filter(d => d.id !== device.id)
+                }
+            } else {
+                // No existe → agregar
+                return {
+                    selectedDevices: [...state.selectedDevices, device]
+                }
             }
         }),
 
     clearDevicesByAsset: (assetId) =>
-        set((state) => {
-            if (!state.selectedDevices[assetId]) {
-                return state
-            }
-
-            const next = { ...state.selectedDevices }
-            delete next[assetId]
-
-            return { selectedDevices: next }
-        }),
+        set((state) => ({
+            selectedDevices: state.selectedDevices.filter(d => d.assetId !== assetId)
+        })),
 
     clearAllDevices: () =>
-        set({ selectedDevices: {} }),
+        set({ selectedDevices: [] }),
+
+    isDeviceSelected: (deviceId) =>
+        get().selectedDevices.some(d => d.id === deviceId),
+
+    getDevicesByAsset: (assetId) =>
+        get().selectedDevices.filter(d => d.assetId === assetId),
 }))

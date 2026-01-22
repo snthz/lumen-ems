@@ -13,11 +13,19 @@ import {
     CollapsibleTrigger,
 } from '@/components/ui/collapsible'
 import { ChevronRight, Eye } from 'lucide-react'
-import {SelectedDevice, useDeviceStore} from '@/features/devices/store/device.store'
+import { SelectedDevice, useDeviceStore } from '@/features/devices/store/device.store'
 import clsx from 'clsx'
-import {Button} from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 
-export function DeviceTreeItem({ relation }: { relation: TbRelation }) {
+export function DeviceTreeItem({
+                                   relation,
+                                   assetId,
+                                   assetName
+                               }: {
+    relation: TbRelation
+    assetId: string
+    assetName: string
+}) {
     const deviceChildren =
         relation.children?.filter(
             child => child.to.entityType === 'DEVICE'
@@ -27,28 +35,33 @@ export function DeviceTreeItem({ relation }: { relation: TbRelation }) {
     const [open, setOpen] = React.useState(false)
 
     const toggleDevice = useDeviceStore(state => state.toggleDevice)
-    const selectedDevices = useDeviceStore(state => state.selectedDevices)
 
-    const assetId =  relation.from.id
-    const isSelected = Boolean(
-        selectedDevices[assetId]?.[relation.to.id]
+    const deviceId = relation.to.id
+
+    // ✅ OPCIÓN 1: Usar un selector que ya evalúa el resultado
+    const isSelected = useDeviceStore(state =>
+        state.selectedDevices.some(d => d.id === deviceId)
     )
 
     function handleSelect(e: React.MouseEvent) {
         e.stopPropagation()
-        const selected:SelectedDevice = {
-            id: relation.to.id,
+
+        const device: SelectedDevice = {
+            id: deviceId,
             name: relation.additionalInfo?.name || relation.toName || 'Device',
+            assetId: assetId,
+            assetName: assetName,
         }
-        toggleDevice(assetId, selected)
+
+        toggleDevice(device)
     }
 
     return (
-        <SidebarMenuSubItem className="pl-0 ">
+        <SidebarMenuSubItem className="pl-0">
             <Collapsible open={open} onOpenChange={setOpen}>
                 <div
                     className={clsx(
-                        'flex items-center justify-between pl-0  cursor-pointer rounded-none',
+                        'flex items-center justify-between pl-0 cursor-pointer rounded-none',
                         isSelected && 'bg-neutral-100/70'
                     )}
                 >
@@ -56,12 +69,12 @@ export function DeviceTreeItem({ relation }: { relation: TbRelation }) {
                         className="pl-0 flex-1 cursor-pointer rounded-none"
                         onClick={handleSelect}
                     >
-            <span className="flex items-center gap-2 w-full">
-              <div className="w-4 h-px bg-neutral-200" />
-              <span className="text-xs">
-                {relation.additionalInfo?.name ?? relation.toName}
-              </span>
-            </span>
+                        <span className="flex items-center gap-2 w-full">
+                            <div className="w-4 h-px bg-neutral-200" />
+                            <span className="text-xs">
+                                {relation.additionalInfo?.name ?? relation.toName}
+                            </span>
+                        </span>
 
                         {isSelected && (
                             <Eye className="size-4 text-neutral-400 ml-2" />
@@ -69,12 +82,12 @@ export function DeviceTreeItem({ relation }: { relation: TbRelation }) {
                     </SidebarMenuButton>
 
                     {hasChildren && (
-                        <CollapsibleTrigger asChild className={""}>
+                        <CollapsibleTrigger asChild>
                             <Button
                                 variant={"ghost"}
                                 size={"icon-sm"}
                                 onClick={e => e.stopPropagation()}
-                                className=" cursor-pointer rounded-none hover:bg-neutral-200/50 "
+                                className="cursor-pointer rounded-none hover:bg-neutral-200/50"
                             >
                                 <ChevronRight
                                     className={clsx(
@@ -94,6 +107,8 @@ export function DeviceTreeItem({ relation }: { relation: TbRelation }) {
                                 <DeviceTreeItem
                                     key={`${child.from.id}-${child.to.id}`}
                                     relation={child}
+                                    assetId={assetId}
+                                    assetName={assetName}
                                 />
                             ))}
                         </SidebarMenuSub>
