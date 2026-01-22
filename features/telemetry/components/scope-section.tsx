@@ -25,12 +25,12 @@ export function ScopeSection() {
                 >
                     <div className="flex items-center gap-2">
                         <RadioGroupItem value="SYSTEM" id="system" />
-                        <Label htmlFor="system">Sistema</Label>
+                        <Label htmlFor="system" className="cursor-pointer">Sistema</Label>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <RadioGroupItem value="PHASE" id="phase" />
-                        <Label htmlFor="phase">Por fase</Label>
+                        <Label htmlFor="phase" className="cursor-pointer">Por fase</Label>
                     </div>
                 </RadioGroup>
             </div>

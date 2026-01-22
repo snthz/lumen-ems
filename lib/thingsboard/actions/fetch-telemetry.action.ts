@@ -1,49 +1,59 @@
 'use server'
 
+import { BuiltTelemetryQuery } from '@/features/telemetry/telemetry.types'
 import { fetchTelemetryTimeseries } from '@/lib/thingsboard/server/thingsboard.server'
-import {AggregationType, BuiltTelemetryQuery, TelemetrySeriesResult} from "@/features/telemetry/telemetry.types";
+import { aggregateClientSide } from '@/features/telemetry/utils/client-aggregation'
 
-export async function fetchTelemetryAction(
-    query: BuiltTelemetryQuery
-) {
-    const results: TelemetrySeriesResult[] = []
+export async function fetchTelemetryAction(query: BuiltTelemetryQuery) {
+    const results = []
+    for (const device of query.devices) {
+        for (const seriesDef of query.series) {
+            try {
+                const params: any = {
+                    entityType: 'DEVICE',
+                    entityId: device.id,
+                    keys: seriesDef.key,
+                    startTs: query.startTs,
+                    endTs: query.endTs,
+                }
 
-    const seriesByAgg = query.series.reduce<
-        Record<'SUM' | 'AVG', typeof query.series>
-    >(
-        (acc: Record<'SUM' | 'AVG', typeof query.series>, s) => {
-            acc[s.agg as 'SUM' | 'AVG'].push(s)
-            return acc
-        },
-        { SUM: [], AVG: [] }
-    )
-    for (const [agg, series] of Object.entries(seriesByAgg)) {
-        if (series.length === 0) continue
+                if (seriesDef.strategy.tbInterval) {
+                    params.interval = seriesDef.strategy.tbInterval * 1000
+                }
 
-        const keys = series.map(s => s.key).join(',')
+                if (seriesDef.strategy.tbAgg !== 'NONE') {
+                    params.agg = seriesDef.strategy.tbAgg
+                }
 
-        for (const device of query.devices) {
-            const data = await fetchTelemetryTimeseries({
-                entityType: 'DEVICE',
-                entityId: device.id,
-                keys,
-                startTs: query.startTs,
-                endTs: query.endTs,
-                interval: Number(query.interval),
-                agg: agg as 'SUM' | 'AVG',
-            })
+                if (!seriesDef.strategy.tbInterval || seriesDef.strategy.tbAgg === 'NONE') {
+                    params.limit = 50000
+                    params.orderBy = 'ASC'
+                }
 
-            for (const s of series) {
+                const data = await fetchTelemetryTimeseries(params)
+                let points = data[seriesDef.key] || []
+
+                if (seriesDef.strategy.useClientAggregation && seriesDef.strategy.clientAgg && seriesDef.strategy.clientInterval) {
+                    points = aggregateClientSide(
+                        points,
+                        seriesDef.strategy.clientInterval,
+                        seriesDef.strategy.clientAgg
+                    )
+                }
+
                 results.push({
                     deviceId: device.id,
                     deviceName: device.name,
-                    key: s.key,
-                    agg: s.agg as AggregationType,
-                    unit: s.unit,
-                    chartType: s.chartType,
-                    axisKey: s.axisKey,
-                    data: data[s.key] ?? [],
+                    assetId: device.assetId,
+                    assetName: device.assetName,
+                    key: seriesDef.key,
+                    unit: seriesDef.unit,
+                    chartType: seriesDef.chartType,
+                    axisKey: seriesDef.axisKey,
+                    data: points,
                 })
+            } catch (error) {
+                console.error(`Error fetching ${seriesDef.key} for device ${device.name}:`, error)
             }
         }
     }

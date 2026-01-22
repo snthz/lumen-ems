@@ -38,7 +38,6 @@ export function DeviceTreeItem({
 
     const deviceId = relation.to.id
 
-    // ✅ OPCIÓN 1: Usar un selector que ya evalúa el resultado
     const isSelected = useDeviceStore(state =>
         state.selectedDevices.some(d => d.id === deviceId)
     )

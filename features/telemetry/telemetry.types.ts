@@ -10,75 +10,69 @@ export type MetricCategory =
 
 export type ChartType = 'line' | 'bar'
 
-export type AggregationType = 'AVG' | 'SUM' | 'MIN' | 'MAX'
+export type AggregationType = 'AVG' | 'SUM' | 'MIN' | 'MAX' | 'COUNT' | 'NONE'
+
+export type TimeRangeKey = '1d' | '2d' | '3d' | '1w' | '2w' | '1m' | '2m' | '3m' | '6m' | '1y'
 
 export interface TelemetryGroup {
-    id: string                // identificador interno
-    label: string             // para UI
-    keys: string              // "E1,E2,E3" | "P" | "V1,V2,V3"
+    id: string
+    label: string
+    keys: string
     unit: string
-    phaseScope: PhaseScope    // SYSTEM | PHASE
+    phaseScope: PhaseScope
     category: MetricCategory
     chartType: ChartType
     favorite: boolean
-    agg: AggregationType
+    agg: Exclude<AggregationType, 'NONE' | 'COUNT'>
 }
 
-export type TimePreset =
-    | 'TODAY'
-    | 'YESTERDAY'
-    | 'LAST_7_DAYS'
-    | 'LAST_30_DAYS'
-    | 'CUSTOM'
-
-export interface TimeRange {
-    preset: TimePreset
-    startDate: Date | null
-    endDate: Date | null
+export interface IntervalStrategy {
+    tbInterval: number | null
+    tbAgg: AggregationType
+    clientAgg: Exclude<AggregationType, 'NONE' | 'COUNT'> | null
+    clientInterval: number | null
+    useClientAggregation: boolean
 }
 
 export interface ResolvedTimeRange {
     start: Date
     end: Date
-    minIntervalSeconds: number
 }
+
 export interface QueryDevice {
     id: string
     name: string
+    assetId: string
+    assetName: string
 }
 
 export interface TelemetryQueryState {
     devices: QueryDevice[]
     metricKeys: string[]
-    resolution: number // en segundos
+    resolution: number
+    timeRange: TimeRangeKey
     phaseScope: PhaseScope
-    timeRange: TimeRange
 }
 
 export interface TelemetrySeriesResult {
     deviceId: string
     deviceName: string
+    assetId: string
+    assetName: string
     key: string
     unit: string
-    agg: AggregationType
-    chartType: 'line' | 'bar'
-    axisKey: "POWER" | "ENERGY" | "VOLTAGE" | "CURRENT" | "FREQUENCY" | "POWER_FACTOR" | string
-    data: any
+    chartType: ChartType
+    axisKey: MetricCategory | string
+    data: Array<{ ts: number; value: string | number }>
 }
 
 export interface TelemetrySeriesQuery {
     key: string
-    agg: 'AVG' | 'MIN' | 'MAX' | 'SUM' | 'COUNT' | 'NONE'
+    agg: Exclude<AggregationType, 'NONE' | 'COUNT'>
     unit: string
-    axisKey:
-        | 'POWER'
-        | 'ENERGY'
-        | 'VOLTAGE'
-        | 'CURRENT'
-        | 'FREQUENCY'
-        | 'POWER_FACTOR'
-        | string
-    chartType: 'line' | 'bar'
+    axisKey: MetricCategory | string
+    chartType: ChartType
+    strategy: IntervalStrategy
 }
 
 export interface BuiltTelemetryQuery {

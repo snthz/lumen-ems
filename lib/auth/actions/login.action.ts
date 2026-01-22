@@ -32,7 +32,6 @@ export async function loginAction(
             success: true,
         }
     } catch (error) {
-        console.log(error);
         return {
             success: false,
             error: "Error al iniciar sesión. Por favor, verifique sus credenciales e intente nuevamente.",

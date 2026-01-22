@@ -16,15 +16,14 @@ export function MetricsSection() {
         const metric = TELEMETRY_GROUPS.find(m => m.id === metricId)
         if (!metric) return
 
-        setMetricKeys(prev => {
-            const exists = prev.includes(metric.keys)
-            return exists
-                ? prev.filter(k => k !== metric.keys)
-                : [...prev, metric.keys]
-        })
+        const exists = metricKeys.includes(metric.keys)
+        const newKeys = exists
+            ? metricKeys.filter(k => k !== metric.keys)
+            : [...metricKeys, metric.keys]
+
+        setMetricKeys(newKeys)
     }
 
-    // Auto-seleccionar favoritos cuando cambia el phaseScope
     React.useEffect(() => {
         const favorites = TELEMETRY_GROUPS
             .filter(m => m.phaseScope === phaseScope && m.favorite)

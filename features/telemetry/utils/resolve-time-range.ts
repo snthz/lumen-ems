@@ -1,80 +1,72 @@
-import {ResolvedTimeRange, TimeRange} from '@/features/telemetry/telemetry.types'
+import { ResolvedTimeRange, TimeRangeKey } from '@/features/telemetry/telemetry.types'
+import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths } from 'date-fns'
 
-export function resolveTimeRange(
-    range: TimeRange
-): ResolvedTimeRange {
+export function resolveTimeRange(rangeKey: TimeRangeKey): ResolvedTimeRange {
     const now = new Date()
 
-    switch (range.preset) {
-        case 'TODAY': {
-            const start = new Date()
-            start.setHours(0, 0, 0, 0)
-
+    switch (rangeKey) {
+        case '1d':
             return {
-                start,
-                end: now,
-                minIntervalSeconds: 900, // 15 min
+                start: startOfDay(now),
+                end: endOfDay(now),
             }
-        }
 
-        case 'YESTERDAY': {
-            const start = new Date()
-            start.setDate(start.getDate() - 1)
-            start.setHours(0, 0, 0, 0)
-
-            const end = new Date(start)
-            end.setHours(23, 59, 59, 999)
-
+        case '2d':
+            const yesterday = subDays(now, 1)
             return {
-                start,
-                end,
-                minIntervalSeconds: 900, // 15 min
+                start: startOfDay(yesterday),
+                end: endOfDay(yesterday),
             }
-        }
 
-        case 'LAST_7_DAYS':
+        case '1w':
             return {
-                start: new Date(now.getTime() - 7 * 86400000),
-                end: now,
-                minIntervalSeconds: 3600, // 1 hour
+                start: startOfWeek(now, { weekStartsOn: 1 }),
+                end: endOfWeek(now, { weekStartsOn: 1 }),
             }
 
-        case 'LAST_30_DAYS':
+        case '2w':
+            const lastWeekStart = startOfWeek(subWeeks(now, 1), { weekStartsOn: 1 })
+            const lastWeekEnd = endOfWeek(subWeeks(now, 1), { weekStartsOn: 1 })
             return {
-                start: new Date(now.getTime() - 30 * 86400000),
-                end: now,
-                minIntervalSeconds: 21600, // 6 hours
+                start: lastWeekStart,
+                end: lastWeekEnd,
             }
 
-        case 'CUSTOM': {
-            if (!range.startDate || !range.endDate) {
-                throw new Error('CUSTOM range requires startDate and endDate')
-            }
-
-            const diffMs =
-                range.endDate.getTime() -
-                range.startDate.getTime()
-
-            const diffDays = diffMs / 86400000
-
-            let minIntervalSeconds = 900 // default
-
-            if (diffDays > 30) minIntervalSeconds = 86400
-            else if (diffDays > 7) minIntervalSeconds = 21600
-            else if (diffDays > 1) minIntervalSeconds = 3600
-
+        case '1m':
             return {
-                start: range.startDate,
-                end: range.endDate,
-                minIntervalSeconds,
+                start: startOfMonth(now),
+                end: endOfMonth(now),
             }
-        }
+
+        case '2m':
+            const lastMonth = subMonths(now, 1)
+            return {
+                start: startOfMonth(lastMonth),
+                end: endOfMonth(lastMonth),
+            }
+
+        case '3m':
+            return {
+                start: startOfMonth(subMonths(now, 2)),
+                end: endOfMonth(now),
+            }
+
+        case '6m':
+            return {
+                start: startOfMonth(subMonths(now, 5)),
+                end: endOfMonth(now),
+            }
+
+        case '1y':
+            return {
+                start: startOfYear(now),
+                end: endOfYear(now),
+            }
+
+        default:
+            return {
+                start: startOfDay(now),
+                end: endOfDay(now),
+            }
     }
-}
-
-export function formatInterval(seconds: number): string {
-    if (seconds >= 86400) return `${seconds / 86400} día(s)`
-    if (seconds >= 3600) return `${seconds / 3600} hora(s)`
-    if (seconds >= 60) return `${seconds / 60} min`
-    return `${seconds} seg`
 }

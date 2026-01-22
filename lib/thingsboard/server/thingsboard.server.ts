@@ -121,15 +121,14 @@ export async function fetchTelemetryTimeseries(
             'Content-Type': 'application/json',
             'X-Authorization': `Bearer ${getAuthToken(cookieStore)}`,
         },
-        next: {
-            revalidate: 60,
-        }
+        cache: 'no-store',
     })
+
     if (!res.ok) {
         throw new Error(
             `Error fetching telemetry for ${params.entityId}: ${res.statusText}`
         )
     }
 
-    return (await res.json()) as TelemetryTimeseriesResponse
+    return await res.json() as TelemetryTimeseriesResponse
 }

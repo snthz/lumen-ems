@@ -108,6 +108,7 @@ export function FilterContent() {
 
             <DevicesHierarchy />
             <TelemetryMetrics />
+
         </div>
     )
 }

@@ -92,7 +92,7 @@ export interface TbRelation {
 export type TbRelationsResponse = TbRelation[];
 
 export interface TelemetryTimeseriesPoint {
-    ts: number
+    ts: number | string
     value: string | number
 }
 
