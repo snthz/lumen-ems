@@ -27,7 +27,7 @@ export function buildValueAxesByAxisKey(
 
         axis.numberFormatter.numberFormat = `#,###.##`
 
-        axis.renderer.labels.template.adapter.add("text", (text, target) => {
+        axis.renderer.labels.template.adapter.add("text", (text) => {
             if (text) {
                 const value = text.replace(/[^\d.,\-]/g, '')
                 return `${value} ${def.unit}`

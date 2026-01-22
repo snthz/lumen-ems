@@ -1,15 +1,18 @@
-
 import { create } from 'zustand'
-import {PhaseScope, QueryDevice, TelemetryQueryState, TimePreset} from "@/features/telemetry/telemetry.types";
+import {
+    PhaseScope,
+    QueryDevice,
+    TelemetryQueryState,
+    TimePreset,
+} from '@/features/telemetry/telemetry.types'
+
 interface TelemetryQueryActions {
     setDevices: (devices: QueryDevice[]) => void
     setMetricKeys: (
-        keys:
-            | string[]
-            | ((prev: string[]) => string[])
+        keys: string[] | ((prev: string[]) => string[])
     ) => void
     setPhaseScope: (scope: PhaseScope) => void
-    setInterval: (interval: string) => void
+    setResolution: (resolution: number) => void
     setTimePreset: (preset: TimePreset) => void
     setCustomRange: (start: Date, end: Date) => void
     reset: () => void
@@ -18,7 +21,7 @@ interface TelemetryQueryActions {
 const initialState: TelemetryQueryState = {
     devices: [],
     metricKeys: [],
-    interval: '1h',
+    resolution: 3600, // default: 1 hora (en segundos)
     phaseScope: 'SYSTEM',
     timeRange: {
         preset: 'TODAY',
@@ -27,25 +30,24 @@ const initialState: TelemetryQueryState = {
     },
 }
 
-export const useTelemetryQueryStore = create<
-    TelemetryQueryState & TelemetryQueryActions
->((set) => ({
+export const useTelemetryQueryStore = create<TelemetryQueryState & TelemetryQueryActions>(set => ({
     ...initialState,
 
-    setDevices: (devices: QueryDevice[]) =>
-        set({ devices }),
-    setMetricKeys: (keys) =>
+    setDevices: (devices: QueryDevice[]) => set({ devices }),
+
+    setMetricKeys: keys =>
         set(state => ({
             metricKeys:
                 typeof keys === 'function'
                     ? keys(state.metricKeys)
                     : keys,
         })),
-    setPhaseScope: (phaseScope) => set({ phaseScope }),
-    setInterval: (interval) =>
-        set({ interval }),
 
-    setTimePreset: (preset) =>
+    setPhaseScope: phaseScope => set({ phaseScope }),
+
+    setResolution: resolution => set({ resolution }),
+
+    setTimePreset: preset =>
         set({
             timeRange: {
                 preset,

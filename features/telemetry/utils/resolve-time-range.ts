@@ -13,7 +13,7 @@ export function resolveTimeRange(
             return {
                 start,
                 end: now,
-                minIntervalSeconds: 3600, // 15 min
+                minIntervalSeconds: 900, // 15 min
             }
         }
 
@@ -28,7 +28,7 @@ export function resolveTimeRange(
             return {
                 start,
                 end,
-                minIntervalSeconds: 3600, // 15 min
+                minIntervalSeconds: 900, // 15 min
             }
         }
 
@@ -70,4 +70,11 @@ export function resolveTimeRange(
             }
         }
     }
+}
+
+export function formatInterval(seconds: number): string {
+    if (seconds >= 86400) return `${seconds / 86400} día(s)`
+    if (seconds >= 3600) return `${seconds / 3600} hora(s)`
+    if (seconds >= 60) return `${seconds / 60} min`
+    return `${seconds} seg`
 }

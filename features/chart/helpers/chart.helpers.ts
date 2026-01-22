@@ -1,4 +1,3 @@
-import * as am4core from "@amcharts/amcharts4/core"
 import * as am4charts from "@amcharts/amcharts4/charts"
 import { createBarSeries, createLineSeries } from "@/features/chart/config/chart.series"
 import { getSeriesColor } from "@/features/chart/utils/series-color.utils"

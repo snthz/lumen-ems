@@ -49,11 +49,10 @@ export interface QueryDevice {
 
 export interface TelemetryQueryState {
     devices: QueryDevice[]
-    metricKeys: string[]        // ["P", "E", "E1,E2,E3"]
-    interval: string            // ej: "5m", "1h" (por ahora fijo)
-    timeRange: TimeRange
+    metricKeys: string[]
+    resolution: number // en segundos
     phaseScope: PhaseScope
-
+    timeRange: TimeRange
 }
 
 export interface TelemetrySeriesResult {
@@ -65,4 +64,27 @@ export interface TelemetrySeriesResult {
     chartType: 'line' | 'bar'
     axisKey: "POWER" | "ENERGY" | "VOLTAGE" | "CURRENT" | "FREQUENCY" | "POWER_FACTOR" | string
     data: any
+}
+
+export interface TelemetrySeriesQuery {
+    key: string
+    agg: 'AVG' | 'MIN' | 'MAX' | 'SUM' | 'COUNT' | 'NONE'
+    unit: string
+    axisKey:
+        | 'POWER'
+        | 'ENERGY'
+        | 'VOLTAGE'
+        | 'CURRENT'
+        | 'FREQUENCY'
+        | 'POWER_FACTOR'
+        | string
+    chartType: 'line' | 'bar'
+}
+
+export interface BuiltTelemetryQuery {
+    devices: QueryDevice[]
+    series: TelemetrySeriesQuery[]
+    startTs: number
+    endTs: number
+    interval: string
 }
