@@ -48,6 +48,8 @@ export function AssetDevicesGroup({
                             <DeviceTreeItem
                                 key={`${rel.from.id}-${rel.to.id}`}
                                 relation={rel}
+                                assetName={assetName}
+                                assetId={rel.from.id}
                             />
                         ))}
                     </SidebarMenuSub>
