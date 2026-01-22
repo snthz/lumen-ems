@@ -2,17 +2,8 @@
 
 import { fetchTelemetryTimeseries } from '@/lib/thingsboard/server/thingsboard.server'
 import { BuiltTelemetryQuery } from '@/features/telemetry/services/build-telemetry-query'
-import {AggregationType} from "@/features/telemetry/telemetry.types";
+import {AggregationType, TelemetrySeriesResult} from "@/features/telemetry/telemetry.types";
 
-export interface TelemetrySeriesResult {
-    deviceId: string
-    deviceName: string
-    key: string
-    agg: AggregationType
-    unit: string
-    chartType: 'line' | 'bar'
-    data: any
-}
 export async function fetchTelemetryAction(
     query: BuiltTelemetryQuery
 ) {
@@ -51,6 +42,7 @@ export async function fetchTelemetryAction(
                     agg: s.agg as AggregationType,
                     unit: s.unit,
                     chartType: s.chartType,
+                    axisKey: s.axisKey,
                     data: data[s.key] ?? [],
                 })
             }

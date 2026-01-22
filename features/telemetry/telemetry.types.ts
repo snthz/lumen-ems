@@ -55,3 +55,14 @@ export interface TelemetryQueryState {
     phaseScope: PhaseScope
 
 }
+
+export interface TelemetrySeriesResult {
+    deviceId: string
+    deviceName: string
+    key: string
+    unit: string
+    agg: AggregationType
+    chartType: 'line' | 'bar'
+    axisKey: "POWER" | "ENERGY" | "VOLTAGE" | "CURRENT" | "FREQUENCY" | "POWER_FACTOR" | string
+    data: any
+}

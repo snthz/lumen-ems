@@ -9,11 +9,13 @@ export interface TelemetrySeriesQuery {
     key: string
     agg: 'AVG' | 'MIN' | 'MAX' | 'SUM' | 'COUNT' | 'NONE'
     unit: string
+    axisKey: 'POWER' | 'ENERGY' | 'VOLTAGE' | 'CURRENT' | 'FREQUENCY' | 'POWER_FACTOR' | string
     chartType: 'line' | 'bar'
 }
 export interface BuiltTelemetryQuery {
     devices: QueryDevice[]
     series: TelemetrySeriesQuery[]
+
     startTs: number
     endTs: number
     interval: string
@@ -38,6 +40,7 @@ export function buildTelemetryQuery(
             agg: group.agg,
             unit: group.unit,
             chartType: group.chartType,
+            axisKey: group.category,
         }))
     )
 

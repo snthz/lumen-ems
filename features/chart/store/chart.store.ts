@@ -1,14 +1,6 @@
 // features/chart/store/chart.store.ts
 import { create } from 'zustand'
-
-export interface TelemetrySeriesResult {
-    deviceId: string
-    deviceName: string
-    key: string
-    unit: string
-    chartType: 'line' | 'bar'
-    data: { ts: number; value: string }[]
-}
+import {TelemetrySeriesResult} from "@/features/telemetry/telemetry.types";
 
 interface ChartState {
     series: TelemetrySeriesResult[]
