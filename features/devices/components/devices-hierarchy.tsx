@@ -11,7 +11,7 @@ export function DevicesHierarchy() {
 
     return (
         <div className={""}>
-            <div className={"border-y py-2"}>
+            <div className={"border-b py-2"}>
                 <span className="px-6 text-sm text-neutral-500">Dispositivos</span>
             </div>
             {assetEntries.length === 0 ? (

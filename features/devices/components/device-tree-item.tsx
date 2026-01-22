@@ -13,7 +13,7 @@ import {
     CollapsibleTrigger,
 } from '@/components/ui/collapsible'
 import { ChevronRight, Eye } from 'lucide-react'
-import { useDeviceStore } from '@/features/devices/store/device.store'
+import {SelectedDevice, useDeviceStore} from '@/features/devices/store/device.store'
 import clsx from 'clsx'
 import {Button} from "@/components/ui/button";
 
@@ -36,7 +36,11 @@ export function DeviceTreeItem({ relation }: { relation: TbRelation }) {
 
     function handleSelect(e: React.MouseEvent) {
         e.stopPropagation()
-        toggleDevice(assetId, relation.to.id)
+        const selected:SelectedDevice = {
+            id: relation.to.id,
+            name: relation.additionalInfo?.name || relation.toName || 'Device',
+        }
+        toggleDevice(assetId, selected)
     }
 
     return (

@@ -46,21 +46,21 @@ export function FilterSidebar() {
     return (
         <aside
             className={clsx(
-                'sticky top-0 h-full  bg-background transition-all duration-300 ease-in-out',
+                'sticky top-0 h-full  bg-background transition-all duration-300 ease-in-out ',
                 expanded ? 'w-80 border-l' : 'w-0 '
             )}
         >
             {/* Toggle button */}
             <div
                 className={clsx(
-                    'absolute top-8 z-20',
+                    'absolute top-8 z-30 ',
                     expanded ? '-left-5' : '-left-5'
                 )}
             >
                 <Button
                     size="icon"
                     variant="outline"
-                    className={"cursor-pointer"}
+                    className={"cursor-pointer "}
                     onClick={() => setExpanded(v => !v)}
                 >
                     {expanded ? (

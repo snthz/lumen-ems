@@ -3,7 +3,7 @@ import {Geist, Geist_Mono} from "next/font/google";
 import "../globals.css";
 import {TokenProvider} from "@/features/auth/providers/token.provider";
 import {Suspense} from "react";
-import {AppSidebar} from "@/components/app-sidebar";
+import {AppSidebar} from "@/components/sidebar/app-sidebar";
 import {SidebarInset, SidebarProvider, SidebarTrigger} from "@/components/ui/sidebar";
 import {getCustomersByEntityGroup} from "@/lib/thingsboard/server/thingsboard.server";
 
@@ -40,7 +40,7 @@ export default async function RootLayout({
                     <SidebarInset>
                         <header className="flex shrink-0 items-center gap-2 border-b">
                             <div className=" flex items-center justify-between gap-2 px-4">
-                                <div className={"flex items-center justify-center gap-1"}>
+                                <div className={"flex items-center justify-center gap-4"}>
                                     <div className={"py-3 pr-2 border-r"}>
                                         <SidebarTrigger className="-ml-1 cursor-pointer"/>
                                     </div>

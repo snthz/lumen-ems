@@ -1,6 +1,4 @@
-import {LoginForm} from "@/components/login-form"
-import {Suspense} from "react";
-
+import {LoginForm} from "@/features/auth/components/login-form"
 export default function LoginPage() {
     return (
             <div className="grid min-h-svh lg:grid-cols-2 ">
