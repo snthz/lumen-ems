@@ -2,7 +2,13 @@ import {env} from "@/lib/config/env";
 import {getAuthToken} from "@/lib/utils";
 import {cookies} from "next/headers";
 import {ApiResponse} from "@/lib/services/types";
-import {TbCustomersResponse, TbEntityType, TbRelation} from "@/lib/thingsboard/thingsboard.types";
+import {
+    TbCustomersResponse,
+    TbEntityType,
+    TbRelation,
+    TelemetryQueryParams,
+    TelemetryTimeseriesResponse
+} from "@/lib/thingsboard/thingsboard.types";
 
 export async function getCustomersByEntityGroup(): ApiResponse<TbCustomersResponse> {
     const cookieStore = await cookies()
@@ -72,4 +78,56 @@ export async function fetchAssetsRelationsRecursive(
     }
 
     return result
+}
+
+export async function fetchTelemetryTimeseries(
+    params: TelemetryQueryParams
+): Promise<TelemetryTimeseriesResponse> {
+    const cookieStore = await cookies()
+
+    const query = new URLSearchParams({
+        keys: params.keys,
+        startTs: String(params.startTs),
+        endTs: String(params.endTs),
+    })
+
+    if (params.interval !== undefined) {
+        query.set('interval', String(params.interval))
+    }
+
+    if (params.agg) {
+        query.set('agg', params.agg)
+    }
+
+    if (params.limit) {
+        query.set('limit', String(params.limit))
+    }
+
+    if (params.orderBy) {
+        query.set('orderBy', params.orderBy)
+    }
+
+    if (params.useStrictDataTypes !== undefined) {
+        query.set(
+            'useStrictDataTypes',
+            String(params.useStrictDataTypes)
+        )
+    }
+
+    const url = `${env.TB_API}/api/plugins/telemetry/${params.entityType}/${params.entityId}/values/timeseries?${query.toString()}`
+
+    const res = await fetch(url, {
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Authorization': `Bearer ${getAuthToken(cookieStore)}`,
+        },
+        cache: 'no-store',
+    })
+    if (!res.ok) {
+        throw new Error(
+            `Error fetching telemetry for ${params.entityId}: ${res.statusText}`
+        )
+    }
+
+    return (await res.json()) as TelemetryTimeseriesResponse
 }

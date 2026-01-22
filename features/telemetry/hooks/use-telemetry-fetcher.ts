@@ -1,33 +1,29 @@
 'use client'
 
 import { useTelemetryQueryStore } from '@/features/telemetry/store/telemetry-query.store'
-import { buildTelemetryQuery } from '@/features/telemetry/services/build-telemetry-query'
-import { fetchTelemetry } from '@/features/telemetry/server/telemetry.server'
 import { useDeviceStore } from '@/features/devices/store/device.store'
+import { buildTelemetryQuery } from '@/features/telemetry/services/build-telemetry-query'
+import {fetchTelemetryAction} from "@/lib/thingsboard/actions/fetch-telemetry.action";
+
 export function useTelemetryFetcher() {
     const query = useTelemetryQueryStore()
-    const selectedDevices = useDeviceStore(
-        state => state.selectedDevices
-    )
+    const selectedDevices = useDeviceStore(s => s.selectedDevices)
 
     async function run() {
         const devices = Object.values(selectedDevices)
-            .flatMap(assetDevices =>
-                Object.values(assetDevices)
+            .flatMap(asset =>
+                Object.values(asset)
             )
-            .map(d => ({
-                id: d.id,
-                name: d.name,
-            }))
 
-        const builtQuery = buildTelemetryQuery({
+        const built = buildTelemetryQuery({
             ...query,
             devices,
         })
 
-        return fetchTelemetry(builtQuery)
+        const data = await  fetchTelemetryAction(built)
+            console.log(data)
+        return data
     }
-
 
     return { run }
 }

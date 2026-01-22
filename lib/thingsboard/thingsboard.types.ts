@@ -1,3 +1,5 @@
+import {AggregationType} from "@/features/telemetry/telemetry.types";
+
 export type EntityType = 'CUSTOMER' | 'TENANT';
 
 export interface EntityId {
@@ -88,3 +90,26 @@ export interface TbRelation {
 
 
 export type TbRelationsResponse = TbRelation[];
+
+export interface TelemetryTimeseriesPoint {
+    ts: number
+    value: string | number
+}
+
+export type TelemetryTimeseriesResponse = Record<
+    string, // key (ej: "P", "E", "V1")
+    TelemetryTimeseriesPoint[]
+>
+
+export interface TelemetryQueryParams {
+    entityType: 'DEVICE'
+    entityId: string
+    keys: string // "P,E,V1"
+    startTs: number
+    endTs: number
+    interval?: number
+    agg?: AggregationType
+    limit?: number
+    orderBy?: 'ASC' | 'DESC'
+    useStrictDataTypes?: boolean
+}

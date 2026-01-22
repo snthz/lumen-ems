@@ -10,6 +10,8 @@ export type MetricCategory =
 
 export type ChartType = 'line' | 'bar'
 
+export type AggregationType = 'AVG' | 'SUM' | 'MIN' | 'MAX'
+
 export interface TelemetryGroup {
     id: string                // identificador interno
     label: string             // para UI
@@ -19,6 +21,7 @@ export interface TelemetryGroup {
     category: MetricCategory
     chartType: ChartType
     favorite: boolean
+    agg: AggregationType
 }
 
 export type TimePreset =
@@ -34,7 +37,11 @@ export interface TimeRange {
     endDate: Date | null
 }
 
-
+export interface ResolvedTimeRange {
+    start: Date
+    end: Date
+    minIntervalSeconds: number
+}
 export interface QueryDevice {
     id: string
     name: string

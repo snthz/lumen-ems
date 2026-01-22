@@ -1,6 +1,7 @@
-import {TelemetryGroup} from "@/features/telemetry/telemetry.types";
+import { TelemetryGroup } from '@/features/telemetry/telemetry.types'
 
 export const TELEMETRY_GROUPS: TelemetryGroup[] = [
+    // ───────── POWER ─────────
     {
         id: 'system_power',
         label: 'Potencia total',
@@ -9,6 +10,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         phaseScope: 'SYSTEM',
         category: 'POWER',
         chartType: 'line',
+        agg: 'AVG',
         favorite: true,
     },
     {
@@ -19,8 +21,11 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         phaseScope: 'PHASE',
         category: 'POWER',
         chartType: 'line',
+        agg: 'AVG',
         favorite: true,
     },
+
+    // ───────── ENERGY ─────────
     {
         id: 'system_energy',
         label: 'Energía total',
@@ -29,6 +34,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         phaseScope: 'SYSTEM',
         category: 'ENERGY',
         chartType: 'bar',
+        agg: 'SUM',
         favorite: true,
     },
     {
@@ -39,6 +45,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         phaseScope: 'PHASE',
         category: 'ENERGY',
         chartType: 'bar',
+        agg: 'SUM',
         favorite: true,
     },
 
@@ -51,6 +58,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         phaseScope: 'PHASE',
         category: 'VOLTAGE',
         chartType: 'line',
+        agg: 'AVG',
         favorite: false,
     },
 
@@ -63,8 +71,11 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         phaseScope: 'PHASE',
         category: 'CURRENT',
         chartType: 'line',
+        agg: 'AVG',
         favorite: false,
     },
+
+    // ───────── FREQUENCY ─────────
     {
         id: 'frequency',
         label: 'Frecuencia',
@@ -73,8 +84,11 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         phaseScope: 'SYSTEM',
         category: 'FREQUENCY',
         chartType: 'line',
+        agg: 'AVG',
         favorite: true,
     },
+
+    // ───────── POWER FACTOR ─────────
     {
         id: 'power_factor',
         label: 'Factor de potencia',
@@ -83,6 +97,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         phaseScope: 'PHASE',
         category: 'POWER_FACTOR',
         chartType: 'line',
+        agg: 'AVG',
         favorite: false,
     },
 ]

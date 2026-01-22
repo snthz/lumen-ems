@@ -1,24 +1,51 @@
 import { resolveTimeRange } from '@/features/telemetry/utils/resolve-time-range'
-import {QueryDevice, TelemetryQueryState} from '@/features/telemetry/telemetry.types'
+import {
+    QueryDevice,
+    TelemetryQueryState,
+} from '@/features/telemetry/telemetry.types'
+import { TELEMETRY_GROUPS } from '@/features/telemetry/constants/telemetry.metrics'
 
+export interface TelemetrySeriesQuery {
+    key: string
+    agg: 'AVG' | 'MIN' | 'MAX' | 'SUM' | 'COUNT' | 'NONE'
+    unit: string
+    chartType: 'line' | 'bar'
+}
 export interface BuiltTelemetryQuery {
-    deviceIds: QueryDevice[]
-    metricKeys: string[]        // ya listas para la API
-    startTs: number             // timestamp ms
-    endTs: number               // timestamp ms
+    devices: QueryDevice[]
+    series: TelemetrySeriesQuery[]
+    startTs: number
+    endTs: number
     interval: string
 }
-
 export function buildTelemetryQuery(
     query: TelemetryQueryState
 ): BuiltTelemetryQuery {
-    const { start, end } = resolveTimeRange(query.timeRange)
+    const { start, end, minIntervalSeconds } =
+        resolveTimeRange(query.timeRange)
+    const selectedGroups = TELEMETRY_GROUPS.filter(g =>
+        query.metricKeys.includes(g.keys)
+    )
+
+    console.log('buildTelemetryQuery', selectedGroups, query)
+    if (selectedGroups.length === 0) {
+        throw new Error('No telemetry metrics selected')
+    }
+
+    const series = selectedGroups.flatMap(group =>
+        group.keys.split(',').map(key => ({
+            key,
+            agg: group.agg,
+            unit: group.unit,
+            chartType: group.chartType,
+        }))
+    )
 
     return {
-        deviceIds: query.devices,
-        metricKeys: query.metricKeys,
+        devices: query.devices,
+        series,
         startTs: start.getTime(),
         endTs: end.getTime(),
-        interval: query.interval,
+        interval: String(minIntervalSeconds * 1000),
     }
 }
