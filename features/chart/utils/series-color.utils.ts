@@ -1,12 +1,22 @@
 import * as am4core from "@amcharts/amcharts4/core"
 const PALETTE = [
-    "#2563eb", // blue-600
-    "#16a34a", // green-600
-    "#dc2626", // red-600
-    "#9333ea", // purple-600
-    "#ea580c", // orange-600
-    "#0d9488", // teal-600
+    "#C3566F", // muted red / ct1
+    "#5E6FAE", // muted indigo / ct2
+    "#6DB3A2", // muted teal / ct3
+
+    "#9C4F64", // darker red
+    "#4F5E9E", // darker indigo
+    "#4E9A89", // darker teal
+
+    "#D07C8E", // lighter red
+    "#7C8BC7", // lighter indigo
+    "#8CCBBE", // lighter teal
+
+    "#8B3E52", // deep red
+    "#3E4B87", // deep indigo
+    "#2F7F6E", // deep teal
 ]
+
 
 export function getSeriesColor(
     key: string

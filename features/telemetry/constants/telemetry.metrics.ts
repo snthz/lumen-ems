@@ -40,7 +40,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     {
         id: 'phase_energy',
         label: 'Energía por fase',
-        keys: 'E1,E2,E3',
+        keys: 'E1delta,E2delta,E3delta',
         unit: 'Wh',
         phaseScope: 'PHASE',
         category: 'ENERGY',

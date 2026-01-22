@@ -24,17 +24,14 @@ export function MetricsSection() {
         })
     }
 
+    // Auto-seleccionar favoritos cuando cambia el phaseScope
     React.useEffect(() => {
-        if (metricKeys.length > 0) return
-
         const favorites = TELEMETRY_GROUPS
             .filter(m => m.phaseScope === phaseScope && m.favorite)
             .map(m => m.keys)
 
-        if (favorites.length > 0) {
-            setMetricKeys(favorites)
-        }
-    }, [phaseScope, metricKeys.length, setMetricKeys])
+        setMetricKeys(favorites)
+    }, [phaseScope, setMetricKeys])
 
     return (
         <div className="space-y-3">

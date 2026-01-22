@@ -26,14 +26,8 @@ export function createBarSeries(
     series.name = "Series"
     series.dataFields.dateX = "date"
     series.dataFields.valueY = "value"
-
-    // ancho relativo de la barra
-    series.columns.template.width = 50
-
-    // tooltip consistente
     series.tooltipText = "{valueY}"
-
-    // suaviza interacción
+    series.stacked = true
     series.columns.template.strokeOpacity = 0
 
     return series
