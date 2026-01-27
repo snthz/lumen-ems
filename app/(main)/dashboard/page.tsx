@@ -3,7 +3,7 @@
 import { FilterSidebar } from "@/components/filter-sidebar/filter-sidebar"
 import { Chart } from "@/features/chart/component/chart"
 import { useChartStore } from "@/features/chart/store/chart.store"
-import { TimeRangeSection } from "@/features/telemetry/components/time-range-section"
+import { TimeRangeSection } from "@/features/telemetry/components/time-range-section/time-range-section"
 import { useTelemetryQueryStore } from "@/features/telemetry/store/telemetry-query.store"
 import { resolveTimeRange } from "@/features/telemetry/utils/resolve-time-range"
 import { format } from "date-fns"

@@ -19,6 +19,7 @@ import {
 export function Chart() {
     const chartRef = useRef<am4charts.XYChart | null>(null)
     const series = useChartStore(state => state.series)
+    const updateKey = useChartStore(state => state.updateKey)
 
     useLayoutEffect(() => {
         const chart = createXYChart("chartdiv")
@@ -35,22 +36,30 @@ export function Chart() {
     }, [])
 
     useEffect(() => {
-        if (!chartRef.current || series.length === 0) return
-
         const chart = chartRef.current
+        if (!chart) return
+
+        if (series.length === 0) {
+            chart.series.clear()
+            chart.yAxes.clear()
+            return
+        }
+
         chart.series.clear()
         chart.yAxes.clear()
 
         const sorted = sortSeries(series)
         const axisDefs = buildAxisDefinitions(sorted)
         const axisMap = buildValueAxesByAxisKey(chart, axisDefs, sorted)
+
         const { bars, lines } = splitByChartType(sorted)
 
         bars.forEach(s => addSeriesToChart(chart, axisMap, s))
         lines.forEach(s => addSeriesToChart(chart, axisMap, s))
 
-        chart.invalidateRawData()
-    }, [series])
+        chart.invalidateData()
+
+    }, [series, updateKey])
 
     return (
         <div

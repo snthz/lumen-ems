@@ -10,16 +10,16 @@ const HOUR = 60 * MINUTE
 const DAY = 24 * HOUR
 
 const INTERVAL_MAP: Record<string, IntervalLimits> = {
-    '1d': { eniscope: 1 * MINUTE, thingsboard: 5 * MINUTE },
-    '2d': { eniscope: 1 * MINUTE, thingsboard: 5 * MINUTE },
+    '1d': { eniscope: MINUTE, thingsboard: 5 * MINUTE },
+    '2d': { eniscope: MINUTE, thingsboard: 5 * MINUTE },
     '3d': { eniscope: 10 * MINUTE, thingsboard: 15 * MINUTE },
     '1w': { eniscope: 15 * MINUTE, thingsboard: 30 * MINUTE },
     '2w': { eniscope: 15 * MINUTE, thingsboard: 30 * MINUTE },
     '1m': { eniscope: 15 * MINUTE, thingsboard: 2 * HOUR },
     '2m': { eniscope: 30 * MINUTE, thingsboard: 2 * HOUR },
     '3m': { eniscope: 30 * MINUTE, thingsboard: 2 * HOUR },
-    '6m': { eniscope: 1 * DAY, thingsboard: 10 * HOUR },
-    '1y': { eniscope: 1 * DAY, thingsboard: 1 * DAY },
+    '6m': { eniscope: DAY, thingsboard: 10 * HOUR },
+    '1y': { eniscope: DAY, thingsboard: DAY },
 }
 
 export interface IntervalStrategy {

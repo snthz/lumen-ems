@@ -93,7 +93,7 @@ export type TbRelationsResponse = TbRelation[];
 
 export interface TelemetryTimeseriesPoint {
     ts: number
-    value: string | number
+    value: string | number | null
 }
 
 export type TelemetryTimeseriesResponse = Record<
