@@ -20,6 +20,9 @@ import {
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { useTelemetryFetcher } from '@/features/telemetry/hooks/use-telemetry-fetcher'
+import { useChartStore } from '@/features/chart/store/chart.store'
+import { toast } from 'sonner'
 
 const TIME_RANGE_OPTIONS: { value: TimeRangeKey | 'custom'; label: string }[] = [
     { value: '1d', label: 'Hoy' },
@@ -39,12 +42,16 @@ export function TimeRangeSection() {
     const setTimeRange = useTelemetryQueryStore(state => state.setTimeRange)
     const setResolution = useTelemetryQueryStore(state => state.setResolution)
 
+    const { run } = useTelemetryFetcher()
+    const setSeries = useChartStore(state => state.setSeries)
+
     const [customRange, setCustomRange] = React.useState<{
         from: Date | undefined
         to: Date | undefined
     }>({ from: undefined, to: undefined })
 
     const [isCustom, setIsCustom] = React.useState(false)
+    const [loading, setLoading] = React.useState(false)
 
     const currentIndex = TIME_RANGE_OPTIONS.findIndex(opt =>
         isCustom ? opt.value === 'custom' : opt.value === timeRange
@@ -61,6 +68,21 @@ export function TimeRangeSection() {
         if (diffDays <= 90) return 1800
         if (diffDays <= 180) return 86400
         return 86400
+    }
+
+    async function refreshChart() {
+        setLoading(true)
+        try {
+            const result = await run()
+            setSeries(result)
+        } catch (error) {
+            console.error('Error updating chart:', error)
+            toast.error('Error al actualizar', {
+                description: error instanceof Error ? error.message : 'Ocurrió un error inesperado',
+            })
+        } finally {
+            setLoading(false)
+        }
     }
 
     function goToPrevious() {
@@ -101,6 +123,18 @@ export function TimeRangeSection() {
         }
     }, [customRange, isCustom, setResolution])
 
+    React.useEffect(() => {
+        if (!isCustom) {
+            refreshChart()
+        }
+    }, [timeRange])
+
+    React.useEffect(() => {
+        if (isCustom && customRange.from && customRange.to) {
+            refreshChart()
+        }
+    }, [customRange])
+
     return (
         <div>
             <div className="px-6 py-4">
@@ -109,7 +143,7 @@ export function TimeRangeSection() {
                         variant="ghost"
                         size="icon"
                         onClick={goToPrevious}
-                        disabled={currentIndex <= 0}
+                        disabled={currentIndex <= 0 || loading}
                         className="h-9 w-9"
                     >
                         <ChevronLeft className="h-4 w-4" />
@@ -121,6 +155,7 @@ export function TimeRangeSection() {
                                 <Button
                                     variant="ghost"
                                     className="flex-1 justify-start text-left font-normal"
+                                    disabled={loading}
                                 >
                                     <Calendar className="mr-2 h-4 w-4" />
                                     {customRange.from ? (
@@ -156,7 +191,7 @@ export function TimeRangeSection() {
                             </PopoverContent>
                         </Popover>
                     ) : (
-                        <Select value={timeRange} onValueChange={handleSelectChange}>
+                        <Select value={timeRange} onValueChange={handleSelectChange} disabled={loading}>
                             <SelectTrigger className="flex-1 border-0 shadow-none cursor-pointer text-center flex justify-center hover:bg-neutral-50 [&>svg]:hidden">
                                 <SelectValue />
                             </SelectTrigger>
@@ -174,7 +209,7 @@ export function TimeRangeSection() {
                         variant="ghost"
                         size="icon"
                         onClick={goToNext}
-                        disabled={currentIndex >= TIME_RANGE_OPTIONS.length - 1}
+                        disabled={currentIndex >= TIME_RANGE_OPTIONS.length - 1 || loading}
                         className="h-9 w-9"
                     >
                         <ChevronRight className="h-4 w-4" />
