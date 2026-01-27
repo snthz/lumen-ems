@@ -7,6 +7,11 @@ export type MetricCategory =
     | 'CURRENT'
     | 'FREQUENCY'
     | 'POWER_FACTOR'
+    | 'REACTIVE_POWER'
+    | 'APPARENT_POWER'
+    | 'ENERGY_EXPORT'
+    | 'REACTIVE_ENERGY'
+    | 'APPARENT_ENERGY'
 
 export type ChartType = 'line' | 'bar'
 
@@ -22,7 +27,7 @@ export interface TelemetryGroup {
     phaseScope: PhaseScope
     category: MetricCategory
     chartType: ChartType
-    favorite: boolean
+    favorite?: boolean
     agg: Exclude<AggregationType, 'NONE' | 'COUNT'>
 }
 

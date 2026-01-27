@@ -1,10 +1,10 @@
-import { TelemetryGroup } from '@/features/telemetry/telemetry.types'
+import {TelemetryGroup} from "@/features/telemetry/telemetry.types";
 
 export const TELEMETRY_GROUPS: TelemetryGroup[] = [
-    // ───────── POWER ─────────
+    // ───────── ACTIVE POWER ─────────
     {
         id: 'system_power',
-        label: 'Potencia total',
+        label: 'Potencia activa total',
         keys: 'P',
         unit: 'W',
         phaseScope: 'SYSTEM',
@@ -15,7 +15,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'phase_power',
-        label: 'Potencia por fase',
+        label: 'Potencia activa por fase',
         keys: 'P1,P2,P3',
         unit: 'W',
         phaseScope: 'PHASE',
@@ -25,7 +25,152 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         favorite: true,
     },
 
-    // ───────── ENERGY ─────────
+    // ───────── REACTIVE POWER ─────────
+    {
+        id: 'system_reactive_power',
+        label: 'Potencia reactiva total',
+        keys: 'Q',
+        unit: 'var',
+        phaseScope: 'SYSTEM',
+        category: 'REACTIVE_POWER',
+        chartType: 'line',
+        agg: 'AVG',
+    },
+    {
+        id: 'phase_reactive_power',
+        label: 'Potencia reactiva por fase',
+        keys: 'Q1,Q2,Q3',
+        unit: 'var',
+        phaseScope: 'PHASE',
+        category: 'REACTIVE_POWER',
+        chartType: 'line',
+        agg: 'AVG',
+    },
+
+    // ───────── APPARENT POWER ─────────
+    {
+        id: 'system_apparent_power',
+        label: 'Potencia aparente total',
+        keys: 'S',
+        unit: 'VA',
+        phaseScope: 'SYSTEM',
+        category: 'APPARENT_POWER',
+        chartType: 'line',
+        agg: 'AVG',
+    },
+    {
+        id: 'phase_apparent_power',
+        label: 'Potencia aparente por fase',
+        keys: 'S1,S2,S3',
+        unit: 'VA',
+        phaseScope: 'PHASE',
+        category: 'APPARENT_POWER',
+        chartType: 'line',
+        agg: 'AVG',
+    },
+
+    // ───────── VOLTAGE ─────────
+    {
+        id: 'phase_voltage_ln',
+        label: 'Voltaje fase-neutro',
+        keys: 'V1,V2,V3',
+        unit: 'V',
+        phaseScope: 'PHASE',
+        category: 'VOLTAGE',
+        chartType: 'line',
+        agg: 'AVG',
+        favorite: true,
+    },
+    {
+        id: 'phase_voltage_ll',
+        label: 'Voltaje línea-línea',
+        keys: 'U1,U2,U3',
+        unit: 'V',
+        phaseScope: 'PHASE',
+        category: 'VOLTAGE',
+        chartType: 'line',
+        agg: 'AVG',
+    },
+    {
+        id: 'system_voltage',
+        label: 'Voltaje sistema',
+        keys: 'V',
+        unit: 'V',
+        phaseScope: 'SYSTEM',
+        category: 'VOLTAGE',
+        chartType: 'line',
+        agg: 'AVG',
+    },
+
+    // ───────── CURRENT ─────────
+    {
+        id: 'phase_current',
+        label: 'Corriente por fase',
+        keys: 'I1,I2,I3',
+        unit: 'A',
+        phaseScope: 'PHASE',
+        category: 'CURRENT',
+        chartType: 'line',
+        agg: 'AVG',
+        favorite: true,
+    },
+    {
+        id: 'neutral_current',
+        label: 'Corriente neutro',
+        keys: 'In',
+        unit: 'A',
+        phaseScope: 'SYSTEM',
+        category: 'CURRENT',
+        chartType: 'line',
+        agg: 'AVG',
+    },
+    {
+        id: 'system_current',
+        label: 'Corriente total',
+        keys: 'I',
+        unit: 'A',
+        phaseScope: 'SYSTEM',
+        category: 'CURRENT',
+        chartType: 'line',
+        agg: 'AVG',
+    },
+
+    // ───────── FREQUENCY ─────────
+    {
+        id: 'frequency',
+        label: 'Frecuencia',
+        keys: 'F',
+        unit: 'Hz',
+        phaseScope: 'SYSTEM',
+        category: 'FREQUENCY',
+        chartType: 'line',
+        agg: 'AVG',
+        favorite: true,
+    },
+
+    // ───────── POWER FACTOR ─────────
+    {
+        id: 'power_factor_system',
+        label: 'Factor de potencia total',
+        keys: 'PF',
+        unit: '',
+        phaseScope: 'SYSTEM',
+        category: 'POWER_FACTOR',
+        chartType: 'line',
+        agg: 'AVG',
+    },
+    {
+        id: 'power_factor_phase',
+        label: 'Factor de potencia por fase',
+        keys: 'PF1,PF2,PF3',
+        unit: '',
+        phaseScope: 'PHASE',
+        category: 'POWER_FACTOR',
+        chartType: 'line',
+        agg: 'AVG',
+    },
+
+    // ───────── ACTIVE ENERGY (DERIVADA TUYA) ─────────
     {
         id: 'system_energy',
         label: 'Energía total',
@@ -46,58 +191,71 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'ENERGY',
         chartType: 'bar',
         agg: 'SUM',
-        favorite: true,
     },
 
-    // ───────── VOLTAGE ─────────
+    // ───────── EXPORT ENERGY ─────────
     {
-        id: 'phase_voltage',
-        label: 'Voltaje por fase',
-        keys: 'V1,V2,V3',
-        unit: 'V',
-        phaseScope: 'PHASE',
-        category: 'VOLTAGE',
-        chartType: 'line',
-        agg: 'AVG',
-        favorite: false,
-    },
-
-    // ───────── CURRENT ─────────
-    {
-        id: 'phase_current',
-        label: 'Corriente por fase',
-        keys: 'I1,I2,I3',
-        unit: 'A',
-        phaseScope: 'PHASE',
-        category: 'CURRENT',
-        chartType: 'line',
-        agg: 'AVG',
-        favorite: false,
-    },
-
-    // ───────── FREQUENCY ─────────
-    {
-        id: 'frequency',
-        label: 'Frecuencia',
-        keys: 'F',
-        unit: 'Hz',
+        id: 'system_energy_export',
+        label: 'Energía exportada',
+        keys: 'Ex',
+        unit: 'Wh',
         phaseScope: 'SYSTEM',
-        category: 'FREQUENCY',
-        chartType: 'line',
-        agg: 'AVG',
-        favorite: false,
+        category: 'ENERGY_EXPORT',
+        chartType: 'bar',
+        agg: 'SUM',
+    },
+    {
+        id: 'phase_energy_export',
+        label: 'Energía exportada por fase',
+        keys: 'Ex1,Ex2,Ex3',
+        unit: 'Wh',
+        phaseScope: 'PHASE',
+        category: 'ENERGY_EXPORT',
+        chartType: 'bar',
+        agg: 'SUM',
     },
 
-    // ───────── POWER FACTOR ─────────
+    // ───────── REACTIVE ENERGY ─────────
     {
-        id: 'power_factor',
-        label: 'Factor de potencia',
-        keys: 'PF,PF1,PF2,PF3',
-        unit: '',
+        id: 'system_reactive_energy',
+        label: 'Energía reactiva total',
+        keys: 'RE',
+        unit: 'varh',
+        phaseScope: 'SYSTEM',
+        category: 'REACTIVE_ENERGY',
+        chartType: 'bar',
+        agg: 'SUM',
+    },
+    {
+        id: 'phase_reactive_energy',
+        label: 'Energía reactiva por fase',
+        keys: 'RE1,RE2,RE3',
+        unit: 'varh',
         phaseScope: 'PHASE',
-        category: 'POWER_FACTOR',
-        chartType: 'line',
-        agg: 'AVG',
-        favorite: false,
+        category: 'REACTIVE_ENERGY',
+        chartType: 'bar',
+        agg: 'SUM',
+    },
+
+    // ───────── APPARENT ENERGY ─────────
+    {
+        id: 'system_apparent_energy',
+        label: 'Energía aparente total',
+        keys: 'AE',
+        unit: 'VAh',
+        phaseScope: 'SYSTEM',
+        category: 'APPARENT_ENERGY',
+        chartType: 'bar',
+        agg: 'SUM',
+    },
+    {
+        id: 'phase_apparent_energy',
+        label: 'Energía aparente por fase',
+        keys: 'AE1,AE2,AE3',
+        unit: 'VAh',
+        phaseScope: 'PHASE',
+        category: 'APPARENT_ENERGY',
+        chartType: 'bar',
+        agg: 'SUM',
     },
 ]
