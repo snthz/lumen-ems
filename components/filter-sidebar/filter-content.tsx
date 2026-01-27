@@ -51,6 +51,11 @@ export function FilterContent() {
         try {
             const result = await run()
             setSeries(result)
+
+            toast.success('Datos actualizados', {
+                description: `Se cargaron ${result.length} series correctamente`,
+                duration: 2000,
+            })
         } catch (error) {
             console.error('Error updating chart:', error)
             toast.error('Error al actualizar', {
@@ -86,11 +91,11 @@ export function FilterContent() {
                 </h2>
             </div>
 
-            <div className="sticky top-14 border-b p-2 py-4 bg-white z-10">
+            <div className="sticky top-14 border-b p-4 bg-white z-10">
                 <Button
                     size="sm"
                     variant="outline"
-                    className="w-full rounded-none"
+                    className="w-full"
                     onClick={handleRefresh}
                     disabled={isDisabled}
                     title={getTooltipMessage()}
@@ -108,7 +113,6 @@ export function FilterContent() {
 
             <DevicesHierarchy />
             <TelemetryMetrics />
-
         </div>
     )
 }

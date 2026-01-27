@@ -1,7 +1,14 @@
 import { ResolvedTimeRange, TimeRangeKey } from '@/features/telemetry/telemetry.types'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, subDays, subWeeks, subMonths } from 'date-fns'
 
-export function resolveTimeRange(rangeKey: TimeRangeKey): ResolvedTimeRange {
+export function resolveTimeRange(rangeKey: TimeRangeKey, customStart?: Date | null, customEnd?: Date | null): ResolvedTimeRange {
+    if (customStart && customEnd) {
+        return {
+            start: customStart,
+            end: customEnd,
+        }
+    }
+
     const now = new Date()
 
     switch (rangeKey) {

@@ -9,7 +9,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
-import { ChevronLeft, ChevronRight, Calendar } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Calendar, X } from 'lucide-react'
 import { useTelemetryQueryStore } from '@/features/telemetry/store/telemetry-query.store'
 import { TimeRangeKey } from '@/features/telemetry/telemetry.types'
 import {
@@ -18,11 +18,13 @@ import {
     PopoverTrigger,
 } from '@/components/ui/popover'
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
-import { format } from 'date-fns'
+import { format, startOfDay, endOfDay } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { useTelemetryFetcher } from '@/features/telemetry/hooks/use-telemetry-fetcher'
 import { useChartStore } from '@/features/chart/store/chart.store'
+import { useDeviceStore } from '@/features/devices/store/device.store'
 import { toast } from 'sonner'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const TIME_RANGE_OPTIONS: { value: TimeRangeKey | 'custom'; label: string }[] = [
     { value: '1d', label: 'Hoy' },
@@ -41,9 +43,11 @@ export function TimeRangeSection() {
     const timeRange = useTelemetryQueryStore(state => state.timeRange)
     const setTimeRange = useTelemetryQueryStore(state => state.setTimeRange)
     const setResolution = useTelemetryQueryStore(state => state.setResolution)
+    const setCustomTimeRange = useTelemetryQueryStore(state => state.setCustomTimeRange)
 
     const { run } = useTelemetryFetcher()
     const setSeries = useChartStore(state => state.setSeries)
+    const selectedDevices = useDeviceStore(state => state.selectedDevices)
 
     const [customRange, setCustomRange] = React.useState<{
         from: Date | undefined
@@ -52,6 +56,7 @@ export function TimeRangeSection() {
 
     const [isCustom, setIsCustom] = React.useState(false)
     const [loading, setLoading] = React.useState(false)
+    const [popoverOpen, setPopoverOpen] = React.useState(false)
 
     const currentIndex = TIME_RANGE_OPTIONS.findIndex(opt =>
         isCustom ? opt.value === 'custom' : opt.value === timeRange
@@ -62,8 +67,8 @@ export function TimeRangeSection() {
         const diffDays = diffMs / (1000 * 60 * 60 * 24)
 
         if (diffDays <= 2) return 60
-        if (diffDays <= 3) return 300
-        if (diffDays <= 7) return 900
+        if (diffDays <= 3) return 600
+        if (diffDays <= 14) return 900
         if (diffDays <= 30) return 900
         if (diffDays <= 90) return 1800
         if (diffDays <= 180) return 86400
@@ -71,6 +76,10 @@ export function TimeRangeSection() {
     }
 
     async function refreshChart() {
+        if (selectedDevices.length === 0) {
+            return
+        }
+
         setLoading(true)
         try {
             const result = await run()
@@ -91,6 +100,9 @@ export function TimeRangeSection() {
             if (prevOption.value !== 'custom') {
                 setTimeRange(prevOption.value as TimeRangeKey)
                 setIsCustom(false)
+                setCustomRange({ from: undefined, to: undefined })
+                setCustomTimeRange(null, null)
+                refreshChart()
             }
         }
     }
@@ -103,6 +115,9 @@ export function TimeRangeSection() {
             } else {
                 setTimeRange(nextOption.value as TimeRangeKey)
                 setIsCustom(false)
+                setCustomRange({ from: undefined, to: undefined })
+                setCustomTimeRange(null, null)
+                refreshChart()
             }
         }
     }
@@ -113,27 +128,60 @@ export function TimeRangeSection() {
         } else {
             setTimeRange(value as TimeRangeKey)
             setIsCustom(false)
+            setCustomRange({ from: undefined, to: undefined })
+            setCustomTimeRange(null, null)
+            refreshChart()
         }
     }
 
-    React.useEffect(() => {
-        if (isCustom && customRange.from && customRange.to) {
-            const minResolution = calculateMinResolution(customRange.from, customRange.to)
-            setResolution(minResolution)
-        }
-    }, [customRange, isCustom, setResolution])
+    function handleQuickSelect(value: TimeRangeKey) {
+        setTimeRange(value)
+        setIsCustom(false)
+        setCustomRange({ from: undefined, to: undefined })
+        setCustomTimeRange(null, null)
+        setPopoverOpen(false)
 
-    React.useEffect(() => {
-        if (!isCustom) {
+        setTimeout(() => {
             refreshChart()
-        }
-    }, [timeRange])
+        }, 50)
+    }
 
-    React.useEffect(() => {
-        if (isCustom && customRange.from && customRange.to) {
-            refreshChart()
+    function handleCalendarSelect(range: any) {
+        setCustomRange({
+            from: range?.from,
+            to: range?.to,
+        })
+    }
+
+    function handleApplyCustomRange() {
+        if (!customRange.from || !customRange.to) {
+            toast.error('Selecciona un rango completo', {
+                description: 'Debes seleccionar fecha de inicio y fin',
+            })
+            return
         }
-    }, [customRange])
+
+        const start = startOfDay(customRange.from)
+        const end = endOfDay(customRange.to)
+
+        const minResolution = calculateMinResolution(start, end)
+
+        setResolution(minResolution)
+        setCustomTimeRange(start, end)
+
+        setPopoverOpen(false)
+
+        setTimeout(() => {
+            refreshChart()
+        }, 100)
+    }
+
+    function handleClearDates() {
+        setCustomRange({
+            from: undefined,
+            to: undefined,
+        })
+    }
 
     return (
         <div>
@@ -150,7 +198,7 @@ export function TimeRangeSection() {
                     </Button>
 
                     {isCustom ? (
-                        <Popover>
+                        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
                             <PopoverTrigger asChild>
                                 <Button
                                     variant="ghost"
@@ -173,21 +221,58 @@ export function TimeRangeSection() {
                                 </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0" align="start">
-                                <CalendarComponent
-                                    mode="range"
-                                    selected={{
-                                        from: customRange.from,
-                                        to: customRange.to,
-                                    }}
-                                    onSelect={(range) => {
-                                        setCustomRange({
-                                            from: range?.from,
-                                            to: range?.to,
-                                        })
-                                    }}
-                                    numberOfMonths={2}
-                                    locale={es}
-                                />
+                                <div className="flex">
+                                    <ScrollArea className="h-[400px] w-40 border-r">
+                                        <div className="p-2">
+                                            {TIME_RANGE_OPTIONS.filter(opt => opt.value !== 'custom').map(opt => (
+                                                <Button
+                                                    key={opt.value}
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => handleQuickSelect(opt.value as TimeRangeKey)}
+                                                    className="w-full justify-start text-sm mb-1"
+                                                >
+                                                    {opt.label}
+                                                </Button>
+                                            ))}
+                                        </div>
+                                    </ScrollArea>
+
+                                    <div>
+                                        <div className="p-3 border-b flex justify-between items-center">
+                                            <span className="text-sm font-medium">Seleccionar rango</span>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={handleClearDates}
+                                                className="h-7 text-xs"
+                                            >
+                                                <X className="h-3 w-3 mr-1" />
+                                                Limpiar
+                                            </Button>
+                                        </div>
+                                        <CalendarComponent
+                                            mode="range"
+                                            selected={{
+                                                from: customRange.from,
+                                                to: customRange.to,
+                                            }}
+                                            onSelect={handleCalendarSelect}
+                                            numberOfMonths={2}
+                                            locale={es}
+                                        />
+                                        <div className="p-3 border-t">
+                                            <Button
+                                                onClick={handleApplyCustomRange}
+                                                disabled={!customRange.from || !customRange.to}
+                                                className="w-full"
+                                                size="sm"
+                                            >
+                                                Actualizar
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
                             </PopoverContent>
                         </Popover>
                     ) : (

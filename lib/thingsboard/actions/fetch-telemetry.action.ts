@@ -6,6 +6,7 @@ import { aggregateClientSide } from '@/features/telemetry/utils/client-aggregati
 
 export async function fetchTelemetryAction(query: BuiltTelemetryQuery) {
     const results = []
+
     for (const device of query.devices) {
         for (const seriesDef of query.series) {
             try {
@@ -54,6 +55,18 @@ export async function fetchTelemetryAction(query: BuiltTelemetryQuery) {
                 })
             } catch (error) {
                 console.error(`Error fetching ${seriesDef.key} for device ${device.name}:`, error)
+
+                results.push({
+                    deviceId: device.id,
+                    deviceName: device.name,
+                    assetId: device.assetId,
+                    assetName: device.assetName,
+                    key: seriesDef.key,
+                    unit: seriesDef.unit,
+                    chartType: seriesDef.chartType,
+                    axisKey: seriesDef.axisKey,
+                    data: [],
+                })
             }
         }
     }

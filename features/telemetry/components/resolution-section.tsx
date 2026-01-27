@@ -20,7 +20,7 @@ const RESOLUTION_OPTIONS = [
 const MIN_RESOLUTION_BY_RANGE: Record<TimeRangeKey, number> = {
     '1d': 60,
     '2d': 60,
-    '3d': 300,
+    '3d': 600,
     '1w': 900,
     '2w': 900,
     '1m': 900,
