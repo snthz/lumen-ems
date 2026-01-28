@@ -7,6 +7,7 @@ import {AppSidebar} from "@/components/sidebar/app-sidebar";
 import {SidebarInset, SidebarProvider, SidebarTrigger} from "@/components/ui/sidebar";
 import {getCustomersByEntityGroup} from "@/lib/thingsboard/server/thingsboard.server";
 import {Toaster} from "sonner";
+import Loading from "./loading";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -34,7 +35,8 @@ export default async function RootLayout({
         <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-        <Suspense fallback={null}>
+            
+        <Suspense fallback={<Loading />}>
             <TokenProvider>
                 <SidebarProvider>
                     <AppSidebar customers={customers}/>

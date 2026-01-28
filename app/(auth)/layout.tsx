@@ -2,6 +2,7 @@ import type {Metadata} from "next";
 import "../globals.css";
 import {TokenProvider} from "@/features/auth/providers/token.provider";
 import {Suspense} from "react";
+import Loading from "./loading";
 
 
 export const metadata: Metadata = {
@@ -19,7 +20,7 @@ export default function RootLayout({
         <body
             className={` antialiased`}
         >
-        <Suspense fallback={null}>
+        <Suspense fallback={<Loading />}>
 
             <TokenProvider>
                 {children}
