@@ -31,7 +31,7 @@ export function AssetDevicesGroup({
                     <SidebarMenuButton className="pl-0 font-medium rounded-none cursor-pointer">
             <span className="flex items-center gap-2 w-full">
               <div className="w-4 h-px bg-neutral-300 " />
-                <span className={"text-neutral-500 font-normal text-xs"}>{assetName}s</span>
+                <span className={"text-neutral-500 font-normal text-xs"}>{assetName}</span>
             </span>
 
                         <ChevronRight

@@ -37,24 +37,29 @@ export function buildTelemetryQuery(
         throw new Error('No telemetry metrics selected')
     }
 
-    const series: TelemetrySeriesQuery[] = selectedGroups.flatMap(group => {
-        const strategy = resolveIntervalStrategy(
-            effectiveTimeRangeKey,
-            group.agg,
-            durationSeconds,
-            query.resolution
-        )
+    const series: TelemetrySeriesQuery[] = selectedGroups
+        .flatMap(group => {
+            const strategy = resolveIntervalStrategy(
+                effectiveTimeRangeKey,
+                group.agg,
+                durationSeconds,
+                query.resolution
+            )
 
-
-        return group.keys.split(',').map(key => ({
-            key,
-            agg: group.agg,
-            unit: group.unit,
-            chartType: group.chartType,
-            axisKey: group.category,
-            strategy,
-        }))
-    })
+            return group.keys.split(',').map(key => ({
+                key,
+                agg: group.agg,
+                unit: group.unit,
+                chartType: group.chartType,
+                axisKey: group.category,
+                strategy,
+            }))
+        })
+        .sort((a, b) => {
+            if (a.chartType === 'bar' && b.chartType !== 'bar') return -1
+            if (a.chartType !== 'bar' && b.chartType === 'bar') return 1
+            return 0
+        })
 
     const intervalMs = query.resolution * 1000
 

@@ -19,33 +19,33 @@ function formatResolution(seconds: number): string {
 export default function Page() {
     const series = useChartStore(state => state.series)
     const hasSeries = series.length > 0
-    
+
     const timeRange = useTelemetryQueryStore(state => state.timeRange)
     const customStart = useTelemetryQueryStore(state => state.customStart)
     const customEnd = useTelemetryQueryStore(state => state.customEnd)
     const resolution = useTelemetryQueryStore(state => state.resolution)
     const phaseScope = useTelemetryQueryStore(state => state.phaseScope)
 
-    const { start, end } = customStart && customEnd 
+    const { start, end } = customStart && customEnd
         ? { start: customStart, end: customEnd }
         : resolveTimeRange(timeRange)
 
     const dateRangeText = `${format(start, "dd MMM yyyy h:mm a", { locale: es })} - ${format(end, "dd MMM yyyy h:mm a", { locale: es })}`
 
     return (
-        <div className="flex relative h-[calc(100vh-69px)] w-full">
-            <div className="flex-1 pt-4 px-6">
+        <div className="md:flex relative h-[calc(100vh-69px)] w-full">
+            <div className="flex-1 md:pt-4 md:px-6">
                 {hasSeries ? (
-                    <div className="shadow-md border rounded-lg">
+                    <div className="md:shadow-md md:border md:rounded-lg">
                         <div className="flex justify-between items-center mb-2 px-6 border-b">
-    <span 
-        className="text-xs text-neutral-600 truncate min-w-0 flex-1 mr-4"
-        title={`${dateRangeText} | ${formatResolution(resolution)} | ${phaseScope}`}
-    >
-        {dateRangeText}  <span className="text-neutral-400"> | {formatResolution(resolution)} | {phaseScope}</span>
-    </span>
-    <TimeRangeSection />
-</div>
+                            <span
+                                className="text-xs text-neutral-600 truncate min-w-0 flex-1 mr-4"
+                                title={`${dateRangeText} | ${formatResolution(resolution)} | ${phaseScope}`}
+                            >
+                                {dateRangeText}  <span className="text-neutral-400"> | {formatResolution(resolution)} | {phaseScope}</span>
+                            </span>
+                            <TimeRangeSection />
+                        </div>
                         <Chart />
                     </div>
                 ) : (

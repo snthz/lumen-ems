@@ -115,7 +115,6 @@ export async function fetchTelemetryTimeseries(
     }
 
     const url = `${env.TB_API}/api/plugins/telemetry/${params.entityType}/${params.entityId}/values/timeseries?${query.toString()}`
-    console.log(url)
     const res = await fetch(url, {
         headers: {
             'Content-Type': 'application/json',

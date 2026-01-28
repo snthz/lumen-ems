@@ -1,5 +1,29 @@
 import * as am4core from "@amcharts/amcharts4/core"
 const PALETTE = [
+    "#D7476E", // vibrant red / ct0
+    "#5E6FB6", // vibrant indigo / ct1
+    "#4AB5A5", // vibrant teal / ct2
+
+    "#CD88C4", // soft purple / ct3
+    "#D54E35", // vibrant orange / ct4
+    "#51BC7C", // vibrant green / ct5
+
+    "#A85735", // warm brown
+    "#D69B37", // warm gold
+    "#AA5671", // warm pink
+
+    "#9A82E4", // pastel indigo
+    "#5EA5DB", // pastel blue
+    "#5DB645", // pastel green
+
+    "#6A59C7", // deep purple
+    "#E4916F", // deep orange
+    "#88722F", // deep gold
+
+    "#D69B37", // deep yellow
+    "D7476E", // deep red
+    "#487939", // deep green
+
     "#C3566F", // muted red / ct1
     "#5E6FAE", // muted indigo / ct2
     "#6DB3A2", // muted teal / ct3
@@ -18,13 +42,22 @@ const PALETTE = [
 ]
 
 
-export function getSeriesColor(
-    key: string
-) {
-    let hash = 0
-    for (let i = 0; i < key.length; i++) {
-        hash = key.charCodeAt(i) + ((hash << 5) - hash)
+const colorMap = new Map<string, am4core.Color>()
+let colorIndex = 0
+
+export function getSeriesColor(key: string): am4core.Color {
+    if (colorMap.has(key)) {
+        return colorMap.get(key)!
     }
-    const index = Math.abs(hash) % PALETTE.length
-    return am4core.color(PALETTE[index])
+    
+    const color = am4core.color(PALETTE[colorIndex % PALETTE.length])
+    colorMap.set(key, color)
+    colorIndex++
+    
+    return color
+}
+
+export function resetSeriesColors(): void {
+    colorMap.clear()
+    colorIndex = 0
 }

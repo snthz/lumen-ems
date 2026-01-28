@@ -88,7 +88,7 @@ export const useAssetStore = create<AssetState>((set, get) => ({
 
             defaultDevices.forEach(deviceRel => {
                 const deviceId = deviceRel.to.id
-                const deviceName = deviceRel.toName || deviceRel.additionalInfo?.name || deviceId
+                const deviceName = deviceRel.additionalInfo?.name || deviceRel.toName || deviceId
 
                 if (!deviceStore.selectedDevices.find(d => d.id === deviceId)) {
                     deviceStore.addDevice({
