@@ -2,6 +2,7 @@ import * as am4charts from "@amcharts/amcharts4/charts"
 import { createBarSeries, createLineSeries } from "@/features/chart/config/chart.series"
 import { getSeriesColor } from "@/features/chart/utils/series-color.utils"
 import { resolveAxisScale } from "@/features/chart/utils/unit-scale"
+import { getKeyLabel } from "@/features/telemetry/utils/telemetry-labels"
 
 export function sortSeries(series: any[]) {
     return [...series].sort((a, b) => {
@@ -103,11 +104,13 @@ export function addSeriesToChart(
 
     series.yAxis = axis
     series.zIndex = s.chartType === "line" ? 10 : 1
-
-    const color = getSeriesColor(`${s.deviceName}-${s.key}`)
-    series.name = `${s.deviceName}`
+    const name = `${s.deviceName} | ${getKeyLabel(s.key)}`
+    const color = getSeriesColor(name)
+    series.name = name
     series.stroke = color
     series.fill = color
+
+
 
     if ("columns" in series) {
         series.columns.template.fill = color
@@ -123,9 +126,11 @@ export function addSeriesToChart(
 
         return point
     })
+   
+    if(series.tooltip) {
+        series.tooltip.fontSize = 12
+    }
+
     series.tooltipText = `[bold]{name}[/]\n{valueY.formatNumber("#,###.##")} ${s._scaledUnit}`
-    // series.tooltip.getFillFromObject = false
-    // series.tooltip.background.fill = color
-    // series.tooltip.background.fillOpacity = 0.9
-    // series.tooltip.label.fill = am4core.color("#ffffff")
+    
 }
