@@ -8,5 +8,6 @@ export function configureInteractions(
 
     chart.scrollbarX = new am4charts.XYChartScrollbar()
     chart.scrollbarX.parent = chart.topAxesContainer
-    chart.scrollbarX.minHeight = 20
+    chart.scrollbarX.minHeight = 30
+    chart.cursor.lineY.disabled = true
 }

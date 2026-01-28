@@ -114,11 +114,15 @@ export function addSeriesToChart(
         series.columns.template.stroke = color
     }
 
-    series.data = s.data.map((p: any) => ({
-        date: new Date(p.ts),
-        value: Number(p.value) / s._scaleFactor,
-    }))
+    series.data = s.data.map((p: any) => {
+        const point: { date: Date; value?: number } = { date: new Date(p.ts) }
 
+        if (p.value != null) {
+            point.value = Number(p.value) / s._scaleFactor
+        }
+
+        return point
+    })
     series.tooltipText = `[bold]{name}[/]\n{valueY.formatNumber("#,###.##")} ${s._scaledUnit}`
     // series.tooltip.getFillFromObject = false
     // series.tooltip.background.fill = color

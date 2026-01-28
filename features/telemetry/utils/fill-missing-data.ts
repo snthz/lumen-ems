@@ -6,16 +6,15 @@ export function fillMissingDataPoints(
     endTs: number,
     intervalSeconds: number
 ): TelemetryTimeseriesPoint[] {
+    const intervalMs = intervalSeconds * 1000
+
     if (data.length === 0) {
         const points: TelemetryTimeseriesPoint[] = []
         let currentTs = startTs
 
         while (currentTs <= endTs) {
-            points.push({
-                ts: currentTs,
-                value: null
-            })
-            currentTs += intervalSeconds * 1000
+            points.push({ ts: currentTs, value: null })
+            currentTs += intervalMs
         }
 
         return points
@@ -24,7 +23,7 @@ export function fillMissingDataPoints(
     const dataMap = new Map<number, TelemetryTimeseriesPoint>()
     data.forEach(point => {
         const ts = typeof point.ts === 'number' ? point.ts : new Date(point.ts).getTime()
-        const bucketTs = Math.floor(ts / (intervalSeconds * 1000)) * (intervalSeconds * 1000)
+        const bucketTs = Math.floor(ts / intervalMs) * intervalMs
         dataMap.set(bucketTs, point)
     })
 
@@ -32,20 +31,20 @@ export function fillMissingDataPoints(
     let currentTs = startTs
 
     while (currentTs <= endTs) {
-        const bucketTs = Math.floor(currentTs / (intervalSeconds * 1000)) * (intervalSeconds * 1000)
+        const existing = dataMap.get(currentTs)
 
-        if (dataMap.has(bucketTs)) {
-            filledData.push(dataMap.get(bucketTs)!)
-        } else {
+        if (existing?.value != null) {
+            const parsedValue = Number(existing.value)
             filledData.push({
-                ts: bucketTs,
-                value: null
+                ts: currentTs, 
+                value: isNaN(parsedValue) ? null : Math.round(parsedValue * 10000) / 10000
             })
+        } else {
+            filledData.push({ ts: currentTs, value: null })
         }
 
-        currentTs += intervalSeconds * 1000
+        currentTs += intervalMs
     }
 
-    console.log('Filled Data:', filledData)
     return filledData
 }

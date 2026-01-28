@@ -8,7 +8,6 @@ export function configureDateAxis(chart: am4charts.XYChart) {
     axis.renderer.labels.template.fontSize = 11
     axis.renderer.labels.template.fill = am4core.color("#9ca3af")
     axis.renderer.minGridDistance = 60
-
     return axis
 }
 
@@ -24,7 +23,7 @@ export function buildValueAxesByAxisKey(
         axis.renderer.opposite = index % 2 === 1
         axis.renderer.labels.template.fontSize = 11
         axis.renderer.labels.template.fillOpacity = 0.6
-
+        axis.cursorTooltipEnabled = false
         axis.numberFormatter.numberFormat = `#,###.##`
 
         axis.renderer.labels.template.adapter.add("text", (text) => {
