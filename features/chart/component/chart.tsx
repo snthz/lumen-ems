@@ -78,6 +78,21 @@ export function Chart() {
                     s.columns.template.strokeOpacity = 0  
                 }
             })
+            // if scroll bar has bar chart, the bar must be stacked to avoid overlap
+            let hasBar = false
+            scrollbar.series.each(s => {
+                if (s instanceof am4charts.ColumnSeries) {
+                    hasBar = true
+                }
+            })
+            if (hasBar) {
+                scrollbar.series.each(s => {
+                    if (s instanceof am4charts.ColumnSeries) {
+                        s.stacked = true
+                    }
+                })
+            }
+
             scrollbar.scrollbarChart.xAxes.each(axis => {
                 axis.renderer.grid.template.disabled = true
                 axis.renderer.labels.template.disabled = true
