@@ -57,21 +57,25 @@ export function Chart() {
         bars.forEach(s => addSeriesToChart(chart, axisMap, s))
         lines.forEach(s => addSeriesToChart(chart, axisMap, s))
 
-        chart.scrollbarX!.background.fill = am4core.color("#f3f4f6")
         const scrollbar = chart.scrollbarX as am4charts.XYChartScrollbar
         if (scrollbar) {
             scrollbar.series.clear()
             chart.series.each(s => {
                 scrollbar.series.push(s)
             })
-            chart.scrollbarX.fillOpacity = 0.1
 
+            scrollbar.background.fill = am4core.color("#f3f4f6")
+            scrollbar.background.fillOpacity = 1
             scrollbar.scrollbarChart.series.each(s => {
-
+                s.fillOpacity = 0.2
+                s.strokeOpacity = 0.2
                 if (s instanceof am4charts.LineSeries) {
                     s.bullets.each(b => {
                         b.disabled = true
                     })
+                }
+                if (s instanceof am4charts.ColumnSeries) {
+                    s.columns.template.strokeOpacity = 0  
                 }
             })
             scrollbar.scrollbarChart.xAxes.each(axis => {
@@ -82,6 +86,7 @@ export function Chart() {
                 axis.renderer.grid.template.disabled = true
                 axis.renderer.labels.template.disabled = true
             })
+
 
         }
 

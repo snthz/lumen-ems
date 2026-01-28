@@ -3,31 +3,38 @@ import { Calendar, X } from 'lucide-react'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { format, startOfDay, endOfDay } from 'date-fns'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { format, setHours, setMinutes } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { toast } from 'sonner'
 import { TimeRangeKey } from '@/features/telemetry/telemetry.types'
-import {TIME_RANGE_OPTIONS} from "@/features/telemetry/constants/telemetry.intervals";
+import { TIME_RANGE_OPTIONS } from "@/features/telemetry/constants/telemetry.intervals"
+import { useState } from 'react'
 
 interface CustomDatePickerProps {
     customRange: { from: Date | undefined; to: Date | undefined }
     onRangeChange: (range: { from: Date | undefined; to: Date | undefined }) => void
     onApply: (start: Date, end: Date) => void
     onQuickSelect: (value: TimeRangeKey) => void
-    popoverOpen: boolean
-    onPopoverChange: (open: boolean) => void
     loading: boolean
+    selectedLabel?: string
 }
 
 export function CustomDatePicker({
-                                     customRange,
-                                     onRangeChange,
-                                     onApply,
-                                     onQuickSelect,
-                                     popoverOpen,
-                                     onPopoverChange,
-                                     loading,
-                                 }: CustomDatePickerProps) {
+    customRange,
+    onRangeChange,
+    onApply,
+    onQuickSelect,
+    loading,
+    selectedLabel,
+}: CustomDatePickerProps) {
+    const [open, setOpen] = useState(false)
+    const [fromTime, setFromTime] = useState({ hour: '00', minute: '00' })
+    const [toTime, setToTime] = useState({ hour: '23', minute: '59' })
+
+    const hours = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'))
+    const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'))
+
     function handleCalendarSelect(range: any) {
         onRangeChange({
             from: range?.from,
@@ -43,37 +50,45 @@ export function CustomDatePicker({
             return
         }
 
-        const start = startOfDay(customRange.from)
-        const end = endOfDay(customRange.to)
+        let start = setHours(customRange.from, parseInt(fromTime.hour))
+        start = setMinutes(start, parseInt(fromTime.minute))
+
+        let end = setHours(customRange.to, parseInt(toTime.hour))
+        end = setMinutes(end, parseInt(toTime.minute))
 
         onApply(start, end)
+        setOpen(false)
+    }
+
+    function handleQuickSelect(value: TimeRangeKey) {
+        onQuickSelect(value)
+        setOpen(false)
     }
 
     function handleClear() {
         onRangeChange({ from: undefined, to: undefined })
+        setFromTime({ hour: '00', minute: '00' })
+        setToTime({ hour: '23', minute: '59' })
+    }
+
+    function getDisplayText() {
+        if (selectedLabel && !customRange.from) return selectedLabel
+        if (customRange.from && customRange.to) {
+            return `${format(customRange.from, 'dd MMM yyyy', { locale: es })} ${fromTime.hour}:${fromTime.minute} - ${format(customRange.to, 'dd MMM yyyy', { locale: es })} ${toTime.hour}:${toTime.minute}`
+        }
+        return selectedLabel || 'Seleccionar fechas'
     }
 
     return (
-        <Popover open={popoverOpen} onOpenChange={onPopoverChange}>
+        <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button
                     variant="ghost"
-                    className="flex-1 justify-start text-left font-normal"
+                    className="justify-start text-left font-normal"
                     disabled={loading}
                 >
                     <Calendar className="mr-2 h-4 w-4" />
-                    {customRange.from ? (
-                        customRange.to ? (
-                            <>
-                                {format(customRange.from, 'dd/MM/yyyy', { locale: es })} -{' '}
-                                {format(customRange.to, 'dd/MM/yyyy', { locale: es })}
-                            </>
-                        ) : (
-                            format(customRange.from, 'dd/MM/yyyy', { locale: es })
-                        )
-                    ) : (
-                        <span>Seleccionar fechas</span>
-                    )}
+                    {getDisplayText()}
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="center">
@@ -85,7 +100,7 @@ export function CustomDatePicker({
                                     key={opt.value}
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => onQuickSelect(opt.value as TimeRangeKey)}
+                                    onClick={() => handleQuickSelect(opt.value as TimeRangeKey)}
                                     className="w-full justify-start text-sm mb-1 rounded-xs"
                                 >
                                     {opt.label}
@@ -107,6 +122,7 @@ export function CustomDatePicker({
                                 Limpiar
                             </Button>
                         </div>
+                        
                         <CalendarComponent
                             mode="range"
                             selected={{
@@ -117,6 +133,71 @@ export function CustomDatePicker({
                             numberOfMonths={2}
                             locale={es}
                         />
+
+                        <div className="p-3 border-t flex gap-4">
+                            <div className="flex-1">
+                                <label className="text-xs text-muted-foreground mb-1 block">Desde</label>
+                                <div className="flex gap-1">
+                                    <Select value={fromTime.hour} onValueChange={(v) => setFromTime(prev => ({ ...prev, hour: v }))}>
+                                        <SelectTrigger className="w-16 h-8 text-xs">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <ScrollArea className="h-48">
+                                                {hours.map(h => (
+                                                    <SelectItem key={h} value={h}>{h}</SelectItem>
+                                                ))}
+                                            </ScrollArea>
+                                        </SelectContent>
+                                    </Select>
+                                    <span className="self-center text-muted-foreground">:</span>
+                                    <Select value={fromTime.minute} onValueChange={(v) => setFromTime(prev => ({ ...prev, minute: v }))}>
+                                        <SelectTrigger className="w-16 h-8 text-xs">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <ScrollArea className="h-48">
+                                                {minutes.map(m => (
+                                                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                                                ))}
+                                            </ScrollArea>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                            
+                            <div className="flex-1">
+                                <label className="text-xs text-muted-foreground mb-1 block">Hasta</label>
+                                <div className="flex gap-1">
+                                    <Select value={toTime.hour} onValueChange={(v) => setToTime(prev => ({ ...prev, hour: v }))}>
+                                        <SelectTrigger className="w-16 h-8 text-xs">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <ScrollArea className="h-48">
+                                                {hours.map(h => (
+                                                    <SelectItem key={h} value={h}>{h}</SelectItem>
+                                                ))}
+                                            </ScrollArea>
+                                        </SelectContent>
+                                    </Select>
+                                    <span className="self-center text-muted-foreground">:</span>
+                                    <Select value={toTime.minute} onValueChange={(v) => setToTime(prev => ({ ...prev, minute: v }))}>
+                                        <SelectTrigger className="w-16 h-8 text-xs">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <ScrollArea className="h-48">
+                                                {minutes.map(m => (
+                                                    <SelectItem key={m} value={m}>{m}</SelectItem>
+                                                ))}
+                                            </ScrollArea>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="p-3 border-t">
                             <Button
                                 onClick={handleApply}
