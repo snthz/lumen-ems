@@ -55,7 +55,7 @@ export function ResolutionSection() {
                 <RadioGroup
                     value={String(resolution)}
                     onValueChange={v => setResolution(Number(v))}
-                    className="flex flex-wrap gap-4 pt-2"
+                    className="grid grid-cols-2 gap-x-8 gap-y-2"
                 >
                     {RESOLUTION_OPTIONS.map(opt => {
                         const isDisabled = opt.value < minResolution
@@ -74,8 +74,8 @@ export function ResolutionSection() {
                                     htmlFor={`res-${opt.value}`}
                                     className={
                                         isDisabled
-                                            ? 'text-neutral-400 cursor-not-allowed'
-                                            : 'cursor-pointer'
+                                            ? 'text-neutral-400 cursor-not-allowed text-sm'
+                                            : 'cursor-pointer text-sm'
                                     }
                                 >
                                     {opt.label}
@@ -85,7 +85,7 @@ export function ResolutionSection() {
                     })}
                 </RadioGroup>
 
-                <p className="text-xs text-neutral-400 mt-2">
+                <p className="text-xs text-neutral-400 mt-3">
                     Mínimo para {timeRange}: {RESOLUTION_OPTIONS.find(o => o.value === minResolution)?.label}
                 </p>
             </div>

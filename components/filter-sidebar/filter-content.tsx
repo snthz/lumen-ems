@@ -91,7 +91,7 @@ export function FilterContent() {
                 </h2>
             </div>
 
-            <div className="sticky top-14 border-b p-4 bg-white z-10">
+            <div className="sticky top-13 border-b p-4 bg-white z-10">
                 <Button
                     size="sm"
                     variant="outline"
