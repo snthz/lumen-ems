@@ -91,125 +91,130 @@ export function CustomDatePicker({
                     {getDisplayText()}
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="center">
-                <div className="flex">
-                    <ScrollArea className="h-100 w-40 border-r">
-                        <div className="p-2">
-                            {TIME_RANGE_OPTIONS.filter(opt => opt.value !== 'custom').map(opt => (
+            <PopoverContent className="w-[95vw] ml-1.5 md:w-auto p-0 max-h-[80vh] overflow-hidden" align="end">
+                <ScrollArea className="h-[80vh] md:h-auto">
+                    <div className="flex flex-col md:flex-row">
+                        <div className="md:h-100 md:w-40 md:border-r border-b md:border-b-0">
+                            <div className="py-4 px-2 md:p-2 grid grid-cols-3 md:grid-cols-1 gap-x-4 gap-y-1">
+                                {TIME_RANGE_OPTIONS.filter(opt => opt.value !== 'custom').map(opt => (
+                                    <Button
+                                        key={opt.value}
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleQuickSelect(opt.value as TimeRangeKey)}
+                                        className="w-full justify-start text-sm rounded-xs"
+                                    >
+                                        {opt.label}
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="flex-1">
+                            <div className="p-3 border-b flex justify-between items-center">
+                                <span className="text-sm font-medium">Seleccionar rango</span>
                                 <Button
-                                    key={opt.value}
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => handleQuickSelect(opt.value as TimeRangeKey)}
-                                    className="w-full justify-start text-sm mb-1 rounded-xs"
+                                    onClick={handleClear}
+                                    className="h-7 text-xs"
                                 >
-                                    {opt.label}
+                                    <X className="h-3 w-3 mr-1" />
+                                    Limpiar
                                 </Button>
-                            ))}
-                        </div>
-                    </ScrollArea>
-
-                    <div>
-                        <div className="p-3 border-b flex justify-between items-center">
-                            <span className="text-sm font-medium">Seleccionar rango</span>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleClear}
-                                className="h-7 text-xs"
-                            >
-                                <X className="h-3 w-3 mr-1" />
-                                Limpiar
-                            </Button>
-                        </div>
-                        
-                        <CalendarComponent
-                            mode="range"
-                            selected={{
-                                from: customRange.from,
-                                to: customRange.to,
-                            }}
-                            onSelect={handleCalendarSelect}
-                            numberOfMonths={2}
-                            locale={es}
-                        />
-
-                        <div className="p-3 border-t flex gap-4">
-                            <div className="flex-1">
-                                <label className="text-xs text-muted-foreground mb-1 block">Desde</label>
-                                <div className="flex gap-1">
-                                    <Select value={fromTime.hour} onValueChange={(v) => setFromTime(prev => ({ ...prev, hour: v }))}>
-                                        <SelectTrigger className="w-16 h-8 text-xs">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <ScrollArea className="h-48">
-                                                {hours.map(h => (
-                                                    <SelectItem key={h} value={h}>{h}</SelectItem>
-                                                ))}
-                                            </ScrollArea>
-                                        </SelectContent>
-                                    </Select>
-                                    <span className="self-center text-muted-foreground">:</span>
-                                    <Select value={fromTime.minute} onValueChange={(v) => setFromTime(prev => ({ ...prev, minute: v }))}>
-                                        <SelectTrigger className="w-16 h-8 text-xs">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <ScrollArea className="h-48">
-                                                {minutes.map(m => (
-                                                    <SelectItem key={m} value={m}>{m}</SelectItem>
-                                                ))}
-                                            </ScrollArea>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
                             </div>
                             
-                            <div className="flex-1">
-                                <label className="text-xs text-muted-foreground mb-1 block">Hasta</label>
-                                <div className="flex gap-1">
-                                    <Select value={toTime.hour} onValueChange={(v) => setToTime(prev => ({ ...prev, hour: v }))}>
-                                        <SelectTrigger className="w-16 h-8 text-xs">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <ScrollArea className="h-48">
-                                                {hours.map(h => (
-                                                    <SelectItem key={h} value={h}>{h}</SelectItem>
-                                                ))}
-                                            </ScrollArea>
-                                        </SelectContent>
-                                    </Select>
-                                    <span className="self-center text-muted-foreground">:</span>
-                                    <Select value={toTime.minute} onValueChange={(v) => setToTime(prev => ({ ...prev, minute: v }))}>
-                                        <SelectTrigger className="w-16 h-8 text-xs">
-                                            <SelectValue />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <ScrollArea className="h-48">
-                                                {minutes.map(m => (
-                                                    <SelectItem key={m} value={m}>{m}</SelectItem>
-                                                ))}
-                                            </ScrollArea>
-                                        </SelectContent>
-                                    </Select>
+                            <div className="overflow-x-auto">
+                                <CalendarComponent
+                                    className="w-full md:w-auto"
+                                    mode="range"
+                                    selected={{
+                                        from: customRange.from,
+                                        to: customRange.to,
+                                    }}
+                                    onSelect={handleCalendarSelect}
+                                    numberOfMonths={2}
+                                    locale={es}
+                                />
+                            </div>
+
+                            <div className="p-3 border-t flex gap-4">
+                                <div className="flex-1">
+                                    <label className="text-xs text-muted-foreground mb-1 block">Desde</label>
+                                    <div className="flex gap-1">
+                                        <Select value={fromTime.hour} onValueChange={(v) => setFromTime(prev => ({ ...prev, hour: v }))}>
+                                            <SelectTrigger className="w-16 h-8 text-xs">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <ScrollArea className="h-48">
+                                                    {hours.map(h => (
+                                                        <SelectItem key={h} value={h}>{h}</SelectItem>
+                                                    ))}
+                                                </ScrollArea>
+                                            </SelectContent>
+                                        </Select>
+                                        <span className="self-center text-muted-foreground">:</span>
+                                        <Select value={fromTime.minute} onValueChange={(v) => setFromTime(prev => ({ ...prev, minute: v }))}>
+                                            <SelectTrigger className="w-16 h-8 text-xs">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <ScrollArea className="h-48">
+                                                    {minutes.map(m => (
+                                                        <SelectItem key={m} value={m}>{m}</SelectItem>
+                                                    ))}
+                                                </ScrollArea>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex-1">
+                                    <label className="text-xs text-muted-foreground mb-1 block">Hasta</label>
+                                    <div className="flex gap-1">
+                                        <Select value={toTime.hour} onValueChange={(v) => setToTime(prev => ({ ...prev, hour: v }))}>
+                                            <SelectTrigger className="w-16 h-8 text-xs">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <ScrollArea className="h-48">
+                                                    {hours.map(h => (
+                                                        <SelectItem key={h} value={h}>{h}</SelectItem>
+                                                    ))}
+                                                </ScrollArea>
+                                            </SelectContent>
+                                        </Select>
+                                        <span className="self-center text-muted-foreground">:</span>
+                                        <Select value={toTime.minute} onValueChange={(v) => setToTime(prev => ({ ...prev, minute: v }))}>
+                                            <SelectTrigger className="w-16 h-8 text-xs">
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <ScrollArea className="h-48">
+                                                    {minutes.map(m => (
+                                                        <SelectItem key={m} value={m}>{m}</SelectItem>
+                                                    ))}
+                                                </ScrollArea>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div className="p-3 border-t">
-                            <Button
-                                onClick={handleApply}
-                                disabled={!customRange.from || !customRange.to}
-                                className="w-full rounded-xs"
-                                size="sm"
-                            >
-                                Actualizar
-                            </Button>
+                            <div className="p-3 border-t">
+                                <Button
+                                    onClick={handleApply}
+                                    disabled={!customRange.from || !customRange.to}
+                                    className="w-full rounded-xs"
+                                    size="sm"
+                                >
+                                    Actualizar
+                                </Button>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </ScrollArea>
             </PopoverContent>
         </Popover>
     )
