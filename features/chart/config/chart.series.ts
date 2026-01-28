@@ -15,7 +15,7 @@ export function createLineSeries(
     const bullet = series.bullets.push(
         new am4charts.CircleBullet()
     )
-    bullet.circle.strokeWidth = 2
+    bullet.circle.strokeWidth = 1
     bullet.circle.radius = 2
 
     series.connect = false

@@ -60,38 +60,36 @@ export function Chart() {
         const scrollbar = chart.scrollbarX as am4charts.XYChartScrollbar
         if (scrollbar) {
             scrollbar.series.clear()
+
+            let hasBar = false
+            let hasLine = false
+
             chart.series.each(s => {
-                scrollbar.series.push(s)
+                if (s instanceof am4charts.ColumnSeries && !hasBar) {
+                    scrollbar.series.push(s)
+                    hasBar = true
+                }
+                if (s instanceof am4charts.LineSeries && !hasLine) {
+                    scrollbar.series.push(s)
+                    hasLine = true
+                }
             })
 
             scrollbar.background.fill = am4core.color("#f3f4f6")
             scrollbar.background.fillOpacity = 1
+
             scrollbar.scrollbarChart.series.each(s => {
-                s.fillOpacity = 0.2
-                s.strokeOpacity = 0.2
+                s.fillOpacity = 0.15
+                s.strokeOpacity = 0.3
                 if (s instanceof am4charts.LineSeries) {
                     s.bullets.each(b => {
                         b.disabled = true
                     })
                 }
                 if (s instanceof am4charts.ColumnSeries) {
-                    s.columns.template.strokeOpacity = 0  
+                    s.columns.template.strokeOpacity = 0
                 }
             })
-            // if scroll bar has bar chart, the bar must be stacked to avoid overlap
-            let hasBar = false
-            scrollbar.series.each(s => {
-                if (s instanceof am4charts.ColumnSeries) {
-                    hasBar = true
-                }
-            })
-            if (hasBar) {
-                scrollbar.series.each(s => {
-                    if (s instanceof am4charts.ColumnSeries) {
-                        s.stacked = true
-                    }
-                })
-            }
 
             scrollbar.scrollbarChart.xAxes.each(axis => {
                 axis.renderer.grid.template.disabled = true
@@ -101,8 +99,6 @@ export function Chart() {
                 axis.renderer.grid.template.disabled = true
                 axis.renderer.labels.template.disabled = true
             })
-
-
         }
 
         chart.invalidateData()
