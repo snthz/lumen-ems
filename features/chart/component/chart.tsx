@@ -20,6 +20,7 @@ export function Chart() {
     const chartRef = useRef<am4charts.XYChart | null>(null)
     const series = useChartStore(state => state.series)
     const updateKey = useChartStore(state => state.updateKey)
+    const energyUnit = useChartStore(state => state.energyUnit)
 
     useLayoutEffect(() => {
         const chart = createXYChart("chartdiv")
@@ -62,7 +63,7 @@ export function Chart() {
         chart.yAxes.clear()
 
         const sorted = sortSeries(series)
-        const axisDefs = buildAxisDefinitions(sorted)
+        const axisDefs = buildAxisDefinitions(sorted, energyUnit)
         const axisMap = buildValueAxesByAxisKey(chart, axisDefs, sorted)
 
         const { bars, lines } = splitByChartType(sorted)
@@ -116,7 +117,7 @@ export function Chart() {
 
         chart.invalidateData()
 
-    }, [series, updateKey])
+    }, [series, updateKey, energyUnit])
 
     return (
         <div

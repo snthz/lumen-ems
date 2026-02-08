@@ -3,6 +3,7 @@ import { createBarSeries, createLineSeries } from "@/features/chart/config/chart
 import { getSeriesColor } from "@/features/chart/utils/series-color.utils"
 import { resolveAxisScale } from "@/features/chart/utils/unit-scale"
 import { getKeyLabel } from "@/features/telemetry/utils/telemetry-labels"
+import { EnergyUnit } from "@/features/chart/store/chart.store"
 
 export function sortSeries(series: any[]) {
     return [...series].sort((a, b) => {
@@ -19,11 +20,11 @@ export function splitByChartType(series: any[]) {
     }
 }
 
-export function buildAxisDefinitions(series: any[]) {
+export function buildAxisDefinitions(series: any[], energyUnit: EnergyUnit = 'auto') {
     const map = new Map<string, { axisKey: string; unit: string; factor: number }>()
     const powerSeries = series.filter(s => s.unit === "W")
-    const energySeries = series.filter(s => s.unit === "Wh")
-    const otherSeries = series.filter(s => s.unit !== "W" && s.unit !== "Wh")
+    const energySeries = series.filter(s => s.unit === "Wh" || s.unit === "varh" || s.unit === "VAh")
+    const otherSeries = series.filter(s => s.unit !== "W" && s.unit !== "Wh" && s.unit !== "varh" && s.unit !== "VAh")
 
     if (powerSeries.length > 0) {
         const allPowerValues = powerSeries.flatMap(s =>
@@ -49,19 +50,26 @@ export function buildAxisDefinitions(series: any[]) {
         })
     }
     if (energySeries.length > 0) {
-        const allEnergyValues = energySeries.flatMap(s =>
-            s.data.map((p: any) => Math.abs(Number(p.value)))
-        )
-        const maxEnergy = Math.max(...allEnergyValues)
-
         let energyScale: { axisKey: string; unit: string; factor: number }
 
-        if (maxEnergy >= 1_000_000) {
-            energyScale = { axisKey: "ENERGY", unit: "MWh", factor: 1_000_000 }
-        } else if (maxEnergy >= 1_000) {
+        if (energyUnit === 'kWh') {
             energyScale = { axisKey: "ENERGY", unit: "kWh", factor: 1_000 }
+        } else if (energyUnit === 'MWh') {
+            energyScale = { axisKey: "ENERGY", unit: "MWh", factor: 1_000_000 }
         } else {
-            energyScale = { axisKey: "ENERGY", unit: "Wh", factor: 1 }
+            // Auto mode
+            const allEnergyValues = energySeries.flatMap(s =>
+                s.data.map((p: any) => Math.abs(Number(p.value)))
+            )
+            const maxEnergy = Math.max(...allEnergyValues)
+
+            if (maxEnergy >= 1_000_000) {
+                energyScale = { axisKey: "ENERGY", unit: "MWh", factor: 1_000_000 }
+            } else if (maxEnergy >= 1_000) {
+                energyScale = { axisKey: "ENERGY", unit: "kWh", factor: 1_000 }
+            } else {
+                energyScale = { axisKey: "ENERGY", unit: "Wh", factor: 1 }
+            }
         }
 
         map.set("ENERGY", energyScale)
@@ -69,7 +77,17 @@ export function buildAxisDefinitions(series: any[]) {
         energySeries.forEach(s => {
             s._resolvedAxisKey = "ENERGY"
             s._scaleFactor = energyScale.factor
-            s._scaledUnit = energyScale.unit
+            
+            // Apply the same scale suffix to all energy types
+            if (s.unit === "Wh") {
+                s._scaledUnit = energyScale.unit
+            } else if (s.unit === "varh") {
+                // For reactive energy, replace Wh with varh (e.g., kWh -> kvarh)
+                s._scaledUnit = energyScale.unit.replace('Wh', 'varh')
+            } else if (s.unit === "VAh") {
+                // For apparent energy, replace Wh with VAh (e.g., kWh -> kVAh)
+                s._scaledUnit = energyScale.unit.replace('Wh', 'VAh')
+            }
         })
     }
     otherSeries.forEach(s => {

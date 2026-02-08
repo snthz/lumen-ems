@@ -117,6 +117,7 @@ export function ComparisonChart() {
 
     const series = useChartStore(s => s.series)
     const updateKey = useChartStore(s => s.updateKey)
+    const energyUnit = useChartStore(s => s.energyUnit)
     const comparisonDate = useChartStore(s => s.comparisonDate)
     const comparisonEndDate = useChartStore(s => s.comparisonEndDate)
     const setComparisonLoading = useChartStore(s => s.setComparisonLoading)
@@ -217,7 +218,7 @@ export function ComparisonChart() {
         // Merge both datasets for consistent axis scaling
         const allSeries = [...series, ...compData]
         const sorted = sortSeries(allSeries)
-        const axisDefs = buildAxisDefinitions(sorted)
+        const axisDefs = buildAxisDefinitions(sorted, energyUnit)
         const axisMap = buildValueAxesByAxisKey(chart, axisDefs, sorted)
 
         // Render primary series
@@ -305,7 +306,7 @@ export function ComparisonChart() {
         }
 
         chart.invalidateData()
-    }, [series, compData, updateKey, compDateMs, compEndDateMs, primaryStartMs, primaryEndMs])
+    }, [series, compData, updateKey, energyUnit, compDateMs, compEndDateMs, primaryStartMs, primaryEndMs])
 
     return (
         <div

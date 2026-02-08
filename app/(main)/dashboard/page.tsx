@@ -5,6 +5,7 @@ import { ChartContainer } from "@/features/chart/component/chart-container"
 import { ChartSummary } from "@/features/chart/component/chart-summary"
 import { ChartViewSelector } from "@/features/chart/component/chart-view-selector"
 import { ComparisonDatePicker } from "@/features/chart/component/comparison-date-picker"
+import { EnergyUnitSelector } from "@/features/chart/component/energy-unit-selector"
 import { ExportButton } from "@/features/chart/component/export-button"
 import { useChartStore } from "@/features/chart/store/chart.store"
 import { TimeRangeSection } from "@/features/telemetry/components/time-range-section/time-range-section"
@@ -52,6 +53,7 @@ export default function Page() {
                                 </span>
                                 <div className="flex items-center gap-1 md:gap-2 ml-auto">
                                     <ChartViewSelector />
+                                    <EnergyUnitSelector />
                                     {chartView === 'comparison' && <ComparisonDatePicker />}
                                     <ExportButton />
                                     <TimeRangeSection />

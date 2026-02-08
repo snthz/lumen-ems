@@ -9,6 +9,7 @@ import {
     computeSeriesStats,
     formatStatValue,
     type SeriesStats,
+    type EnergyUnit,
 } from "@/features/chart/utils/series-stats.utils"
 import { cn } from "@/lib/utils"
 
@@ -68,6 +69,7 @@ export function ChartSummary() {
     const series = useChartStore(state => state.series)
     const chartView = useChartStore(state => state.chartView)
     const comparisonSeries = useChartStore(state => state.comparisonSeries)
+    const energyUnit = useChartStore(state => state.energyUnit)
 
     const stats: SeriesStats[] = useMemo(() => {
         if (series.length === 0) return []
@@ -82,7 +84,7 @@ export function ChartSummary() {
                     .filter(p => p.value != null && p.value !== '')
                     .map(p => Number(p.value))
                     .filter(v => !isNaN(v))
-                return computeSeriesStats(name, name, s.unit, values)
+                return computeSeriesStats(name, name, s.unit, values, energyUnit)
             })
         }
 
@@ -92,9 +94,9 @@ export function ChartSummary() {
                 ? `${g.label} (${g.key})`
                 : g.key
             const values = g.data.map(p => p.value).filter(v => !isNaN(v))
-            return computeSeriesStats(name, name, g.unit, values)
+            return computeSeriesStats(name, name, g.unit, values, energyUnit)
         })
-    }, [series, chartView])
+    }, [series, chartView, energyUnit])
 
     const comparisonRows: ComparisonRow[] = useMemo(() => {
         if (chartView !== 'comparison' || stats.length === 0) return []
@@ -110,12 +112,12 @@ export function ChartSummary() {
                         .filter(p => p.value != null && p.value !== '')
                         .map(p => Number(p.value))
                         .filter(v => !isNaN(v))
-                    return computeSeriesStats(primaryStats.name, primaryStats.name, comp.unit, values)
+                    return computeSeriesStats(primaryStats.name, primaryStats.name, comp.unit, values, energyUnit)
                 })()
                 : null
             return { primary: primaryStats, comparison: compStats }
         })
-    }, [series, comparisonSeries, stats, chartView])
+    }, [series, comparisonSeries, stats, chartView, energyUnit])
 
     if (stats.length === 0) return null
 

@@ -30,6 +30,7 @@ export function GroupedChartView() {
     const chartRef = useRef<am4charts.XYChart | null>(null)
     const series = useChartStore(state => state.series)
     const updateKey = useChartStore(state => state.updateKey)
+    const energyUnit = useChartStore(state => state.energyUnit)
 
     useLayoutEffect(() => {
         const chart = createXYChart("chartdiv-grouped")
@@ -70,7 +71,7 @@ export function GroupedChartView() {
         const grouped = groupSeriesByKey(series)
         const chartSeriesData = toChartSeries(grouped)
         const sorted = sortSeries(chartSeriesData)
-        const axisDefs = buildAxisDefinitions(sorted)
+        const axisDefs = buildAxisDefinitions(sorted, energyUnit)
         const axisMap = buildValueAxesByAxisKey(chart, axisDefs, sorted)
 
         for (const s of sorted) {
@@ -155,7 +156,7 @@ export function GroupedChartView() {
         }
 
         chart.invalidateData()
-    }, [series, updateKey])
+    }, [series, updateKey, energyUnit])
 
     return (
         <div

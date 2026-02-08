@@ -12,6 +12,7 @@ import { startOfDay, endOfDay } from "date-fns"
 export function ExportButton() {
     const series = useChartStore(s => s.series)
     const chartView = useChartStore(s => s.chartView)
+    const energyUnit = useChartStore(s => s.energyUnit)
     const comparisonDate = useChartStore(s => s.comparisonDate)
     const comparisonEndDate = useChartStore(s => s.comparisonEndDate)
     const comparisonSeries = useChartStore(s => s.comparisonSeries)
@@ -37,6 +38,7 @@ export function ExportButton() {
             comparisonSeries: isComparison ? comparisonSeries : undefined,
             dateRange: primaryRange,
             comparisonRange: compRange,
+            energyUnit,
         })
     }
 

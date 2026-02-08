@@ -1,13 +1,14 @@
 import * as XLSX from "xlsx"
 import { TelemetrySeriesResult } from "@/features/telemetry/telemetry.types"
 import { getKeyLabel } from "@/features/telemetry/utils/telemetry-labels"
-import { computeSeriesStats, formatStatValue, type SeriesStats } from "./series-stats.utils"
+import { computeSeriesStats, formatStatValue, type SeriesStats, type EnergyUnit } from "./series-stats.utils"
 
 interface ExportOptions {
     series: TelemetrySeriesResult[]
     comparisonSeries?: TelemetrySeriesResult[]
     dateRange: { start: Date; end: Date }
     comparisonRange?: { start: Date; end: Date } | null
+    energyUnit?: EnergyUnit
 }
 
 function seriesLabel(s: TelemetrySeriesResult): string {
@@ -52,14 +53,14 @@ function buildDataSheet(series: TelemetrySeriesResult[], sheetName: string): XLS
     return XLSX.utils.aoa_to_sheet(rows)
 }
 
-function buildSummarySheet(series: TelemetrySeriesResult[], comparisonSeries?: TelemetrySeriesResult[]): XLSX.WorkSheet {
+function buildSummarySheet(series: TelemetrySeriesResult[], comparisonSeries?: TelemetrySeriesResult[], energyUnit: EnergyUnit = 'auto'): XLSX.WorkSheet {
     const stats: SeriesStats[] = series.map(s => {
         const name = seriesLabel(s)
         const values = s.data
             .filter(p => p.value != null && p.value !== '')
             .map(p => Number(p.value))
             .filter(v => !isNaN(v))
-        return computeSeriesStats(name, name, s.unit, values)
+        return computeSeriesStats(name, name, s.unit, values, energyUnit)
     })
 
     const hasComparison = comparisonSeries && comparisonSeries.length > 0
@@ -83,7 +84,7 @@ function buildSummarySheet(series: TelemetrySeriesResult[], comparisonSeries?: T
                         .filter(p => p.value != null && p.value !== '')
                         .map(p => Number(p.value))
                         .filter(v => !isNaN(v))
-                    return computeSeriesStats(ps.name, ps.name, comp.unit, values)
+                    return computeSeriesStats(ps.name, ps.name, comp.unit, values, energyUnit)
                 })()
                 : null
 
@@ -129,7 +130,7 @@ function formatDateForFilename(date: Date): string {
     return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`
 }
 
-export function exportToExcel({ series, comparisonSeries, dateRange, comparisonRange }: ExportOptions) {
+export function exportToExcel({ series, comparisonSeries, dateRange, comparisonRange, energyUnit = 'auto' }: ExportOptions) {
     const wb = XLSX.utils.book_new()
 
     // Data sheet
@@ -143,7 +144,7 @@ export function exportToExcel({ series, comparisonSeries, dateRange, comparisonR
     }
 
     // Summary sheet
-    const summaryWs = buildSummarySheet(series, comparisonSeries)
+    const summaryWs = buildSummarySheet(series, comparisonSeries, energyUnit)
     XLSX.utils.book_append_sheet(wb, summaryWs, "Resumen")
 
     // Generate filename
