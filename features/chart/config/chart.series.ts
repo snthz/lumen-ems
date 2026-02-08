@@ -12,11 +12,10 @@ export function createLineSeries(
     series.strokeWidth = 2
     series.tooltipText = "{valueY}"
 
-    const bullet = series.bullets.push(
-        new am4charts.CircleBullet()
-    )
-    bullet.circle.strokeWidth = 1
-    bullet.circle.radius = 2
+    if (series.tooltip) {
+        series.tooltip.fontSize = 12
+        series.tooltip.animationDuration = 2000
+    }
 
     series.connect = false
     return series

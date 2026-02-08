@@ -3,6 +3,12 @@
 import { LineChart, PieChart, BarChart3, ArrowLeftRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useChartStore, type ChartView } from "@/features/chart/store/chart.store"
 import { cn } from "@/lib/utils"
 
@@ -17,30 +23,63 @@ export function ChartViewSelector() {
     const chartView = useChartStore(state => state.chartView)
     const setChartView = useChartStore(state => state.setChartView)
 
+    const ActiveIcon = VIEW_OPTIONS.find(o => o.value === chartView)?.icon ?? LineChart
+
     return (
-        <div className="flex items-center gap-1">
-            {VIEW_OPTIONS.map(opt => {
-                const Icon = opt.icon
-                const isActive = chartView === opt.value
-                return (
-                    <Tooltip key={opt.value}>
-                        <TooltipTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon-sm"
-                                className={cn(
-                                    "text-neutral-400",
-                                    isActive && "bg-neutral-100 text-neutral-900"
-                                )}
-                                onClick={() => setChartView(opt.value)}
-                            >
-                                <Icon className="size-4" />
-                            </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>{opt.label}</TooltipContent>
-                    </Tooltip>
-                )
-            })}
-        </div>
+        <>
+            {/* Desktop: inline icon buttons */}
+            <div className="hidden md:flex items-center gap-1">
+                {VIEW_OPTIONS.map(opt => {
+                    const Icon = opt.icon
+                    const isActive = chartView === opt.value
+                    return (
+                        <Tooltip key={opt.value}>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant="ghost"
+                                    size="icon-sm"
+                                    className={cn(
+                                        "text-neutral-400",
+                                        isActive && "bg-neutral-100 text-neutral-900"
+                                    )}
+                                    onClick={() => setChartView(opt.value)}
+                                >
+                                    <Icon className="size-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>{opt.label}</TooltipContent>
+                        </Tooltip>
+                    )
+                })}
+            </div>
+
+            {/* Mobile: dropdown menu */}
+            <div className="md:hidden">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon-sm" className="text-neutral-600">
+                            <ActiveIcon className="size-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        {VIEW_OPTIONS.map(opt => {
+                            const Icon = opt.icon
+                            return (
+                                <DropdownMenuItem
+                                    key={opt.value}
+                                    onClick={() => setChartView(opt.value)}
+                                    className={cn(
+                                        chartView === opt.value && "bg-neutral-100 font-medium"
+                                    )}
+                                >
+                                    <Icon className="size-4" />
+                                    {opt.label}
+                                </DropdownMenuItem>
+                            )
+                        })}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            </div>
+        </>
     )
 }

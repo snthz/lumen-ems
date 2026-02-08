@@ -1,8 +1,9 @@
 "use client"
 
-import { useLayoutEffect, useEffect, useRef } from "react"
+import { useLayoutEffect, useEffect, useRef, useState } from "react"
 import * as am4charts from "@amcharts/amcharts4/charts"
 import * as am4core from "@amcharts/amcharts4/core"
+import { startOfDay, endOfDay } from "date-fns"
 import { createXYChart } from "@/features/chart/config/chart.factory"
 import { configureDateAxis, buildValueAxesByAxisKey } from "@/features/chart/config/chart.axes"
 import { configureInteractions } from "@/features/chart/config/chart.interactions"
@@ -18,6 +19,7 @@ import {
     splitByChartType,
     buildAxisDefinitions,
 } from "@/features/chart/helpers/chart.helpers"
+import { TelemetrySeriesResult } from "@/features/telemetry/telemetry.types"
 import { toast } from "sonner"
 
 function addPrimarySeries(
@@ -54,7 +56,7 @@ function addPrimarySeries(
     amSeries.tooltipText = `[bold]{name}[/]\n{valueY.formatNumber("#,###.##")} ${s._scaledUnit}`
     if (amSeries.tooltip) {
         amSeries.tooltip.fontSize = 12
-        amSeries.tooltip.animationDuration = 400
+        amSeries.tooltip.animationDuration = 500
     }
 }
 
@@ -105,7 +107,8 @@ function addComparisonSeries(
     amSeries.tooltipText = `[bold]{name}[/]\n{valueY.formatNumber("#,###.##")} ${s._scaledUnit}`
     if (amSeries.tooltip) {
         amSeries.tooltip.fontSize = 12
-        amSeries.tooltip.animationDuration = 400
+        amSeries.tooltip.animationDuration = 500
+            
     }
 }
 
@@ -115,8 +118,7 @@ export function ComparisonChart() {
     const series = useChartStore(s => s.series)
     const updateKey = useChartStore(s => s.updateKey)
     const comparisonDate = useChartStore(s => s.comparisonDate)
-    const comparisonSeries = useChartStore(s => s.comparisonSeries)
-    const setComparisonSeries = useChartStore(s => s.setComparisonSeries)
+    const comparisonEndDate = useChartStore(s => s.comparisonEndDate)
     const setComparisonLoading = useChartStore(s => s.setComparisonLoading)
 
     const timeRange = useTelemetryQueryStore(s => s.timeRange)
@@ -129,29 +131,30 @@ export function ComparisonChart() {
         ? { start: customStart, end: customEnd }
         : resolveTimeRange(timeRange)
 
-    // Fetch comparison data when comparisonDate changes
+    const primaryStartMs = primaryRange.start.getTime()
+    const primaryEndMs = primaryRange.end.getTime()
+
+    // Local state for comparison data to batch rendering
+    const [compData, setCompData] = useState<TelemetrySeriesResult[]>([])
+    const compDateMs = comparisonDate?.getTime() ?? null
+    const compEndDateMs = comparisonEndDate?.getTime() ?? null
+
+    // Fetch comparison data when comparison range or primary data changes
     useEffect(() => {
-        if (!comparisonDate) {
-            setComparisonSeries([])
+        if (!compDateMs || !compEndDateMs) {
+            setCompData([])
             return
         }
 
-        const durationMs = primaryRange.end.getTime() - primaryRange.start.getTime()
-        const compStart = new Date(comparisonDate)
-        compStart.setHours(
-            primaryRange.start.getHours(),
-            primaryRange.start.getMinutes(),
-            primaryRange.start.getSeconds(),
-            0
-        )
-        const compEnd = new Date(compStart.getTime() + durationMs)
+        const compStart = startOfDay(new Date(compDateMs))
+        const compEnd = endOfDay(new Date(compEndDateMs))
 
         let cancelled = false
         setComparisonLoading(true)
 
         run(compStart, compEnd)
             .then(result => {
-                if (!cancelled) setComparisonSeries(result)
+                if (!cancelled) setCompData(result)
             })
             .catch(err => {
                 if (!cancelled) {
@@ -165,7 +168,12 @@ export function ComparisonChart() {
 
         return () => { cancelled = true }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [comparisonDate, primaryRange.start.getTime(), primaryRange.end.getTime()])
+    }, [compDateMs, compEndDateMs, primaryStartMs, primaryEndMs, updateKey])
+
+    // Sync local compData to store for summary
+    useEffect(() => {
+        useChartStore.getState().setComparisonSeries(compData)
+    }, [compData])
 
     // Create chart on mount
     useLayoutEffect(() => {
@@ -183,7 +191,7 @@ export function ComparisonChart() {
 
         const dateAxis = chart.xAxes.getIndex(0)
         if (dateAxis?.tooltip) {
-            dateAxis.tooltip.animationDuration = 400
+            dateAxis.tooltip.animationDuration = 500
         }
 
         chartRef.current = chart
@@ -193,18 +201,21 @@ export function ComparisonChart() {
         }
     }, [])
 
-    // Render series
+    // Render series - uses local compData so it renders once when both are ready
     useEffect(() => {
         const chart = chartRef.current
         if (!chart) return
 
         chart.series.clear()
         chart.yAxes.clear()
+        while (chart.xAxes.length > 1) {
+            chart.xAxes.removeIndex(chart.xAxes.length - 1).dispose()
+        }
 
         if (series.length === 0) return
 
         // Merge both datasets for consistent axis scaling
-        const allSeries = [...series, ...comparisonSeries]
+        const allSeries = [...series, ...compData]
         const sorted = sortSeries(allSeries)
         const axisDefs = buildAxisDefinitions(sorted)
         const axisMap = buildValueAxesByAxisKey(chart, axisDefs, sorted)
@@ -218,22 +229,34 @@ export function ComparisonChart() {
         primaryLines.forEach(s => addPrimarySeries(chart, axisMap, s))
 
         // Render comparison series (shifted)
-        if (comparisonSeries.length > 0 && comparisonDate) {
-            const compStart = new Date(comparisonDate)
-            compStart.setHours(
-                primaryRange.start.getHours(),
-                primaryRange.start.getMinutes(),
-                primaryRange.start.getSeconds(),
-                0
-            )
-            const shiftOffset = primaryRange.start.getTime() - compStart.getTime()
+        if (compData.length > 0 && compDateMs && compEndDateMs) {
+            const compStart = startOfDay(new Date(compDateMs))
+            const compEnd = endOfDay(new Date(compEndDateMs))
+            const shiftOffset = primaryStartMs - compStart.getTime()
 
             const compSorted = sorted.filter(s =>
-                comparisonSeries.some(cs => cs.deviceId === s.deviceId && cs.key === s.key && cs.data === s.data)
+                compData.some(cs => cs.deviceId === s.deviceId && cs.key === s.key && cs.data === s.data)
             )
             const { bars: compBars, lines: compLines } = splitByChartType(compSorted)
             compBars.forEach(s => addComparisonSeries(chart, axisMap, s, shiftOffset))
             compLines.forEach(s => addComparisonSeries(chart, axisMap, s, shiftOffset))
+
+            // Add secondary date axis at top showing comparison dates
+            const compAxis = chart.xAxes.push(new am4charts.DateAxis())
+            compAxis.renderer.opposite = true
+            compAxis.renderer.labels.template.fill = am4core.color("#9ca3af")
+            compAxis.renderer.labels.template.fontSize = 10
+            compAxis.renderer.grid.template.disabled = true
+            compAxis.renderer.line.strokeOpacity = 0.2
+            compAxis.min = compStart.getTime()
+            compAxis.max = compEnd.getTime()
+            compAxis.renderer.minGridDistance = 60
+            compAxis.title.text = "Comparación"
+            compAxis.title.fill = am4core.color("#9ca3af")
+            compAxis.title.fontSize = 10
+            if (compAxis.tooltip) {
+                compAxis.tooltip.disabled = true
+            }
         }
 
         // Scrollbar - only primary series
@@ -282,7 +305,7 @@ export function ComparisonChart() {
         }
 
         chart.invalidateData()
-    }, [series, comparisonSeries, updateKey, comparisonDate, primaryRange.start, primaryRange.end])
+    }, [series, compData, updateKey, compDateMs, compEndDateMs, primaryStartMs, primaryEndMs])
 
     return (
         <div

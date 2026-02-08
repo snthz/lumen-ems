@@ -5,6 +5,7 @@ import { ChartContainer } from "@/features/chart/component/chart-container"
 import { ChartSummary } from "@/features/chart/component/chart-summary"
 import { ChartViewSelector } from "@/features/chart/component/chart-view-selector"
 import { ComparisonDatePicker } from "@/features/chart/component/comparison-date-picker"
+import { ExportButton } from "@/features/chart/component/export-button"
 import { useChartStore } from "@/features/chart/store/chart.store"
 import { TimeRangeSection } from "@/features/telemetry/components/time-range-section/time-range-section"
 import { useTelemetryQueryStore } from "@/features/telemetry/store/telemetry-query.store"
@@ -41,17 +42,18 @@ export default function Page() {
             <div className="flex-1 md:pt-4 md:px-6 overflow-auto">
                 {hasSeries ? (
                     <>
-                        <div className=" md:border md:rounded-lg">
-                            <div className="flex justify-between items-center mb-2 px-6 border-b">
+                        <div className="md:border md:rounded-lg">
+                            <div className="flex flex-wrap justify-between items-center gap-2 mb-2 px-4 md:px-6 py-1 border-b">
                                 <span
-                                    className="text-xs text-neutral-600 truncate min-w-0 flex-1 mr-4"
+                                    className="hidden md:inline text-xs text-neutral-600 truncate min-w-0 flex-1 mr-4"
                                     title={`${dateRangeText} | ${formatResolution(resolution)} | ${phaseScope}`}
                                 >
                                     {dateRangeText}  <span className="text-neutral-400"> | {formatResolution(resolution)} | {phaseScope}</span>
                                 </span>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-1 md:gap-2 ml-auto">
                                     <ChartViewSelector />
                                     {chartView === 'comparison' && <ComparisonDatePicker />}
+                                    <ExportButton />
                                     <TimeRangeSection />
                                 </div>
                             </div>

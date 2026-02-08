@@ -9,4 +9,9 @@ const envSchema = z.object({
 
 const parsedEnv = envSchema.safeParse(process.env)
 
+if (!parsedEnv.success) {
+    console.error("Invalid environment variables:", z.treeifyError(parsedEnv.error))
+    throw new Error("Invalid environment variables")
+}
+
 export const env = parsedEnv.data

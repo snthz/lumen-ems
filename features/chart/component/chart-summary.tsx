@@ -76,7 +76,7 @@ export function ChartSummary() {
             return series.map(s => {
                 const label = getKeyLabel(s.key)
                 const name = label !== s.key
-                    ? `${s.deviceName} | ${label} (${s.key})`
+                    ? `${s.deviceName} | ${label}`
                     : `${s.deviceName} | ${s.key}`
                 const values = s.data
                     .filter(p => p.value != null && p.value !== '')
@@ -157,7 +157,7 @@ export function ChartSummary() {
                                             style={{ backgroundColor: getSeriesHex(row.primary.colorKey) }}
                                         />
                                         <span className="truncate max-w-50" title={row.primary.name}>
-                                            {row.primary.name}
+                                            {row.primary.name} <span className="text-neutral-400">({row.primary.unit})</span>
                                         </span>
                                     </div>
                                 </td>
@@ -205,7 +205,7 @@ export function ChartSummary() {
                                         style={{ backgroundColor: getSeriesHex(stat.colorKey) }}
                                     />
                                     <span className="truncate max-w-[240px]" title={stat.name}>
-                                        {stat.name}
+                                        {stat.name} <span className="text-neutral-400">({stat.unit})</span>
                                     </span>
                                 </div>
                             </td>
