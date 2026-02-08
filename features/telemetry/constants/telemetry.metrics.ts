@@ -4,7 +4,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     // ───────── ACTIVE POWER ─────────
     {
         id: 'system_power',
-        label: 'Potencia activa total',
+        label: 'Active power',
         keys: 'P',
         unit: 'W',
         phaseScope: 'SYSTEM',
@@ -15,7 +15,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'phase_power',
-        label: 'Potencia activa por fase',
+        label: 'Active power (φ)',
         keys: 'P1,P2,P3',
         unit: 'W',
         phaseScope: 'PHASE',
@@ -28,7 +28,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     // ───────── REACTIVE POWER ─────────
     {
         id: 'system_reactive_power',
-        label: 'Potencia reactiva total',
+        label: 'Reactive power',
         keys: 'Q',
         unit: 'var',
         phaseScope: 'SYSTEM',
@@ -38,7 +38,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'phase_reactive_power',
-        label: 'Potencia reactiva por fase',
+        label: 'Reactive power (φ)',
         keys: 'Q1,Q2,Q3',
         unit: 'var',
         phaseScope: 'PHASE',
@@ -50,7 +50,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     // ───────── APPARENT POWER ─────────
     {
         id: 'system_apparent_power',
-        label: 'Potencia aparente total',
+        label: 'Apparent power',
         keys: 'S',
         unit: 'VA',
         phaseScope: 'SYSTEM',
@@ -60,7 +60,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'phase_apparent_power',
-        label: 'Potencia aparente por fase',
+        label: 'Apparent power (φ)',
         keys: 'S1,S2,S3',
         unit: 'VA',
         phaseScope: 'PHASE',
@@ -72,7 +72,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     // ───────── VOLTAGE ─────────
     {
         id: 'phase_voltage_ln',
-        label: 'Voltaje fase-neutro',
+        label: 'Phase-neutral voltage',
         keys: 'V1,V2,V3',
         unit: 'V',
         phaseScope: 'PHASE',
@@ -83,7 +83,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'phase_voltage_ll',
-        label: 'Voltaje línea-línea',
+        label: 'Line-to-line voltage',
         keys: 'U1,U2,U3',
         unit: 'V',
         phaseScope: 'PHASE',
@@ -93,7 +93,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'system_voltage',
-        label: 'Voltaje sistema',
+        label: 'System voltage',
         keys: 'U',
         unit: 'V',
         phaseScope: 'SYSTEM',
@@ -105,7 +105,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     // ───────── CURRENT ─────────
     {
         id: 'phase_current',
-        label: 'Corriente por fase',
+        label: 'Current (φ)',
         keys: 'I1,I2,I3',
         unit: 'A',
         phaseScope: 'PHASE',
@@ -116,7 +116,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'neutral_current',
-        label: 'Corriente neutro',
+        label: 'Neutral current',
         keys: 'In',
         unit: 'A',
         phaseScope: 'SYSTEM',
@@ -126,7 +126,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'system_current',
-        label: 'Corriente total',
+        label: 'Current',
         keys: 'I',
         unit: 'A',
         phaseScope: 'SYSTEM',
@@ -138,7 +138,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     // ───────── FREQUENCY ─────────
     {
         id: 'frequency',
-        label: 'Frecuencia',
+        label: 'Frequency',
         keys: 'F',
         unit: 'Hz',
         phaseScope: 'SYSTEM',
@@ -150,7 +150,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     // ───────── POWER FACTOR ─────────
     {
         id: 'power_factor_system',
-        label: 'Factor de potencia total',
+        label: 'Power factor',
         keys: 'PF',
         unit: '',
         phaseScope: 'SYSTEM',
@@ -160,7 +160,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'power_factor_phase',
-        label: 'Factor de potencia por fase',
+        label: 'Power factor (φ)',
         keys: 'PF1,PF2,PF3',
         unit: '',
         phaseScope: 'PHASE',
@@ -172,7 +172,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     // ───────── ACTIVE ENERGY (DERIVADA TUYA) ─────────
     {
         id: 'system_energy',
-        label: 'Energía total',
+        label: 'Energy',
         keys: 'Edelta',
         unit: 'Wh',
         phaseScope: 'SYSTEM',
@@ -183,7 +183,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'phase_energy',
-        label: 'Energía por fase',
+        label: 'Energy (φ)',
         keys: 'E1delta,E2delta,E3delta',
         unit: 'Wh',
         phaseScope: 'PHASE',
@@ -195,7 +195,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     // ───────── EXPORT ENERGY ─────────
     {
         id: 'system_energy_export',
-        label: 'Energía exportada',
+        label: 'Exported energy',
         keys: 'Ex',
         unit: 'Wh',
         phaseScope: 'SYSTEM',
@@ -205,7 +205,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'phase_energy_export',
-        label: 'Energía exportada por fase',
+        label: 'Exported energy (φ)',
         keys: 'Ex1,Ex2,Ex3',
         unit: 'Wh',
         phaseScope: 'PHASE',
@@ -217,7 +217,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     // ───────── REACTIVE ENERGY ─────────
     {
         id: 'system_reactive_energy',
-        label: 'Energía reactiva total',
+        label: 'Reactive energy',
         keys: 'RE',
         unit: 'varh',
         phaseScope: 'SYSTEM',
@@ -227,7 +227,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'phase_reactive_energy',
-        label: 'Energía reactiva por fase',
+        label: 'Reactive energy (φ)',
         keys: 'RE1,RE2,RE3',
         unit: 'varh',
         phaseScope: 'PHASE',
@@ -239,7 +239,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     // ───────── APPARENT ENERGY ─────────
     {
         id: 'system_apparent_energy',
-        label: 'Energía aparente total',
+        label: 'Apparent energy',
         keys: 'AE',
         unit: 'VAh',
         phaseScope: 'SYSTEM',
@@ -249,7 +249,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'phase_apparent_energy',
-        label: 'Energía aparente por fase',
+        label: 'Apparent energy (φ)',
         keys: 'AE1,AE2,AE3',
         unit: 'VAh',
         phaseScope: 'PHASE',
