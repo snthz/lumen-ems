@@ -23,7 +23,7 @@ export function fillMissingDataPoints(
     const dataMap = new Map<number, TelemetryTimeseriesPoint>()
     data.forEach(point => {
         const ts = typeof point.ts === 'number' ? point.ts : new Date(point.ts).getTime()
-        const bucketTs = Math.floor(ts / intervalMs) * intervalMs
+        const bucketTs = startTs + Math.floor((ts - startTs) / intervalMs) * intervalMs
         dataMap.set(bucketTs, point)
     })
 

@@ -24,6 +24,7 @@ const KEY_LABELS: Record<string, string> = {
     'V3': 'Voltaje L3-N',
     
     // Voltaje línea-línea
+    'U': 'Voltaje sistema',
     'U1': 'Voltaje L1-L2',
     'U2': 'Voltaje L2-L3',
     'U3': 'Voltaje L3-L1',

@@ -36,13 +36,14 @@ export function CustomerButton({
         if (open && relations === null) {
             setLoading(true)
             const data:TbRelationsResponse = await getCustomerRelationsAction(customer.id.id)
+            console.log("Relations for customer", customer.id.id, data)
             setRelations(data)
             setLoading(false)
         }
     }
 
     const assetRelations =
-        relations?.filter(rel => rel.to.entityType === 'ASSET') ?? []
+        relations?.filter(rel => rel.to.entityType === 'ASSET' || rel.to.entityType === 'CUSTOMER') || []
 
     const hasAssets = assetRelations.length > 0
 

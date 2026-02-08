@@ -4,25 +4,35 @@ import { useLayoutEffect, useEffect, useRef } from "react"
 import * as am4charts from "@amcharts/amcharts4/charts"
 import * as am4core from "@amcharts/amcharts4/core"
 import { createXYChart } from "@/features/chart/config/chart.factory"
-import { configureDateAxis } from "@/features/chart/config/chart.axes"
-import { buildValueAxesByAxisKey } from "@/features/chart/config/chart.axes"
+import { configureDateAxis, buildValueAxesByAxisKey } from "@/features/chart/config/chart.axes"
 import { configureInteractions } from "@/features/chart/config/chart.interactions"
+import { createLineSeries, createBarSeries } from "@/features/chart/config/chart.series"
 import { useChartStore } from "@/features/chart/store/chart.store"
+import { groupSeriesByKey } from "@/features/chart/utils/series-grouping.utils"
+import { buildAxisDefinitions, sortSeries } from "@/features/chart/helpers/chart.helpers"
+import { getSeriesColor } from "@/features/chart/utils/series-color.utils"
 
-import {
-    sortSeries,
-    splitByChartType,
-    buildAxisDefinitions,
-    addSeriesToChart,
-} from "@/features/chart/helpers/chart.helpers"
+function toChartSeries(grouped: ReturnType<typeof groupSeriesByKey>) {
+    return grouped.map(g => ({
+        deviceId: '__grouped__',
+        deviceName: '',
+        assetId: '',
+        assetName: '',
+        key: g.key,
+        unit: g.unit,
+        chartType: g.chartType,
+        axisKey: g.axisKey,
+        data: g.data.map(p => ({ ts: p.ts, value: p.value })),
+    }))
+}
 
-export function Chart() {
+export function GroupedChartView() {
     const chartRef = useRef<am4charts.XYChart | null>(null)
     const series = useChartStore(state => state.series)
     const updateKey = useChartStore(state => state.updateKey)
 
     useLayoutEffect(() => {
-        const chart = createXYChart("chartdiv")
+        const chart = createXYChart("chartdiv-grouped")
 
         configureDateAxis(chart)
         configureInteractions(chart)
@@ -52,23 +62,55 @@ export function Chart() {
         const chart = chartRef.current
         if (!chart) return
 
-        if (series.length === 0) {
-            chart.series.clear()
-            chart.yAxes.clear()
-            return
-        }
-
         chart.series.clear()
         chart.yAxes.clear()
 
-        const sorted = sortSeries(series)
+        if (series.length === 0) return
+
+        const grouped = groupSeriesByKey(series)
+        const chartSeriesData = toChartSeries(grouped)
+        const sorted = sortSeries(chartSeriesData)
         const axisDefs = buildAxisDefinitions(sorted)
         const axisMap = buildValueAxesByAxisKey(chart, axisDefs, sorted)
 
-        const { bars, lines } = splitByChartType(sorted)
+        for (const s of sorted) {
+            const resolvedAxisKey = (s as any)._resolvedAxisKey
+            const scaleFactor = (s as any)._scaleFactor ?? 1
+            const scaledUnit = (s as any)._scaledUnit ?? s.unit
 
-        bars.forEach(s => addSeriesToChart(chart, axisMap, s))
-        lines.forEach(s => addSeriesToChart(chart, axisMap, s))
+            const axis = axisMap.get(resolvedAxisKey)
+            if (!axis) continue
+
+            const amSeries = s.chartType === 'bar'
+                ? createBarSeries(chart)
+                : createLineSeries(chart)
+
+            amSeries.yAxis = axis
+            amSeries.zIndex = s.chartType === 'line' ? 10 : 1
+
+            const groupInfo = grouped.find(g => g.key === s.key)!
+            const name = groupInfo.label
+            const color = getSeriesColor(name)
+            amSeries.name = name
+            amSeries.stroke = color
+            amSeries.fill = color
+
+            if ("columns" in amSeries) {
+                (amSeries as am4charts.ColumnSeries).columns.template.fill = color;
+                (amSeries as am4charts.ColumnSeries).columns.template.stroke = color
+            }
+
+            amSeries.data = s.data.map((p: any) => ({
+                date: new Date(p.ts),
+                value: p.value != null ? Number(p.value) / scaleFactor : undefined,
+            }))
+
+            amSeries.tooltipText = `[bold]{name}[/]\n{valueY.formatNumber("#,###.##")} ${scaledUnit}`
+            if (amSeries.tooltip) {
+                amSeries.tooltip.fontSize = 12
+                amSeries.tooltip.animationDuration = 400
+            }
+        }
 
         const scrollbar = chart.scrollbarX as am4charts.XYChartScrollbar
         if (scrollbar) {
@@ -95,9 +137,7 @@ export function Chart() {
                 s.fillOpacity = 0.15
                 s.strokeOpacity = 0.3
                 if (s instanceof am4charts.LineSeries) {
-                    s.bullets.each(b => {
-                        b.disabled = true
-                    })
+                    s.bullets.each(b => { b.disabled = true })
                 }
                 if (s instanceof am4charts.ColumnSeries) {
                     s.columns.template.strokeOpacity = 0
@@ -115,13 +155,12 @@ export function Chart() {
         }
 
         chart.invalidateData()
-
     }, [series, updateKey])
 
     return (
         <div
-            id="chartdiv"
-            style={{ width: "100%", minHeight: "600px" }}
+            id="chartdiv-grouped"
+            style={{ width: "100%", height: "600px" }}
         />
     )
 }

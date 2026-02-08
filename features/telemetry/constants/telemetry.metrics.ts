@@ -94,7 +94,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     {
         id: 'system_voltage',
         label: 'Voltaje sistema',
-        keys: 'V',
+        keys: 'U',
         unit: 'V',
         phaseScope: 'SYSTEM',
         category: 'VOLTAGE',

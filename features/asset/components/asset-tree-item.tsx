@@ -17,6 +17,7 @@ import { useAssetStore } from '@/features/asset/store/asset.store'
 import clsx from 'clsx'
 import { Button } from "@/components/ui/button"
 import { Spinner } from '@/components/ui/spinner'
+import { env } from '@/lib/config/env'
 
 export function AssetTreeItem({ relation }: { relation: TbRelation }) {
     const selectedAssets = useAssetStore(state => state.selectedAssets)
@@ -25,7 +26,7 @@ export function AssetTreeItem({ relation }: { relation: TbRelation }) {
 
     const assetChildren =
         relation.children?.filter(
-            child => child.to.entityType === 'ASSET'
+            child => child.to.entityType === 'ASSET' || child.to.entityType === 'CUSTOMER'
         ) ?? []
 
     const hasChildren = assetChildren.length > 0
@@ -51,11 +52,32 @@ export function AssetTreeItem({ relation }: { relation: TbRelation }) {
                 >
                     <SidebarMenuButton
                         className="pl-0 flex-1 cursor-pointer rounded-none"
-                        onClick={handleSelect}
+                        onClick={(e) => {
+                            if (relation.to.entityType === 'CUSTOMER') return
+                            handleSelect(e)
+                        }}
                         disabled={isLoading}
                     >
                         <span className="flex items-center gap-2 w-full">
                             <div className="w-4 h-px bg-neutral-200" />
+                            {
+                                relation.to.entityType === 'CUSTOMER' && (
+                                    relation.additionalInfo?.logo ? (
+                                        <img
+                                            src={`${env?.NEXT_PUBLIC_TB_API}${relation.additionalInfo.logo}`}
+                                            alt={relation.additionalInfo.name ?? relation.toName}
+                                            className="size-6 rounded-md object-cover"
+                                        />
+                                    ) : (
+                                        <div className="size-6 bg-neutral-200 rounded-md flex items-center justify-center">
+                                            <span className="uppercase text-xs">
+                                                {relation.additionalInfo?.name?.charAt(0) ?? relation.toName?.charAt(0) ?? '?'}
+                                            </span>
+                                        </div>
+                                    )
+                                )
+                            }
+
                             <span className="text-xs">
                                 {relation.additionalInfo?.name ?? relation.toName}
                             </span>

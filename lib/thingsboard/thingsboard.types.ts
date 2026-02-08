@@ -68,7 +68,8 @@ export type TbRelationTypeGroup =
     | 'RULE_CHAIN';
 
 export interface TbRelationAdditionalInfo {
-    name?: string
+    name?: string,
+    logo?: string,
     default?: boolean
 }
 

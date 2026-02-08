@@ -129,6 +129,7 @@ export function addSeriesToChart(
    
     if(series.tooltip) {
         series.tooltip.fontSize = 12
+        series.tooltip.animationDuration = 400
     }
 
     series.tooltipText = `[bold]{name}[/]\n{valueY.formatNumber("#,###.##")} ${s._scaledUnit}`

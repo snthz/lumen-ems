@@ -1,7 +1,10 @@
 'use client'
 
 import { FilterSidebar } from "@/components/filter-sidebar/filter-sidebar"
-import { Chart } from "@/features/chart/component/chart"
+import { ChartContainer } from "@/features/chart/component/chart-container"
+import { ChartSummary } from "@/features/chart/component/chart-summary"
+import { ChartViewSelector } from "@/features/chart/component/chart-view-selector"
+import { ComparisonDatePicker } from "@/features/chart/component/comparison-date-picker"
 import { useChartStore } from "@/features/chart/store/chart.store"
 import { TimeRangeSection } from "@/features/telemetry/components/time-range-section/time-range-section"
 import { useTelemetryQueryStore } from "@/features/telemetry/store/telemetry-query.store"
@@ -18,6 +21,7 @@ function formatResolution(seconds: number): string {
 
 export default function Page() {
     const series = useChartStore(state => state.series)
+    const chartView = useChartStore(state => state.chartView)
     const hasSeries = series.length > 0
 
     const timeRange = useTelemetryQueryStore(state => state.timeRange)
@@ -34,20 +38,29 @@ export default function Page() {
 
     return (
         <div className="md:flex relative h-[calc(100vh-69px)] w-full">
-            <div className="flex-1 md:pt-4 md:px-6">
+            <div className="flex-1 md:pt-4 md:px-6 overflow-auto">
                 {hasSeries ? (
-                    <div className="md:shadow-md md:border md:rounded-lg">
-                        <div className="flex justify-between items-center mb-2 px-6 border-b">
-                            <span
-                                className="text-xs text-neutral-600 truncate min-w-0 flex-1 mr-4"
-                                title={`${dateRangeText} | ${formatResolution(resolution)} | ${phaseScope}`}
-                            >
-                                {dateRangeText}  <span className="text-neutral-400"> | {formatResolution(resolution)} | {phaseScope}</span>
-                            </span>
-                            <TimeRangeSection />
+                    <>
+                        <div className=" md:border md:rounded-lg">
+                            <div className="flex justify-between items-center mb-2 px-6 border-b">
+                                <span
+                                    className="text-xs text-neutral-600 truncate min-w-0 flex-1 mr-4"
+                                    title={`${dateRangeText} | ${formatResolution(resolution)} | ${phaseScope}`}
+                                >
+                                    {dateRangeText}  <span className="text-neutral-400"> | {formatResolution(resolution)} | {phaseScope}</span>
+                                </span>
+                                <div className="flex items-center gap-2">
+                                    <ChartViewSelector />
+                                    {chartView === 'comparison' && <ComparisonDatePicker />}
+                                    <TimeRangeSection />
+                                </div>
+                            </div>
+                            <ChartContainer />
                         </div>
-                        <Chart />
-                    </div>
+                        <div className="my-6 md:border md:rounded-lg">
+                            <ChartSummary />
+                        </div>
+                    </>
                 ) : (
                     <div className="h-full flex items-center justify-center">
                         <div className="text-center space-y-2">
