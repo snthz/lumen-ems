@@ -22,18 +22,15 @@ export function EnergyUnitSelector() {
     if (!hasEnergyMetrics) return null
 
     return (
-        <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">Energy unit:</span>
-            <Select value={energyUnit} onValueChange={(value) => setEnergyUnit(value as EnergyUnit)}>
-                <SelectTrigger className="w-30">
-                    <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="auto">Auto</SelectItem>
-                    <SelectItem value="kWh">kWh</SelectItem>
-                    <SelectItem value="MWh">MWh</SelectItem>
-                </SelectContent>
-            </Select>
-        </div>
+        <Select value={energyUnit} onValueChange={(value) => setEnergyUnit(value as EnergyUnit)}>
+            <SelectTrigger className="w-20 h-7 text-xs">
+                <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+                <SelectItem value="auto">Auto</SelectItem>
+                <SelectItem value="kWh">kWh</SelectItem>
+                <SelectItem value="MWh">MWh</SelectItem>
+            </SelectContent>
+        </Select>
     )
 }

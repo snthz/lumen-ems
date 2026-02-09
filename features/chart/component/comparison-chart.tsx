@@ -306,7 +306,7 @@ export function ComparisonChart() {
         }
 
         chart.invalidateData()
-    }, [series, compData, updateKey, energyUnit, compDateMs, compEndDateMs, primaryStartMs, primaryEndMs])
+    }, [series, compData, updateKey, compDateMs, compEndDateMs, primaryStartMs, primaryEndMs])
 
     return (
         <div

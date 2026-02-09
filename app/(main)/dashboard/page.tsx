@@ -44,20 +44,19 @@ export default function Page() {
                 {hasSeries ? (
                     <>
                         <div className="md:border md:rounded-lg">
-                            <div className="flex flex-wrap justify-between items-center gap-2 mb-2 px-4 md:px-6 py-1 border-b">
-                                <span
-                                    className="hidden md:inline text-xs text-neutral-600 truncate min-w-0 flex-1 mr-4"
-                                    title={`${dateRangeText} | ${formatResolution(resolution)} | ${phaseScope}`}
-                                >
-                                    {dateRangeText}  <span className="text-neutral-400"> | {formatResolution(resolution)} | {phaseScope}</span>
-                                </span>
-                                <div className="flex items-center gap-1 md:gap-2 ml-auto">
+                            <div className="px-4 md:px-6 py-2 border-b">
+                                <div className="flex items-center gap-1.5">
                                     <ChartViewSelector />
+                                    <div className="hidden md:block h-4 w-px bg-neutral-200 mx-0.5" />
                                     <EnergyUnitSelector />
                                     {chartView === 'comparison' && <ComparisonDatePicker />}
+                                    <div className="flex-1" />
                                     <ExportButton />
                                     <TimeRangeSection />
                                 </div>
+                                <p className="hidden lg:block text-[10px] text-neutral-400 mt-1 truncate">
+                                    {dateRangeText} &middot; {formatResolution(resolution)} &middot; {phaseScope}
+                                </p>
                             </div>
                             <ChartContainer />
                         </div>
