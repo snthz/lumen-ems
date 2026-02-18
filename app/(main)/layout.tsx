@@ -5,7 +5,7 @@ import {TokenProvider} from "@/features/auth/providers/token.provider";
 import {Suspense} from "react";
 import {AppSidebar} from "@/components/sidebar/app-sidebar";
 import {SidebarInset, SidebarProvider, SidebarTrigger} from "@/components/ui/sidebar";
-import {getCustomersByEntityGroup} from "@/lib/thingsboard/server/thingsboard.server";
+import {getCustomerGroups} from "@/lib/thingsboard/server/thingsboard.server";
 import {Toaster} from "sonner";
 import Loading from "./loading";
 
@@ -29,7 +29,7 @@ export default async function RootLayout({
                                          }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const {data: customers} = await getCustomersByEntityGroup()
+    const {data: groups} = await getCustomerGroups()
     return (
         <html lang="en">
         <body
@@ -39,7 +39,7 @@ export default async function RootLayout({
         <Suspense fallback={<Loading />}>
             <TokenProvider>
                 <SidebarProvider>
-                    <AppSidebar customers={customers}/>
+                    <AppSidebar groups={groups ?? []}/>
                     <SidebarInset>
                         <header className="flex shrink-0 items-center gap-2 border-b">
                             <div className=" flex items-center justify-between gap-2 px-4">

@@ -25,7 +25,8 @@ import { toast } from "sonner"
 function addPrimarySeries(
     chart: am4charts.XYChart,
     axisMap: Map<string, am4charts.ValueAxis>,
-    s: any
+    s: any,
+    splitBars: boolean
 ) {
     const axis = axisMap.get(s._resolvedAxisKey)
     if (!axis) return
@@ -43,9 +44,15 @@ function addPrimarySeries(
     amSeries.stroke = color
     amSeries.fill = color
 
-    if ("columns" in amSeries) {
-        (amSeries as am4charts.ColumnSeries).columns.template.fill = color;
-        (amSeries as am4charts.ColumnSeries).columns.template.stroke = color
+    if (amSeries instanceof am4charts.ColumnSeries) {
+        amSeries.columns.template.fill = color
+        amSeries.columns.template.stroke = color
+        if (splitBars) {
+            amSeries.columns.template.width = am4core.percent(45)
+            amSeries.columns.template.adapter.add("dx", (_dx, target) => {
+                return -(target.pixelWidth / 2) - 1
+            })
+        }
     }
 
     amSeries.data = s.data.map((p: any) => ({
@@ -63,10 +70,14 @@ function addPrimarySeries(
 function addComparisonSeries(
     chart: am4charts.XYChart,
     axisMap: Map<string, am4charts.ValueAxis>,
+    compAxisMap: Map<string, am4charts.ValueAxis>,
     s: any,
     shiftOffset: number
 ) {
-    const axis = axisMap.get(s._resolvedAxisKey)
+    // Bars use shadow axis for independent stacking; lines use regular axis
+    const axis = s.chartType === "bar"
+        ? compAxisMap.get(s._resolvedAxisKey)
+        : axisMap.get(s._resolvedAxisKey)
     if (!axis) return
 
     const amSeries = s.chartType === "bar"
@@ -92,11 +103,16 @@ function addComparisonSeries(
     }
 
     if (amSeries instanceof am4charts.ColumnSeries) {
-        amSeries.columns.template.fillOpacity = 0.25
+        amSeries.stacked = true
+        amSeries.clustered = false
+        amSeries.columns.template.width = am4core.percent(45)
+        amSeries.columns.template.fillOpacity = 0.35
         amSeries.columns.template.strokeOpacity = 0.5
         amSeries.columns.template.fill = color
         amSeries.columns.template.stroke = color
-        amSeries.stacked = false
+        amSeries.columns.template.adapter.add("dx", (_dx, target) => {
+            return (target.pixelWidth / 2) + 1
+        })
     }
 
     amSeries.data = s.data.map((p: any) => ({
@@ -108,7 +124,6 @@ function addComparisonSeries(
     if (amSeries.tooltip) {
         amSeries.tooltip.fontSize = 12
         amSeries.tooltip.animationDuration = 500
-            
     }
 }
 
@@ -221,26 +236,57 @@ export function ComparisonChart() {
         const axisDefs = buildAxisDefinitions(sorted, energyUnit)
         const axisMap = buildValueAxesByAxisKey(chart, axisDefs, sorted)
 
+        // Pre-compute comparison split to know if bars need side-by-side layout
+        let compSorted: any[] = []
+        let compBars: any[] = []
+        let compLines: any[] = []
+        let shiftOffset = 0
+
+        if (compData.length > 0 && compDateMs && compEndDateMs) {
+            const compStart = startOfDay(new Date(compDateMs))
+            shiftOffset = primaryStartMs - compStart.getTime()
+
+            compSorted = sorted.filter(s =>
+                compData.some(cs => cs.deviceId === s.deviceId && cs.key === s.key && cs.data === s.data)
+            )
+            const split = splitByChartType(compSorted)
+            compBars = split.bars
+            compLines = split.lines
+        }
+
+        const hasCompBars = compBars.length > 0
+
+        // Create shadow value axes for comparison bars (independent stacking)
+        const compAxisMap = new Map<string, am4charts.ValueAxis>()
+        if (hasCompBars) {
+            for (const [key, primaryAxis] of axisMap) {
+                const shadowAxis = chart.yAxes.push(new am4charts.ValueAxis())
+                shadowAxis.renderer.grid.template.disabled = true
+                shadowAxis.renderer.labels.template.disabled = true
+                shadowAxis.renderer.baseGrid.disabled = true
+                shadowAxis.renderer.inside = true
+                shadowAxis.renderer.line.strokeOpacity = 0
+                shadowAxis.cursorTooltipEnabled = false
+                shadowAxis.syncWithAxis = primaryAxis
+                compAxisMap.set(key, shadowAxis)
+            }
+        }
+
         // Render primary series
         const primarySorted = sorted.filter(s =>
             series.some(ps => ps.deviceId === s.deviceId && ps.key === s.key && ps.data === s.data)
         )
         const { bars: primaryBars, lines: primaryLines } = splitByChartType(primarySorted)
-        primaryBars.forEach(s => addPrimarySeries(chart, axisMap, s))
-        primaryLines.forEach(s => addPrimarySeries(chart, axisMap, s))
+        primaryBars.forEach(s => addPrimarySeries(chart, axisMap, s, hasCompBars))
+        primaryLines.forEach(s => addPrimarySeries(chart, axisMap, s, false))
 
         // Render comparison series (shifted)
         if (compData.length > 0 && compDateMs && compEndDateMs) {
             const compStart = startOfDay(new Date(compDateMs))
             const compEnd = endOfDay(new Date(compEndDateMs))
-            const shiftOffset = primaryStartMs - compStart.getTime()
 
-            const compSorted = sorted.filter(s =>
-                compData.some(cs => cs.deviceId === s.deviceId && cs.key === s.key && cs.data === s.data)
-            )
-            const { bars: compBars, lines: compLines } = splitByChartType(compSorted)
-            compBars.forEach(s => addComparisonSeries(chart, axisMap, s, shiftOffset))
-            compLines.forEach(s => addComparisonSeries(chart, axisMap, s, shiftOffset))
+            compBars.forEach(s => addComparisonSeries(chart, axisMap, compAxisMap, s, shiftOffset))
+            compLines.forEach(s => addComparisonSeries(chart, axisMap, compAxisMap, s, shiftOffset))
 
             // Add secondary date axis at top showing comparison dates
             const compAxis = chart.xAxes.push(new am4charts.DateAxis())
@@ -306,7 +352,7 @@ export function ComparisonChart() {
         }
 
         chart.invalidateData()
-    }, [series, compData, updateKey, compDateMs, compEndDateMs, primaryStartMs, primaryEndMs])
+    }, [series, compData, updateKey, energyUnit, compDateMs, compEndDateMs, primaryStartMs, primaryEndMs])
 
     return (
         <div

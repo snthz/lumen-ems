@@ -13,12 +13,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import {TbCustomersResponse} from "@/lib/thingsboard/thingsboard.types";
+import type {CustomerGroupsResponse} from "@/lib/thingsboard/server/thingsboard.server";
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
-  customers?: TbCustomersResponse | undefined
+  groups: CustomerGroupsResponse
 }
-export function AppSidebar({ customers, ...props }: AppSidebarProps) {
+export function AppSidebar({ groups, ...props }: AppSidebarProps) {
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -39,7 +39,7 @@ export function AppSidebar({ customers, ...props }: AppSidebarProps) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain customers={customers || []} />
+        <NavMain groups={groups} />
         {/*<NavProjects projects={data.projects} />*/}
         <NavSecondary className="mt-auto" />
       </SidebarContent>

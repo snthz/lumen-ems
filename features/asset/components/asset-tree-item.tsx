@@ -20,6 +20,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Spinner } from '@/components/ui/spinner'
 
 export function AssetTreeItem({ relation }: { relation: TbRelation }) {
+    console.log("Rendering AssetTreeItem for relation", relation)
     const selectedAssets = useAssetStore(state => state.selectedAssets)
     const loadingAssets = useAssetStore(state => state.loadingAssets)
     const toggleAssetSelected = useAssetStore(state => state.toggleAssetSelected)
@@ -67,11 +68,6 @@ export function AssetTreeItem({ relation }: { relation: TbRelation }) {
                                 ) : (
                                     <div className="size-6 bg-neutral-200 rounded-md flex items-center justify-center">
                                         <span className="uppercase text-xs">
-                                             <img
-                                        src={`${process.env.NEXT_PUBLIC_TB_API ?? ''}${relation.additionalInfo?.logo}`}
-                                        alt={relation.additionalInfo?.name ?? relation.toName}
-                                        className="size-6 rounded-md object-cover"
-                                    />
                                             {relation.additionalInfo?.name?.charAt(0) ?? relation.toName?.charAt(0) ?? '?'}
                                         </span>
                                     </div>
@@ -86,7 +82,7 @@ export function AssetTreeItem({ relation }: { relation: TbRelation }) {
                                     />
                             )}
 
-                            <span className="text-xs">
+                            <span className="text-xs truncate max-w-35" title={relation.additionalInfo?.name ?? relation.toName ?? ''}>
                                 {relation.additionalInfo?.name ?? relation.toName}
                             </span>
                         </span>

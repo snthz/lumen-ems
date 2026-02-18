@@ -10,23 +10,67 @@ import {
     TelemetryTimeseriesResponse
 } from "@/lib/thingsboard/thingsboard.types";
 
-export async function getCustomersByEntityGroup(): ApiResponse<TbCustomersResponse> {
-    const cookieStore = await cookies()
-    const entityGroupId = env.EMS_GROUP_ID
-    const response = await fetch(`${env.TB_API}/api/entityGroup/${entityGroupId}/customers?pageSize=1000&page=0&sortOrder=DESC`, {
+export interface CustomerGroup {
+    label: string;
+    groupId: string;
+    customers: TbCustomersResponse;
+}
+
+export type CustomerGroupsResponse = CustomerGroup[];
+
+async function fetchCustomersByGroupId(groupId: string, token: string): Promise<TbCustomersResponse> {
+    const response = await fetch(`${env.TB_API}/api/entityGroup/${groupId}/customers?pageSize=1000&page=0&sortOrder=DESC`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'X-Authorization': `Bearer ${getAuthToken(cookieStore)}`,
+            'X-Authorization': `Bearer ${token}`,
         },
     });
+
     if (!response.ok) {
-        throw new Error(`Error fetching customers for entity group ${entityGroupId}: ${response.statusText}`);
+        console.error(`Error fetching customers for entity group ${groupId}:`, await response.text());
+        return [];
     }
+
     const json = await response.json();
+    return (json.data ?? []) as TbCustomersResponse;
+}
+
+export async function getCustomersByEntityGroup(): ApiResponse<TbCustomersResponse> {
+    const cookieStore = await cookies()
+    const entityGroupId = env.EMS_INDUSTRIES_GROUP_ID
+    const token = getAuthToken(cookieStore)
+    const customers = await fetchCustomersByGroupId(entityGroupId, token)
     return {
         success: true,
-        data: json.data as TbCustomersResponse,
+        data: customers,
+    }
+}
+
+export async function getCustomerGroups(): ApiResponse<CustomerGroupsResponse> {
+    const cookieStore = await cookies()
+    const token = getAuthToken(cookieStore)
+
+    const groupDefinitions = [
+        { label: "Industrias", groupId: env.EMS_INDUSTRIES_GROUP_ID },
+        { label: "Multisitio", groupId: env.EMS_MULTISITE_GROUP_ID },
+        { label: "Facturación", groupId: env.EMS_BILLING_GROUP_ID },
+    ]
+
+    const groups = await Promise.all(
+        groupDefinitions.map(async (def) => ({
+            label: def.label,
+            groupId: def.groupId,
+            customers: await fetchCustomersByGroupId(def.groupId, token),
+        }))
+    )
+
+    // Only return groups where the user has permission (non-empty customer list)
+    const accessibleGroups = groups.filter((g) => g.customers.length > 0)
+
+    return {
+        success: true,
+        data: accessibleGroups,
     }
 }
 
@@ -57,7 +101,9 @@ export async function fetchAssetsRelationsRecursive(
             }
         }
     )
-
+    //show data
+    console.log(`Response from TB API for relations of ${fromType}:${fromId}:`, await res.clone().text());
+    console.log(`Fetching relations for ${fromType}:${fromId}, response status: ${res.status}`);
     if (!res.ok) {
         throw new Error(
             `Error fetching relations for ${fromType}:${fromId}`
