@@ -36,6 +36,7 @@ export function AssetTreeItem({ relation }: { relation: TbRelation }) {
     const assetId = relation.to.id
     const isSelected = Boolean(selectedAssets[assetId])
     const isLoading = Boolean(loadingAssets[assetId])
+    const hasDevices = relation.additionalInfo?.hasDevices !== false
 
     function handleSelect(e: React.MouseEvent) {
         e.stopPropagation()
@@ -52,6 +53,7 @@ export function AssetTreeItem({ relation }: { relation: TbRelation }) {
                         className="pl-0 flex-1 cursor-pointer rounded-none"
                         onClick={(e) => {
                             if (relation.to.entityType === 'CUSTOMER') return
+                            if (!hasDevices) return
                             handleSelect(e)
                         }}
                         disabled={isLoading}
@@ -72,7 +74,7 @@ export function AssetTreeItem({ relation }: { relation: TbRelation }) {
                                         </span>
                                     </div>
                                 )
-                            ) : (
+                            ) : hasDevices ? (
                                 isLoading
                                     ? <Spinner className="size-4 text-neutral-400" />
                                     : <Checkbox
@@ -80,7 +82,7 @@ export function AssetTreeItem({ relation }: { relation: TbRelation }) {
                                         tabIndex={-1}
                                         className="pointer-events-none"
                                     />
-                            )}
+                            ) : null}
 
                             <span className="text-xs truncate max-w-35" title={relation.additionalInfo?.name ?? relation.toName ?? ''}>
                                 {relation.additionalInfo?.name ?? relation.toName}

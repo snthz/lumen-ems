@@ -22,9 +22,9 @@ export function EnergyUnitSelector() {
     if (!hasEnergyMetrics) return null
 
     return (
-        <Select value={energyUnit} onValueChange={(value) => setEnergyUnit(value as EnergyUnit)}>
-            <SelectTrigger className="w-20 h-7 text-xs">
-                <SelectValue />
+        <Select  value={energyUnit} onValueChange={(value) => setEnergyUnit(value as EnergyUnit)}>
+            <SelectTrigger className="w-20 h-2 py-0 text-xs border-none shadow-none cursor-pointer bg-transparent data-[placeholder]:text-muted-foreground">
+                <SelectValue className="h-7" />
             </SelectTrigger>
             <SelectContent>
                 <SelectItem value="auto">Auto</SelectItem>

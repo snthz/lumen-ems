@@ -11,7 +11,6 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'POWER',
         chartType: 'line',
         agg: 'AVG',
-        favorite: true,
     },
     {
         id: 'phase_power',
@@ -22,7 +21,6 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'POWER',
         chartType: 'line',
         agg: 'AVG',
-        favorite: true,
     },
 
     // ───────── REACTIVE POWER ─────────

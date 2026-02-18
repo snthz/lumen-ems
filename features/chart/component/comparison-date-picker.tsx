@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { format, addDays, differenceInDays } from "date-fns"
+import { useState, useEffect, useMemo } from "react"
+import { format, addDays, differenceInDays, startOfDay, eachDayOfInterval } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar as CalendarIcon, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -12,6 +12,8 @@ import { useTelemetryQueryStore } from "@/features/telemetry/store/telemetry-que
 import { resolveTimeRange } from "@/features/telemetry/utils/resolve-time-range"
 
 export function ComparisonDatePicker() {
+    const comparisonPickerOpen = useChartStore(s => s.comparisonPickerOpen)
+    const setComparisonPickerOpen = useChartStore(s => s.setComparisonPickerOpen)
     const [open, setOpen] = useState(false)
     const [pendingFrom, setPendingFrom] = useState<Date | null>(null)
 
@@ -62,8 +64,19 @@ export function ComparisonDatePicker() {
 
     function handleOpenChange(isOpen: boolean) {
         setOpen(isOpen)
-        if (!isOpen) setPendingFrom(null)
+        if (!isOpen) {
+            setPendingFrom(null)
+            setComparisonPickerOpen(false)
+        }
     }
+
+    // Auto-open when switching to comparison view
+    useEffect(() => {
+        if (comparisonPickerOpen) {
+            setOpen(true)
+            setComparisonPickerOpen(false)
+        }
+    }, [comparisonPickerOpen, setComparisonPickerOpen])
 
     const pendingEnd = pendingFrom ? addDays(pendingFrom, primaryDays - 1) : null
 
@@ -77,6 +90,18 @@ export function ComparisonDatePicker() {
         compStart: activeFrom,
         compEnd: activeEnd,
     } : {}
+
+    // Highlight the current/primary period on the calendar
+    const primaryModifiers = useMemo(() => {
+        const from = startOfDay(primaryRange.start)
+        const to = startOfDay(primaryRange.end)
+        const days = eachDayOfInterval({ start: from, end: to })
+        return {
+            primaryRange: days,
+            primaryStart: from,
+            primaryEnd: to,
+        }
+    }, [primaryRange.start.getTime(), primaryRange.end.getTime()])
 
     return (
         <Popover open={open} onOpenChange={handleOpenChange}>
@@ -102,11 +127,17 @@ export function ComparisonDatePicker() {
                     locale={es}
                     disabled={{ after: new Date() }}
                     numberOfMonths={2}
-                    modifiers={rangeModifiers}
+                    modifiers={{
+                        ...rangeModifiers,
+                        ...primaryModifiers,
+                    }}
                     modifiersClassNames={{
                         compRange: "!bg-accent",
                         compStart: "!rounded-l-md !bg-accent",
                         compEnd: "!rounded-r-md !bg-accent",
+                        primaryRange: "!bg-blue-100 !text-blue-900",
+                        primaryStart: "!rounded-l-md !bg-blue-200 !text-blue-900",
+                        primaryEnd: "!rounded-r-md !bg-blue-200 !text-blue-900",
                     }}
                 />
                 {!isSingleDay && (

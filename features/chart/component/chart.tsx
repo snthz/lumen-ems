@@ -35,6 +35,11 @@ export function Chart() {
         chart.legend.marginTop = 10
         chart.legend.labels.template.fill = am4core.color("#6b7280")
         chart.legend.valueLabels.template.disabled = true
+        chart.legend.useDefaultMarker = true
+        chart.legend.markers.template.width = 14
+        chart.legend.markers.template.height = 14
+        chart.legend.itemContainers.template.paddingLeft = 4
+        chart.legend.itemContainers.template.paddingRight = 4
 
         const dateAxis = chart.xAxes.getIndex(0)
         if (dateAxis?.tooltip) {

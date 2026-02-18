@@ -48,8 +48,8 @@ export default function Page() {
                                 <div className="flex items-center gap-1.5">
                                     <ChartViewSelector />
                                     <div className="hidden md:block h-4 w-px bg-neutral-200 mx-0.5" />
-                                    <EnergyUnitSelector />
                                     {chartView === 'comparison' && <ComparisonDatePicker />}
+                                    <EnergyUnitSelector />
                                     <div className="flex-1" />
                                     <ExportButton />
                                     <TimeRangeSection />

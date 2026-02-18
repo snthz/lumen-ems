@@ -63,7 +63,9 @@ function addPrimarySeries(
     amSeries.tooltipText = `[bold]{name}[/]\n{valueY.formatNumber("#,###.##")} ${s._scaledUnit}`
     if (amSeries.tooltip) {
         amSeries.tooltip.fontSize = 12
-        amSeries.tooltip.animationDuration = 500
+        amSeries.tooltip.animationDuration = 1000
+        amSeries.tooltip.animationEasing = am4core.ease.cubicOut
+        amSeries.tooltip.pointerOrientation = "vertical"
     }
 }
 
@@ -95,6 +97,7 @@ function addComparisonSeries(
     amSeries.stroke = color
     amSeries.fill = color
     amSeries.strokeOpacity = 0.5
+    amSeries.fillOpacity = 0.35
 
     if (amSeries instanceof am4charts.LineSeries) {
         amSeries.strokeDasharray = "6,3"
@@ -123,7 +126,9 @@ function addComparisonSeries(
     amSeries.tooltipText = `[bold]{name}[/]\n{valueY.formatNumber("#,###.##")} ${s._scaledUnit}`
     if (amSeries.tooltip) {
         amSeries.tooltip.fontSize = 12
-        amSeries.tooltip.animationDuration = 500
+        amSeries.tooltip.animationDuration = 1000
+        amSeries.tooltip.animationEasing = am4core.ease.cubicOut
+        amSeries.tooltip.pointerOrientation = "vertical"
     }
 }
 
@@ -135,6 +140,7 @@ export function ComparisonChart() {
     const energyUnit = useChartStore(s => s.energyUnit)
     const comparisonDate = useChartStore(s => s.comparisonDate)
     const comparisonEndDate = useChartStore(s => s.comparisonEndDate)
+    const comparisonLoading = useChartStore(s => s.comparisonLoading)
     const setComparisonLoading = useChartStore(s => s.setComparisonLoading)
 
     const timeRange = useTelemetryQueryStore(s => s.timeRange)
@@ -204,6 +210,11 @@ export function ComparisonChart() {
         chart.legend.marginTop = 10
         chart.legend.labels.template.fill = am4core.color("#6b7280")
         chart.legend.valueLabels.template.disabled = true
+        chart.legend.useDefaultMarker = true
+        chart.legend.markers.template.width = 14
+        chart.legend.markers.template.height = 14
+        chart.legend.itemContainers.template.paddingLeft = 4
+        chart.legend.itemContainers.template.paddingRight = 4
 
         const dateAxis = chart.xAxes.getIndex(0)
         if (dateAxis?.tooltip) {
@@ -217,10 +228,13 @@ export function ComparisonChart() {
         }
     }, [])
 
-    // Render series - uses local compData so it renders once when both are ready
+    // Render series - wait for comparison data to be ready to avoid double render
     useEffect(() => {
         const chart = chartRef.current
         if (!chart) return
+
+        // If comparison is active but still loading, skip render to avoid flash
+        if (compDateMs && compEndDateMs && comparisonLoading) return
 
         chart.series.clear()
         chart.yAxes.clear()
@@ -352,7 +366,7 @@ export function ComparisonChart() {
         }
 
         chart.invalidateData()
-    }, [series, compData, updateKey, energyUnit, compDateMs, compEndDateMs, primaryStartMs, primaryEndMs])
+    }, [series, compData, updateKey, energyUnit, compDateMs, compEndDateMs, primaryStartMs, primaryEndMs, comparisonLoading])
 
     return (
         <div

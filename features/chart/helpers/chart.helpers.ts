@@ -1,4 +1,5 @@
 import * as am4charts from "@amcharts/amcharts4/charts"
+import * as am4core from "@amcharts/amcharts4/core"
 import { createBarSeries, createLineSeries } from "@/features/chart/config/chart.series"
 import { getSeriesColor } from "@/features/chart/utils/series-color.utils"
 import { resolveAxisScale } from "@/features/chart/utils/unit-scale"
@@ -147,7 +148,9 @@ export function addSeriesToChart(
    
     if(series.tooltip) {
         series.tooltip.fontSize = 12
-        series.tooltip.animationDuration = 400
+        series.tooltip.animationDuration = 1000
+        series.tooltip.animationEasing = am4core.ease.cubicOut
+        series.tooltip.pointerOrientation = "vertical"
     }
 
     series.tooltipText = `[bold]{name}[/]\n{valueY.formatNumber("#,###.##")} ${s._scaledUnit}`

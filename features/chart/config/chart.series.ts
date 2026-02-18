@@ -1,4 +1,5 @@
 import * as am4charts from "@amcharts/amcharts4/charts"
+import * as am4core from "@amcharts/amcharts4/core"
 
 export function createLineSeries(
     chart: am4charts.XYChart
@@ -14,7 +15,9 @@ export function createLineSeries(
 
     if (series.tooltip) {
         series.tooltip.fontSize = 12
-        series.tooltip.animationDuration = 2000
+        series.tooltip.animationDuration = 1000
+        series.tooltip.animationEasing = am4core.ease.cubicOut
+        series.tooltip.pointerOrientation = "vertical"
     }
 
     series.connect = false
