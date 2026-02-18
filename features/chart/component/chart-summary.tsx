@@ -70,6 +70,23 @@ export function ChartSummary() {
     const chartView = useChartStore(state => state.chartView)
     const comparisonSeries = useChartStore(state => state.comparisonSeries)
     const energyUnit = useChartStore(state => state.energyUnit)
+    const visibleRangeStart = useChartStore(state => state.visibleRangeStart)
+    const visibleRangeEnd = useChartStore(state => state.visibleRangeEnd)
+
+    const filterByRange = (data: Array<{ ts: number; value: string | number }>) => {
+        if (visibleRangeStart == null || visibleRangeEnd == null) return data
+        // Add buffer of half the smallest interval to avoid cutting off edge points
+        const timestamps = data.map(p => p.ts).sort((a, b) => a - b)
+        let buffer = 0
+        if (timestamps.length >= 2) {
+            buffer = (timestamps[1] - timestamps[0]) / 2
+        }
+        const start = visibleRangeStart - buffer
+        const end = visibleRangeEnd + buffer
+        return data.filter(p => p.ts >= start && p.ts <= end)
+    }
+
+    const ENERGY_UNITS = new Set(['Wh', 'varh', 'VAh'])
 
     const stats: SeriesStats[] = useMemo(() => {
         if (series.length === 0) return []
@@ -80,6 +97,19 @@ export function ChartSummary() {
                 const name = label !== s.key
                     ? `${s.deviceName} | ${label}`
                     : `${s.deviceName} | ${s.key}`
+                const values = filterByRange(s.data)
+                    .filter(p => p.value != null && p.value !== '')
+                    .map(p => Number(p.value))
+                    .filter(v => !isNaN(v))
+                return computeSeriesStats(name, name, s.unit, values, energyUnit)
+            })
+        }
+
+        if (chartView === 'pie') {
+            // Pie chart: one entry per series (per device), matching the pie slices
+            return series.map(s => {
+                const label = getKeyLabel(s.key)
+                const name = `${s.deviceName} | ${label}`
                 const values = s.data
                     .filter(p => p.value != null && p.value !== '')
                     .map(p => Number(p.value))
@@ -88,15 +118,15 @@ export function ChartSummary() {
             })
         }
 
+        // Grouped view: one entry per key, colorKey = label (matches chart legend)
         const grouped = groupSeriesByKey(series)
         return grouped.map(g => {
-            const name = g.label !== g.key
-                ? `${g.label} (${g.key})`
-                : g.key
+            const colorKey = g.label
+            const name = g.label
             const values = g.data.map(p => p.value).filter(v => !isNaN(v))
-            return computeSeriesStats(name, name, g.unit, values, energyUnit)
+            return computeSeriesStats(name, colorKey, g.unit, values, energyUnit)
         })
-    }, [series, chartView, energyUnit])
+    }, [series, chartView, energyUnit, visibleRangeStart, visibleRangeEnd])
 
     const comparisonRows: ComparisonRow[] = useMemo(() => {
         if (chartView !== 'comparison' || stats.length === 0) return []

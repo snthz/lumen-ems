@@ -5,6 +5,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { useTelemetryQueryStore } from '@/features/telemetry/store/telemetry-query.store'
 import { TimeRangeKey } from '@/features/telemetry/telemetry.types'
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
+import { ChevronDown } from 'lucide-react'
 
 const RESOLUTION_OPTIONS = [
     { value: 60, label: '1 min' },
@@ -30,7 +32,7 @@ const MIN_RESOLUTION_BY_RANGE: Record<TimeRangeKey, number> = {
     '1y': 86400,
 }
 
-export function ResolutionSection() {
+export function ResolutionSection({ defaultOpen = true }: { defaultOpen?: boolean }) {
     const timeRange = useTelemetryQueryStore(state => state.timeRange)
     const resolution = useTelemetryQueryStore(state => state.resolution)
     const setResolution = useTelemetryQueryStore(state => state.setResolution)
@@ -44,14 +46,15 @@ export function ResolutionSection() {
     }, [minResolution, resolution, setResolution])
 
     return (
-        <div>
-            <div className="border-y py-2">
-                <span className="px-6 text-sm text-neutral-500">
+        <Collapsible defaultOpen={defaultOpen}>
+            <div className="border-y py-2 px-6">
+                <CollapsibleTrigger className="flex items-center gap-1 cursor-pointer text-sm text-neutral-500 group">
+                    <ChevronDown className="size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
                     Resolución
-                </span>
+                </CollapsibleTrigger>
             </div>
 
-            <div className="px-6 py-4">
+            <CollapsibleContent className="px-6 py-4">
                 <RadioGroup
                     value={String(resolution)}
                     onValueChange={v => setResolution(Number(v))}
@@ -88,7 +91,7 @@ export function ResolutionSection() {
                 <p className="text-xs text-neutral-400 mt-3">
                     Mínimo para {timeRange}: {RESOLUTION_OPTIONS.find(o => o.value === minResolution)?.label}
                 </p>
-            </div>
-        </div>
+            </CollapsibleContent>
+        </Collapsible>
     )
 }

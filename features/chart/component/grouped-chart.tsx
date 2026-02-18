@@ -91,7 +91,7 @@ export function GroupedChartView() {
 
             const groupInfo = grouped.find(g => g.key === s.key)!
             const name = groupInfo.label
-            const color = getSeriesColor(name)
+            const color = am4core.color(getSeriesColor(name))
             amSeries.name = name
             amSeries.stroke = color
             amSeries.fill = color
@@ -109,7 +109,7 @@ export function GroupedChartView() {
             amSeries.tooltipText = `[bold]{name}[/]\n{valueY.formatNumber("#,###.##")} ${scaledUnit}`
             if (amSeries.tooltip) {
                 amSeries.tooltip.fontSize = 12
-                amSeries.tooltip.animationDuration = 400
+                amSeries.tooltip.animationDuration = 1000
             }
         }
 

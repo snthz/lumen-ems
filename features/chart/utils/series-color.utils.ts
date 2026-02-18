@@ -1,4 +1,3 @@
-import * as am4core from "@amcharts/amcharts4/core"
 export const PALETTE = [
     "#D7476E", // vibrant red / ct0
     "#5E6FB6", // vibrant indigo / ct1
@@ -42,27 +41,26 @@ export const PALETTE = [
 ]
 
 
-const colorMap = new Map<string, am4core.Color>()
+const colorMap = new Map<string, string>()
 let colorIndex = 0
 
-export function getSeriesColor(key: string): am4core.Color {
+export function getSeriesColor(key: string): string {
     if (colorMap.has(key)) {
         return colorMap.get(key)!
     }
     
-    const color = am4core.color(PALETTE[colorIndex % PALETTE.length])
-    colorMap.set(key, color)
+    const hex = PALETTE[colorIndex % PALETTE.length]
+    colorMap.set(key, hex)
     colorIndex++
     
-    return color
+    return hex
 }
 
 export function getSeriesHex(key: string): string {
     if (!colorMap.has(key)) {
         getSeriesColor(key)
     }
-    const idx = Array.from(colorMap.keys()).indexOf(key)
-    return PALETTE[idx % PALETTE.length]
+    return colorMap.get(key)!
 }
 
 export function resetSeriesColors(): void {

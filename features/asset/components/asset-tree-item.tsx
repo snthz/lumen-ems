@@ -20,7 +20,6 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Spinner } from '@/components/ui/spinner'
 
 export function AssetTreeItem({ relation }: { relation: TbRelation }) {
-    console.log("Rendering AssetTreeItem for relation", relation)
     const selectedAssets = useAssetStore(state => state.selectedAssets)
     const loadingAssets = useAssetStore(state => state.loadingAssets)
     const toggleAssetSelected = useAssetStore(state => state.toggleAssetSelected)

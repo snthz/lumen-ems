@@ -14,7 +14,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'phase_power',
-        label: 'Active power (φ)',
+        label: 'Active power 3(φ)',
         keys: 'P1,P2,P3',
         unit: 'W',
         phaseScope: 'PHASE',
@@ -36,7 +36,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'phase_reactive_power',
-        label: 'Reactive power (φ)',
+        label: 'Reactive power 3(φ)',
         keys: 'Q1,Q2,Q3',
         unit: 'var',
         phaseScope: 'PHASE',
@@ -58,7 +58,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'phase_apparent_power',
-        label: 'Apparent power (φ)',
+        label: 'Apparent power 3(φ)',
         keys: 'S1,S2,S3',
         unit: 'VA',
         phaseScope: 'PHASE',
@@ -103,7 +103,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     // ───────── CURRENT ─────────
     {
         id: 'phase_current',
-        label: 'Current (φ)',
+        label: 'Current 3(φ)',
         keys: 'I1,I2,I3',
         unit: 'A',
         phaseScope: 'PHASE',
@@ -158,7 +158,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'power_factor_phase',
-        label: 'Power factor (φ)',
+        label: 'Power factor 3(φ)',
         keys: 'PF1,PF2,PF3',
         unit: '',
         phaseScope: 'PHASE',
@@ -181,7 +181,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'phase_energy',
-        label: 'Energy (φ)',
+        label: 'Energy 3(φ)',
         keys: 'E1delta,E2delta,E3delta',
         unit: 'Wh',
         phaseScope: 'PHASE',
@@ -194,7 +194,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     {
         id: 'system_energy_export',
         label: 'Exported energy',
-        keys: 'Ex',
+        keys: 'Exdelta',
         unit: 'Wh',
         phaseScope: 'SYSTEM',
         category: 'ENERGY_EXPORT',
@@ -203,8 +203,8 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'phase_energy_export',
-        label: 'Exported energy (φ)',
-        keys: 'Ex1,Ex2,Ex3',
+        label: 'Exported energy 3(φ)',
+        keys: 'Ex1delta,Ex2delta,Ex3delta',
         unit: 'Wh',
         phaseScope: 'PHASE',
         category: 'ENERGY_EXPORT',
@@ -216,7 +216,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     {
         id: 'system_reactive_energy',
         label: 'Reactive energy',
-        keys: 'RE',
+        keys: 'REdelta',
         unit: 'varh',
         phaseScope: 'SYSTEM',
         category: 'REACTIVE_ENERGY',
@@ -225,8 +225,8 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'phase_reactive_energy',
-        label: 'Reactive energy (φ)',
-        keys: 'RE1,RE2,RE3',
+        label: 'Reactive energy 3(φ)',
+        keys: 'RE1delta,RE2delta,RE3delta',
         unit: 'varh',
         phaseScope: 'PHASE',
         category: 'REACTIVE_ENERGY',
@@ -238,7 +238,7 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     {
         id: 'system_apparent_energy',
         label: 'Apparent energy',
-        keys: 'AE',
+        keys: 'AEdelta',
         unit: 'VAh',
         phaseScope: 'SYSTEM',
         category: 'APPARENT_ENERGY',
@@ -247,8 +247,8 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     },
     {
         id: 'phase_apparent_energy',
-        label: 'Apparent energy (φ)',
-        keys: 'AE1,AE2,AE3',
+        label: 'Apparent energy 3(φ)',
+        keys: 'AE1delta,AE2delta,AE3delta',
         unit: 'VAh',
         phaseScope: 'PHASE',
         category: 'APPARENT_ENERGY',

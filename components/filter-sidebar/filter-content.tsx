@@ -10,9 +10,11 @@ import { useChartStore } from "@/features/chart/store/chart.store"
 import { useDeviceStore } from "@/features/devices/store/device.store"
 import { useTelemetryQueryStore } from "@/features/telemetry/store/telemetry-query.store"
 import { toast } from "sonner"
+import { useSidebar } from "@/components/ui/sidebar"
 
 export function FilterContent() {
     const { run } = useTelemetryFetcher()
+    const { setOpen, isMobile, setOpenMobile } = useSidebar()
     const [loading, setLoading] = React.useState(false)
     const [hasAutoLoaded, setHasAutoLoaded] = React.useState(false)
 
@@ -51,6 +53,7 @@ export function FilterContent() {
         try {
             const result = await run()
             setSeries(result)
+            if (isMobile) { setOpenMobile(false) } else { setOpen(false) }
 
             toast.success('Datos actualizados', {
                 description: `Se cargaron ${result.length} series correctamente`,

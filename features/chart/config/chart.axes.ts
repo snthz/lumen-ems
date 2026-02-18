@@ -38,8 +38,9 @@ export function buildValueAxesByAxisKey(
         const hasNegatives = seriesForThisAxis.some(s =>
             s.data.some((p: any) => Number(p.value) < 0)
         )
+        const hasBars = seriesForThisAxis.some(s => s.chartType === 'bar')
 
-        if (!hasNegatives) {
+        if (!hasNegatives && hasBars) {
             axis.min = 0
             axis.strictMinMax = true
             axis.extraMax = 0.05

@@ -101,9 +101,6 @@ export async function fetchAssetsRelationsRecursive(
             }
         }
     )
-    //show data
-    console.log(`Response from TB API for relations of ${fromType}:${fromId}:`, await res.clone().text());
-    console.log(`Fetching relations for ${fromType}:${fromId}, response status: ${res.status}`);
     if (!res.ok) {
         throw new Error(
             `Error fetching relations for ${fromType}:${fromId}`

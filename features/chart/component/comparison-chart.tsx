@@ -26,20 +26,21 @@ function addPrimarySeries(
     chart: am4charts.XYChart,
     axisMap: Map<string, am4charts.ValueAxis>,
     s: any,
-    splitBars: boolean
+    splitBars: boolean,
+    resolution?: number
 ) {
     const axis = axisMap.get(s._resolvedAxisKey)
     if (!axis) return
 
     const amSeries = s.chartType === "bar"
         ? createBarSeries(chart)
-        : createLineSeries(chart)
+        : createLineSeries(chart, resolution)
 
     amSeries.yAxis = axis
     amSeries.zIndex = s.chartType === "line" ? 10 : 1
 
     const name = `${s.deviceName} | ${getKeyLabel(s.key)}`
-    const color = getSeriesColor(name)
+    const color = am4core.color(getSeriesColor(name))
     amSeries.name = name
     amSeries.stroke = color
     amSeries.fill = color
@@ -74,7 +75,8 @@ function addComparisonSeries(
     axisMap: Map<string, am4charts.ValueAxis>,
     compAxisMap: Map<string, am4charts.ValueAxis>,
     s: any,
-    shiftOffset: number
+    shiftOffset: number,
+    resolution?: number
 ) {
     // Bars use shadow axis for independent stacking; lines use regular axis
     const axis = s.chartType === "bar"
@@ -84,14 +86,14 @@ function addComparisonSeries(
 
     const amSeries = s.chartType === "bar"
         ? createBarSeries(chart)
-        : createLineSeries(chart)
+        : createLineSeries(chart, resolution)
 
     amSeries.yAxis = axis
     amSeries.zIndex = s.chartType === "line" ? 5 : 0
 
     const primaryName = `${s.deviceName} | ${getKeyLabel(s.key)}`
     const compName = `${s.deviceName} | ${getKeyLabel(s.key)} (comp.)`
-    const color = getSeriesColor(primaryName)
+    const color = am4core.color(getSeriesColor(primaryName))
 
     amSeries.name = compName
     amSeries.stroke = color
@@ -102,7 +104,6 @@ function addComparisonSeries(
     if (amSeries instanceof am4charts.LineSeries) {
         amSeries.strokeDasharray = "6,3"
         amSeries.fillOpacity = 0
-        amSeries.bullets.each(b => { b.disabled = true })
     }
 
     if (amSeries instanceof am4charts.ColumnSeries) {
@@ -146,6 +147,7 @@ export function ComparisonChart() {
     const timeRange = useTelemetryQueryStore(s => s.timeRange)
     const customStart = useTelemetryQueryStore(s => s.customStart)
     const customEnd = useTelemetryQueryStore(s => s.customEnd)
+    const resolution = useTelemetryQueryStore(s => s.resolution)
 
     const { run } = useTelemetryFetcher()
 
@@ -291,16 +293,16 @@ export function ComparisonChart() {
             series.some(ps => ps.deviceId === s.deviceId && ps.key === s.key && ps.data === s.data)
         )
         const { bars: primaryBars, lines: primaryLines } = splitByChartType(primarySorted)
-        primaryBars.forEach(s => addPrimarySeries(chart, axisMap, s, hasCompBars))
-        primaryLines.forEach(s => addPrimarySeries(chart, axisMap, s, false))
+        primaryBars.forEach(s => addPrimarySeries(chart, axisMap, s, hasCompBars, resolution))
+        primaryLines.forEach(s => addPrimarySeries(chart, axisMap, s, false, resolution))
 
         // Render comparison series (shifted)
         if (compData.length > 0 && compDateMs && compEndDateMs) {
             const compStart = startOfDay(new Date(compDateMs))
             const compEnd = endOfDay(new Date(compEndDateMs))
 
-            compBars.forEach(s => addComparisonSeries(chart, axisMap, compAxisMap, s, shiftOffset))
-            compLines.forEach(s => addComparisonSeries(chart, axisMap, compAxisMap, s, shiftOffset))
+            compBars.forEach(s => addComparisonSeries(chart, axisMap, compAxisMap, s, shiftOffset, resolution))
+            compLines.forEach(s => addComparisonSeries(chart, axisMap, compAxisMap, s, shiftOffset, resolution))
 
             // Add secondary date axis at top showing comparison dates
             const compAxis = chart.xAxes.push(new am4charts.DateAxis())
@@ -365,8 +367,14 @@ export function ComparisonChart() {
             })
         }
 
+        // Ensure cursor zooms on the primary date axis (not the comparison axis)
+        const primaryDateAxis = chart.xAxes.getIndex(0) as am4charts.DateAxis
+        if (chart.cursor && primaryDateAxis) {
+            chart.cursor.xAxis = primaryDateAxis
+        }
+
         chart.invalidateData()
-    }, [series, compData, updateKey, energyUnit, compDateMs, compEndDateMs, primaryStartMs, primaryEndMs, comparisonLoading])
+    }, [series, compData, updateKey, energyUnit, compDateMs, compEndDateMs, primaryStartMs, primaryEndMs, comparisonLoading, resolution])
 
     return (
         <div

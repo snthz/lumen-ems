@@ -4,20 +4,23 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { useTelemetryQueryStore } from '@/features/telemetry/store/telemetry-query.store'
 import { PhaseScope } from '@/features/telemetry/telemetry.types'
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
+import { ChevronDown } from 'lucide-react'
 
-export function ScopeSection() {
+export function ScopeSection({ defaultOpen = true }: { defaultOpen?: boolean }) {
     const phaseScope = useTelemetryQueryStore(state => state.phaseScope)
     const setPhaseScope = useTelemetryQueryStore(state => state.setPhaseScope)
 
     return (
-        <div>
-            <div className="border-y py-2">
-                <span className="px-6 text-sm text-neutral-500">
+        <Collapsible defaultOpen={defaultOpen}>
+            <div className="border-y py-2 px-6">
+                <CollapsibleTrigger className="flex items-center gap-1 cursor-pointer text-sm text-neutral-500 group">
+                    <ChevronDown className="size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
                     Alcance
-                </span>
+                </CollapsibleTrigger>
             </div>
 
-            <div className="px-6 py-4">
+            <CollapsibleContent className="px-6 py-4">
                 <RadioGroup
                     value={phaseScope}
                     onValueChange={v => setPhaseScope(v as PhaseScope)}
@@ -33,7 +36,7 @@ export function ScopeSection() {
                         <Label htmlFor="phase" className="cursor-pointer">Por fase</Label>
                     </div>
                 </RadioGroup>
-            </div>
-        </div>
+            </CollapsibleContent>
+        </Collapsible>
     )
 }

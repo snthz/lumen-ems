@@ -24,8 +24,10 @@ export function splitByChartType(series: any[]) {
 export function buildAxisDefinitions(series: any[], energyUnit: EnergyUnit = 'auto') {
     const map = new Map<string, { axisKey: string; unit: string; factor: number }>()
     const powerSeries = series.filter(s => s.unit === "W")
+    const reactivePowerSeries = series.filter(s => s.unit === "var")
+    const apparentPowerSeries = series.filter(s => s.unit === "VA")
     const energySeries = series.filter(s => s.unit === "Wh" || s.unit === "varh" || s.unit === "VAh")
-    const otherSeries = series.filter(s => s.unit !== "W" && s.unit !== "Wh" && s.unit !== "varh" && s.unit !== "VAh")
+    const otherSeries = series.filter(s => s.unit !== "W" && s.unit !== "var" && s.unit !== "VA" && s.unit !== "Wh" && s.unit !== "varh" && s.unit !== "VAh")
 
     if (powerSeries.length > 0) {
         const allPowerValues = powerSeries.flatMap(s =>
@@ -48,6 +50,54 @@ export function buildAxisDefinitions(series: any[], energyUnit: EnergyUnit = 'au
             s._resolvedAxisKey = "POWER"
             s._scaleFactor = powerScale.factor
             s._scaledUnit = powerScale.unit
+        })
+    }
+
+    if (reactivePowerSeries.length > 0) {
+        const allValues = reactivePowerSeries.flatMap(s =>
+            s.data.map((p: any) => Math.abs(Number(p.value)))
+        )
+        const maxVal = Math.max(...allValues)
+
+        let scale: { axisKey: string; unit: string; factor: number }
+
+        if (maxVal >= 1_000_000) {
+            scale = { axisKey: "REACTIVE_POWER", unit: "Mvar", factor: 1_000_000 }
+        } else if (maxVal >= 1_000) {
+            scale = { axisKey: "REACTIVE_POWER", unit: "kvar", factor: 1_000 }
+        } else {
+            scale = { axisKey: "REACTIVE_POWER", unit: "var", factor: 1 }
+        }
+
+        map.set("REACTIVE_POWER", scale)
+        reactivePowerSeries.forEach(s => {
+            s._resolvedAxisKey = "REACTIVE_POWER"
+            s._scaleFactor = scale.factor
+            s._scaledUnit = scale.unit
+        })
+    }
+
+    if (apparentPowerSeries.length > 0) {
+        const allValues = apparentPowerSeries.flatMap(s =>
+            s.data.map((p: any) => Math.abs(Number(p.value)))
+        )
+        const maxVal = Math.max(...allValues)
+
+        let scale: { axisKey: string; unit: string; factor: number }
+
+        if (maxVal >= 1_000_000) {
+            scale = { axisKey: "APPARENT_POWER", unit: "MVA", factor: 1_000_000 }
+        } else if (maxVal >= 1_000) {
+            scale = { axisKey: "APPARENT_POWER", unit: "kVA", factor: 1_000 }
+        } else {
+            scale = { axisKey: "APPARENT_POWER", unit: "VA", factor: 1 }
+        }
+
+        map.set("APPARENT_POWER", scale)
+        apparentPowerSeries.forEach(s => {
+            s._resolvedAxisKey = "APPARENT_POWER"
+            s._scaleFactor = scale.factor
+            s._scaledUnit = scale.unit
         })
     }
     if (energySeries.length > 0) {
@@ -109,7 +159,8 @@ export function buildAxisDefinitions(series: any[], energyUnit: EnergyUnit = 'au
 export function addSeriesToChart(
     chart: am4charts.XYChart,
     axisMap: Map<string, am4charts.ValueAxis>,
-    s: any
+    s: any,
+    resolution?: number
 ) {
     const axis = axisMap.get(s._resolvedAxisKey)
     if (!axis) {
@@ -119,12 +170,13 @@ export function addSeriesToChart(
 
     const series = s.chartType === "bar"
         ? createBarSeries(chart)
-        : createLineSeries(chart)
+        : createLineSeries(chart, resolution)
 
     series.yAxis = axis
     series.zIndex = s.chartType === "line" ? 10 : 1
     const name = `${s.deviceName} | ${getKeyLabel(s.key)}`
-    const color = getSeriesColor(name)
+    const hex = getSeriesColor(name)
+    const color = am4core.color(hex)
     series.name = name
     series.stroke = color
     series.fill = color

@@ -14,6 +14,8 @@ interface ChartState {
     comparisonSeries: TelemetrySeriesResult[]
     comparisonLoading: boolean
     comparisonPickerOpen: boolean
+    visibleRangeStart: number | null
+    visibleRangeEnd: number | null
     setSeries: (series: TelemetrySeriesResult[]) => void
     setChartView: (view: ChartView) => void
     setEnergyUnit: (unit: EnergyUnit) => void
@@ -23,6 +25,7 @@ interface ChartState {
     setComparisonSeries: (series: TelemetrySeriesResult[]) => void
     setComparisonLoading: (loading: boolean) => void
     setComparisonPickerOpen: (open: boolean) => void
+    setVisibleRange: (start: number | null, end: number | null) => void
     clear: () => void
 }
 
@@ -36,6 +39,8 @@ export const useChartStore = create<ChartState>(set => ({
     comparisonSeries: [],
     comparisonLoading: false,
     comparisonPickerOpen: false,
+    visibleRangeStart: null,
+    visibleRangeEnd: null,
     setSeries: series => {
         set(state => ({
             series: [...series],
@@ -58,9 +63,12 @@ export const useChartStore = create<ChartState>(set => ({
     setComparisonSeries: comparisonSeries => set({ comparisonSeries: [...comparisonSeries] }),
     setComparisonLoading: comparisonLoading => set({ comparisonLoading }),
     setComparisonPickerOpen: comparisonPickerOpen => set({ comparisonPickerOpen }),
+    setVisibleRange: (start, end) => set({ visibleRangeStart: start, visibleRangeEnd: end }),
     clear: () => set({
         series: [], updateKey: 0, chartView: 'series', energyUnit: 'auto',
         comparisonDate: null, comparisonEndDate: null, comparisonSeries: [], comparisonLoading: false,
         comparisonPickerOpen: false,
+        visibleRangeStart: null,
+        visibleRangeEnd: null,
     }),
 }))

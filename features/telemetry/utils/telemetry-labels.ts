@@ -56,18 +56,30 @@ const KEY_LABELS: Record<string, string> = {
     'Ex1': 'Energía exportada L1',
     'Ex2': 'Energía exportada L2',
     'Ex3': 'Energía exportada L3',
+    'Exdelta': 'Energía exportada',
+    'Ex1delta': 'Energía exportada L1',
+    'Ex2delta': 'Energía exportada L2',
+    'Ex3delta': 'Energía exportada L3',
     
     // Energía reactiva
     'RE': 'Energía reactiva',
     'RE1': 'Energía reactiva L1',
     'RE2': 'Energía reactiva L2',
     'RE3': 'Energía reactiva L3',
+    'REdelta': 'Energía reactiva',
+    'RE1delta': 'Energía reactiva L1',
+    'RE2delta': 'Energía reactiva L2',
+    'RE3delta': 'Energía reactiva L3',
     
     // Energía aparente
     'AE': 'Energía aparente',
     'AE1': 'Energía aparente L1',
     'AE2': 'Energía aparente L2',
     'AE3': 'Energía aparente L3',
+    'AEdelta': 'Energía aparente',
+    'AE1delta': 'Energía aparente L1',
+    'AE2delta': 'Energía aparente L2',
+    'AE3delta': 'Energía aparente L3',
 }
 
 export function getKeyLabel(key: string): string {

@@ -37,7 +37,7 @@ export function FilterSidebar() {
                             Filtros
                         </SheetTitle>
                     </VisuallyHidden>
-                    <FilterContent/>
+                    <FilterContent />
                 </SheetContent>
             </Sheet>
         )

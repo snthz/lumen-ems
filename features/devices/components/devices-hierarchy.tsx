@@ -6,8 +6,10 @@ import { useDeviceStore, SelectedDevice } from '@/features/devices/store/device.
 import { SidebarMenuSub } from '@/components/ui/sidebar'
 import { AssetDevicesGroup } from "@/features/asset/components/asset-devices-group"
 import { Button } from '@/components/ui/button'
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
+import { ChevronDown } from 'lucide-react'
 
-export function DevicesHierarchy() {
+export function DevicesHierarchy({ defaultOpen = true }: { defaultOpen?: boolean }) {
     const selectedAssets = useAssetStore(state => state.selectedAssets)
     const assetEntries = Object.values(selectedAssets)
     
@@ -38,9 +40,12 @@ export function DevicesHierarchy() {
     }
 
     return (
-        <div>
+        <Collapsible defaultOpen={defaultOpen}>
             <div className="border-b py-2 flex items-center justify-between px-6">
-                <span className="text-sm text-neutral-500">Dispositivos</span>
+                <CollapsibleTrigger className="flex items-center gap-1 cursor-pointer text-sm text-neutral-500 group">
+                    <ChevronDown className="size-3.5 transition-transform group-data-[state=closed]:-rotate-90" />
+                    Dispositivos
+                </CollapsibleTrigger>
                 {allDevices.length > 0 && (
                     <div className="flex gap-1">
                         <Button
@@ -64,6 +69,7 @@ export function DevicesHierarchy() {
                     </div>
                 )}
             </div>
+            <CollapsibleContent>
             
             {assetEntries.length === 0 ? (
                 <div className="text-xs text-neutral-400 px-6 py-4 text-center">
@@ -89,6 +95,7 @@ export function DevicesHierarchy() {
                     })}
                 </SidebarMenuSub>
             )}
-        </div>
+            </CollapsibleContent>
+        </Collapsible>
     )
 }

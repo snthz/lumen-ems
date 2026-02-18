@@ -3,11 +3,12 @@
 import { useLayoutEffect, useEffect, useRef } from "react"
 import * as am4core from "@amcharts/amcharts4/core"
 import * as am4charts from "@amcharts/amcharts4/charts"
-import am4themes_animated from "@amcharts/amcharts4/themes/animated"
 import { useChartStore } from "@/features/chart/store/chart.store"
-import { groupSeriesByKey } from "@/features/chart/utils/series-grouping.utils"
 import { getSeriesColor } from "@/features/chart/utils/series-color.utils"
 import { autoScaleValue } from "@/features/chart/utils/series-stats.utils"
+import { getKeyLabel } from "@/features/telemetry/utils/telemetry-labels"
+
+const ENERGY_UNITS = new Set(['Wh', 'varh', 'VAh'])
 
 export function PieChartView() {
     const chartRef = useRef<am4charts.PieChart | null>(null)
@@ -15,8 +16,6 @@ export function PieChartView() {
     const updateKey = useChartStore(state => state.updateKey)
 
     useLayoutEffect(() => {
-        am4core.useTheme(am4themes_animated)
-
         const chart = am4core.create("chartdiv-pie", am4charts.PieChart)
         chart.logo.dispose()
         chart.innerRadius = am4core.percent(40)
@@ -59,13 +58,23 @@ export function PieChartView() {
             return
         }
 
-        const grouped = groupSeriesByKey(series)
+        // Show one slice per series entry (per device)
+        // Energy metrics: use total (sum); others: use average
+        const pieData = series.map(s => {
+            const values = s.data
+                .filter(p => p.value != null && p.value !== '')
+                .map(p => Math.abs(Number(p.value)))
+                .filter(v => !isNaN(v))
 
-        const pieData = grouped.map(g => {
-            const total = g.data.reduce((sum, p) => sum + Math.abs(p.value), 0)
-            const scaled = autoScaleValue(total, g.unit)
+            const isEnergy = ENERGY_UNITS.has(s.unit)
+            const aggregate = isEnergy
+                ? values.reduce((sum, v) => sum + v, 0)
+                : values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : 0
+
+            const scaled = autoScaleValue(aggregate, s.unit)
+            const label = `${s.deviceName} | ${getKeyLabel(s.key)}`
             return {
-                label: g.label,
+                label,
                 value: scaled.value,
                 unit: scaled.unit,
             }
@@ -79,7 +88,7 @@ export function PieChartView() {
                 const dataItem = target.dataItem
                 if (dataItem) {
                     const label = (dataItem as any).category
-                    if (label) return getSeriesColor(label)
+                    if (label) return am4core.color(getSeriesColor(label))
                 }
                 return _fill!
             })
@@ -87,7 +96,7 @@ export function PieChartView() {
                 const dataItem = target.dataItem
                 if (dataItem) {
                     const label = (dataItem as any).category
-                    if (label) return getSeriesColor(label)
+                    if (label) return am4core.color(getSeriesColor(label))
                 }
                 return _stroke!
             })

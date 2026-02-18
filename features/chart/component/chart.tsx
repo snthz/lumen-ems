@@ -8,6 +8,7 @@ import { configureDateAxis } from "@/features/chart/config/chart.axes"
 import { buildValueAxesByAxisKey } from "@/features/chart/config/chart.axes"
 import { configureInteractions } from "@/features/chart/config/chart.interactions"
 import { useChartStore } from "@/features/chart/store/chart.store"
+import { useTelemetryQueryStore } from "@/features/telemetry/store/telemetry-query.store"
 
 import {
     sortSeries,
@@ -21,6 +22,8 @@ export function Chart() {
     const series = useChartStore(state => state.series)
     const updateKey = useChartStore(state => state.updateKey)
     const energyUnit = useChartStore(state => state.energyUnit)
+    const setVisibleRange = useChartStore(state => state.setVisibleRange)
+    const resolution = useTelemetryQueryStore(state => state.resolution)
 
     useLayoutEffect(() => {
         const chart = createXYChart("chartdiv")
@@ -46,6 +49,16 @@ export function Chart() {
             dateAxis.tooltip.animationDuration = 400
         }
 
+        if (dateAxis) {
+            (dateAxis as am4charts.DateAxis).events.on("extremeschanged", () => {
+                const min = (dateAxis as am4charts.DateAxis).minZoomed
+                const max = (dateAxis as am4charts.DateAxis).maxZoomed
+                if (min != null && max != null) {
+                    setVisibleRange(min, max)
+                }
+            })
+        }
+
         chartRef.current = chart
 
         return () => {
@@ -61,11 +74,13 @@ export function Chart() {
         if (series.length === 0) {
             chart.series.clear()
             chart.yAxes.clear()
+            setVisibleRange(null, null)
             return
         }
 
         chart.series.clear()
         chart.yAxes.clear()
+        setVisibleRange(null, null)
 
         const sorted = sortSeries(series)
         const axisDefs = buildAxisDefinitions(sorted, energyUnit)
@@ -73,8 +88,8 @@ export function Chart() {
 
         const { bars, lines } = splitByChartType(sorted)
 
-        bars.forEach(s => addSeriesToChart(chart, axisMap, s))
-        lines.forEach(s => addSeriesToChart(chart, axisMap, s))
+        bars.forEach(s => addSeriesToChart(chart, axisMap, s, resolution))
+        lines.forEach(s => addSeriesToChart(chart, axisMap, s, resolution))
 
         const scrollbar = chart.scrollbarX as am4charts.XYChartScrollbar
         if (scrollbar) {
@@ -122,7 +137,7 @@ export function Chart() {
 
         chart.invalidateData()
 
-    }, [series, updateKey, energyUnit])
+    }, [series, updateKey, energyUnit, resolution])
 
     return (
         <div
