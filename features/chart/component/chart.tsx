@@ -50,9 +50,10 @@ export function Chart() {
         }
 
         if (dateAxis) {
-            (dateAxis as am4charts.DateAxis).events.on("extremeschanged", () => {
-                const min = (dateAxis as am4charts.DateAxis).minZoomed
-                const max = (dateAxis as am4charts.DateAxis).maxZoomed
+            const da = dateAxis as am4charts.DateAxis
+            ;(da.events as any).on("selectionextremeschanged", () => {
+                const min = da.minZoomed
+                const max = da.maxZoomed
                 if (min != null && max != null) {
                     setVisibleRange(min, max)
                 }

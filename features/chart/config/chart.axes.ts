@@ -8,6 +8,7 @@ export function configureDateAxis(chart: am4charts.XYChart) {
     axis.renderer.labels.template.fontSize = 11
     axis.renderer.labels.template.fill = am4core.color("#9ca3af")
     axis.renderer.minGridDistance = 60
+    axis.tooltipDateFormat = "MMM d, HH:mm"
     return axis
 }
 
@@ -17,6 +18,8 @@ export function buildValueAxesByAxisKey(
     series: any[]
 ) {
     const axisMap = new Map<string, am4charts.ValueAxis>()
+
+    const anyBars = series.some(s => s.chartType === 'bar')
 
     axes.forEach((def, index) => {
         const axis = chart.yAxes.push(new am4charts.ValueAxis())
@@ -40,7 +43,7 @@ export function buildValueAxesByAxisKey(
         )
         const hasBars = seriesForThisAxis.some(s => s.chartType === 'bar')
 
-        if (!hasNegatives && hasBars) {
+        if (!hasNegatives && anyBars) {
             axis.min = 0
             axis.strictMinMax = true
             axis.extraMax = 0.05

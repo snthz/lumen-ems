@@ -54,11 +54,6 @@ export function FilterContent() {
             const result = await run()
             setSeries(result)
             if (isMobile) { setOpenMobile(false) } else { setOpen(false) }
-
-            toast.success('Datos actualizados', {
-                description: `Se cargaron ${result.length} series correctamente`,
-                duration: 2000,
-            })
         } catch (error) {
             console.error('Error updating chart:', error)
             toast.error('Error al actualizar', {
