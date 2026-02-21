@@ -163,9 +163,11 @@ bun run start
 
 ## Variables de entorno
 
-Copia `.env.example` como `.env.local` y completa los valores. A continuación se detalla cada variable:
+Copia `.env.example` como `.env.local` y completa los valores. A continuación se detalla cada variable.
 
-### Obligatorias
+> **Nota:** Todas las variables de ThingsBoard y Group IDs también se pueden configurar desde **Ajustes → General** en la interfaz de administración. Las variables de entorno sirven como valores por defecto que se pueden sobrescribir desde la UI.
+
+### ThingsBoard y grupos
 
 | Variable | Descripción |
 |----------|-------------|
@@ -211,19 +213,48 @@ DATABASE_URL=postgres://lumen:secret@localhost:5432/lumen_ems
 
 ## Despliegue con Docker
 
-El proyecto incluye un `Dockerfile` multi-stage optimizado y un `docker-compose.yml` con PostgreSQL.
+El proyecto incluye un `Dockerfile` multi-stage optimizado y un `docker-compose.yml` con PostgreSQL. **No se requieren build args ni archivos `.env`** — toda la configuración se hace directamente en el `docker-compose.yml` mediante variables de entorno.
+
+### Ejecutar Docker localmente (desarrollo)
+
+Para probar la imagen Docker en tu máquina local:
+
+```bash
+# Construir y levantar
+docker compose up --build
+
+# O en modo detached (background)
+docker compose up --build -d
+
+# Ver logs
+docker compose logs -f app
+```
+
+La aplicación estará disponible en [http://localhost:3000](http://localhost:3000).
 
 ### Usando docker-compose (recomendado)
 
+#### 1. Configurar variables de entorno
+
+Edita el `docker-compose.yml` y completa las variables en la sección `environment` del servicio `app`:
+
+```yaml
+environment:
+  - DATABASE_URL=postgres://lumen:lumen@db:5432/lumen_ems
+  - DATA_DIR=/data
+  - TB_API=https://thingsboard.miempresa.com
+  - NEXT_PUBLIC_TB_API=https://thingsboard.miempresa.com
+  - EMS_INDUSTRIES_GROUP_ID=uuid-del-grupo-industria
+  - EMS_BILLING_GROUP_ID=uuid-del-grupo-facturacion
+  - EMS_MULTISITE_GROUP_ID=uuid-del-grupo-multisitio
+```
+
+> `DATABASE_URL` y `DATA_DIR` ya vienen preconfigurados. Solo necesitas ajustar `TB_API`, `NEXT_PUBLIC_TB_API` y los Group IDs.
+
+#### 2. Construir y levantar
+
 ```bash
-# Crear archivo de entorno para Docker
-cp .env.example .env
-
-# Editar .env con tus valores (TB_API, Group IDs, etc.)
-nano .env
-
-# Levantar la aplicación + base de datos
-docker compose up -d
+docker compose up -d --build
 ```
 
 Esto levanta:
@@ -233,35 +264,136 @@ Esto levanta:
 | `app` | 3000 | Aplicación Lumen EMS |
 | `db` | 5432 | PostgreSQL 17 Alpine |
 
-La base de datos se configura automáticamente con usuario `lumen`, contraseña `lumen` y base de datos `lumen_ems`. Los datos se persisten en volúmenes Docker (`pg-data` y `app-data`).
+La base de datos se configura automáticamente con usuario `lumen`, contraseña `lumen` y base de datos `lumen_ems`. Los datos se persisten en volúmenes Docker (`pg-data` y `app-data`). Las tablas se crean automáticamente en el primer inicio.
 
-### Dockerfile standalone
+#### 3. Detener
 
 ```bash
-# Build de la imagen
-docker build \
-  --build-arg NEXT_PUBLIC_TB_API=https://tb.example.com \
-  -t lumen-ems .
-
-# Ejecutar
-docker run -p 3000:3000 \
-  -e TB_API=https://tb.example.com \
-  -e EMS_INDUSTRIES_GROUP_ID=... \
-  -e EMS_BILLING_GROUP_ID=... \
-  -e EMS_MULTISITE_GROUP_ID=... \
-  -v lumen-data:/data \
-  lumen-ems
+docker compose down        # Detiene los contenedores (los datos se conservan)
+docker compose down -v     # Detiene y ELIMINA los volúmenes (borra datos)
 ```
 
-> **Nota:** `NEXT_PUBLIC_TB_API` se debe pasar como build arg porque se inyecta en el bundle del cliente durante el build.
+---
+
+### Publicar imagen en un registro (distribución sin código fuente)
+
+Si deseas entregar la aplicación a un cliente **sin compartir el código fuente**, puedes publicar la imagen Docker en un registro privado.
+
+#### 1. Construir la imagen
+
+```bash
+docker build -t lumen-ems:latest .
+```
+
+> No se necesitan build args. La URL de ThingsBoard se inyecta en runtime por el entrypoint.
+
+#### 2. Etiquetar para el registro
+
+```bash
+# Docker Hub
+docker tag lumen-ems:latest tu-usuario/lumen-ems:latest
+docker tag lumen-ems:latest tu-usuario/lumen-ems:1.0.0
+
+# GitHub Container Registry (ghcr.io)
+docker tag lumen-ems:latest ghcr.io/tu-org/lumen-ems:latest
+
+# Registro privado
+docker tag lumen-ems:latest registry.miempresa.com/lumen-ems:latest
+```
+
+#### 3. Hacer push
+
+```bash
+# Autenticarse (ejemplo Docker Hub)
+docker login
+
+# Push
+docker push tu-usuario/lumen-ems:latest
+docker push tu-usuario/lumen-ems:1.0.0
+```
+
+#### 4. Uso por el cliente
+
+El cliente solo necesita un `docker-compose.yml`, **sin código fuente ni archivos `.env`**:
+
+**`docker-compose.yml`** (entregable al cliente):
+
+```yaml
+services:
+  app:
+    image: tu-usuario/lumen-ems:latest   # ← imagen del registro
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgres://lumen:lumen@db:5432/lumen_ems
+      - DATA_DIR=/data
+      - TB_API=https://thingsboard.delcliente.com
+      - NEXT_PUBLIC_TB_API=https://thingsboard.delcliente.com
+      - EMS_INDUSTRIES_GROUP_ID=<uuid>
+      - EMS_BILLING_GROUP_ID=<uuid>
+      - EMS_MULTISITE_GROUP_ID=<uuid>
+    volumes:
+      - app-data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: lumen
+      POSTGRES_PASSWORD: lumen
+      POSTGRES_DB: lumen_ems
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lumen -d lumen_ems"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pg-data:
+  app-data:
+```
+
+El cliente ejecuta:
+
+```bash
+docker compose up -d
+```
+
+Y la aplicación queda levantada en el puerto 3000, conectada a su instancia de ThingsBoard, sin acceso al código fuente.
+
+#### 5. Actualizar en el cliente
+
+Para enviar una nueva versión al cliente:
+
+```bash
+# Tú (desarrollador): build + push
+docker build -t tu-usuario/lumen-ems:1.1.0 .
+docker push tu-usuario/lumen-ems:1.1.0
+```
+
+```bash
+# El cliente: pull + recrear
+docker compose pull
+docker compose up -d
+```
+
+---
 
 ### Pipeline del Dockerfile
 
 ```
 Stage 1 (deps)    → Bun: instala dependencias
 Stage 2 (builder) → Bun: compila Next.js (output: standalone)
-Stage 3 (runner)  → Node.js 22 Alpine: ejecuta server.js (~imagen final liviana)
+Stage 3 (runner)  → Node.js 22 Alpine: entrypoint inyecta env → ejecuta server.js
 ```
+
+> **¿Cómo funciona sin build args?** El Dockerfile compila con un placeholder para `NEXT_PUBLIC_TB_API`. Al iniciar el contenedor, `docker-entrypoint.sh` reemplaza el placeholder con el valor real de la variable de entorno. Esto permite que una sola imagen funcione con cualquier URL de ThingsBoard.
 
 ---
 
@@ -428,6 +560,7 @@ lumen-ems/
 │
 ├── proxy.ts                      # Middleware de autenticación
 ├── Dockerfile                    # Multi-stage: Bun (build) → Node.js Alpine (run)
+├── docker-entrypoint.sh          # Inyecta env vars en runtime (imagen portable)
 ├── docker-compose.yml            # App + PostgreSQL 17
 ├── .env.example                  # Plantilla de variables de entorno
 └── package.json

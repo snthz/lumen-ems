@@ -10,9 +10,9 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build arguments for required env vars at build time
-ARG NEXT_PUBLIC_TB_API
-ENV NEXT_PUBLIC_TB_API=${NEXT_PUBLIC_TB_API}
+# Use a placeholder so the image is portable.
+# The real value is injected at runtime by docker-entrypoint.sh.
+ENV NEXT_PUBLIC_TB_API=__NEXT_PUBLIC_TB_API_PLACEHOLDER__
 
 RUN bun run build
 
@@ -28,13 +28,16 @@ ENV HOSTNAME="0.0.0.0"
 RUN mkdir -p /data && chown -R node:node /data
 ENV DATA_DIR=/data
 
-# Copy standalone output
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
+# Copy standalone output (owned by node so entrypoint can sed in-place)
+COPY --from=builder --chown=node:node /app/.next/standalone ./
+COPY --from=builder --chown=node:node /app/.next/static ./.next/static
+COPY --from=builder --chown=node:node /app/public ./public
+
+# Entrypoint script replaces NEXT_PUBLIC_TB_API placeholder at runtime
+COPY --chown=node:node docker-entrypoint.sh /app/docker-entrypoint.sh
 
 USER node
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]

@@ -7,6 +7,9 @@ import {getAllSettings} from "@/lib/db/store";
 import {toBranding} from "@/lib/branding/branding.defaults";
 import Loading from "./loading";
 
+// Force dynamic so branding is always fresh from DB at runtime
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata(): Promise<Metadata> {
     const settings = await getAllSettings();
     const branding = toBranding(settings);

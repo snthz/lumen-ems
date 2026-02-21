@@ -10,15 +10,27 @@ import postgres from "postgres"
 let sql: postgres.Sql | null = null
 let migrated: Promise<void> | null = null
 
+/** True when Next.js is building (prerendering static pages). */
+const isBuilding = process.env.NEXT_PHASE === "phase-production-build"
+    || process.env.__NEXT_BUILD === "1"
+
 /** Get the raw postgres.js instance (null when DATABASE_URL is unset). */
 export function getDb(): postgres.Sql | null {
     if (!process.env.DATABASE_URL) return null
     if (!sql) {
         sql = postgres(process.env.DATABASE_URL, {
-            max: 10,
-            idle_timeout: 20,
+            max: isBuilding ? 1 : 10,
+            idle_timeout: isBuilding ? 1 : 20,
             connect_timeout: 10,
+            onclose: isBuilding ? () => { sql = null; migrated = null } : undefined,
         })
+
+        // During build, ensure the pool closes so Node.js can exit
+        if (isBuilding) {
+            process.once("beforeExit", () => {
+                sql?.end({ timeout: 0 }).catch(() => {})
+            })
+        }
     }
     return sql
 }
@@ -27,20 +39,40 @@ export function hasDb(): boolean {
     return !!process.env.DATABASE_URL
 }
 
+/** Gracefully close the connection pool. */
+export async function closeDb() {
+    if (sql) {
+        await sql.end({ timeout: 1 })
+        sql = null
+        migrated = null
+    }
+}
+
 /**
  * Returns the postgres instance after ensuring all tables exist.
  * Safe to call repeatedly — migrations only run once per process.
- * Returns null when DATABASE_URL is not set.
+ * Returns null when DATABASE_URL is not set or during next build.
  */
 export async function ensureDb(): Promise<postgres.Sql | null> {
+    // Skip DB during build — prerender uses empty defaults, runtime uses real DB
+    if (isBuilding) return null
+
     const db = getDb()
     if (!db) return null
 
     if (!migrated) {
         migrated = runAutoMigrations(db)
     }
-    await migrated
-    return db
+    try {
+        await migrated
+        return db
+    } catch (err) {
+        // DB unreachable (e.g. during Vercel build) — fall back to file storage
+        console.warn("[db] Connection failed, falling back to file storage:", (err as Error).message)
+        sql = null
+        migrated = null
+        return null
+    }
 }
 
 /** Inline CREATE TABLE IF NOT EXISTS — no external dependency needed. */

@@ -1,17 +1,17 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_TB_API: ${NEXT_PUBLIC_TB_API}
+    build: .
+    image: lumen-ems:latest
     ports:
       - "3000:3000"
-    env_file:
-      - .env
     environment:
       - DATABASE_URL=postgres://lumen:lumen@db:5432/lumen_ems
       - DATA_DIR=/data
+      - TB_API=https://dashboard.lumenenergysolutions.com
+      - NEXT_PUBLIC_TB_API=https://dashboard.lumenenergysolutions.com
+      - EMS_INDUSTRIES_GROUP_ID=uuid-del-grupo-industria
+      - EMS_BILLING_GROUP_ID=uuid-del-grupo-facturacion
+      - EMS_MULTISITE_GROUP_ID=uuid-del-grupo-multisitio
     volumes:
       - app-data:/data
     depends_on:

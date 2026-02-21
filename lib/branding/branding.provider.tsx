@@ -61,9 +61,10 @@ export function BrandingProvider({ children, initial }: { children: React.ReactN
         }
     }, [])
 
+    // Always refresh on mount — initial may be stale (e.g. from static prerender)
     useEffect(() => {
-        if (!initial) refresh()
-    }, [initial, refresh])
+        refresh()
+    }, [refresh])
 
     const branding = toBranding(raw)
 
