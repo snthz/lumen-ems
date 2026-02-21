@@ -60,7 +60,11 @@ export function PieChartView() {
 
         // Show one slice per series entry (per device)
         // Energy metrics: use total (sum); others: use average
-        const pieData = series.map(s => {
+        // All slices sharing the same base unit are normalized to a common scale
+        // so that pie percentages are accurate.
+
+        // Step 1: compute raw aggregates per series (in base units)
+        const rawEntries = series.map(s => {
             const values = s.data
                 .filter(p => p.value != null && p.value !== '')
                 .map(p => Math.abs(Number(p.value)))
@@ -71,12 +75,32 @@ export function PieChartView() {
                 ? values.reduce((sum, v) => sum + v, 0)
                 : values.length > 0 ? values.reduce((sum, v) => sum + v, 0) / values.length : 0
 
-            const scaled = autoScaleValue(aggregate, s.unit)
             const label = `${s.deviceName} | ${getKeyLabel(s.key)}`
+            return { label, aggregate, unit: s.unit }
+        })
+
+        // Step 2: group by base unit and find the best common scale for each group
+        const unitGroups = new Map<string, number>()
+        for (const entry of rawEntries) {
+            const prev = unitGroups.get(entry.unit) ?? 0
+            unitGroups.set(entry.unit, Math.max(prev, Math.abs(entry.aggregate)))
+        }
+        // For each base unit, determine a single scale (using the max value in the group)
+        const unitScaleMap = new Map<string, { factor: number; unit: string }>()
+        for (const [baseUnit, maxVal] of unitGroups) {
+            const scaled = autoScaleValue(maxVal, baseUnit)
+            // Derive factor from the scaling: factor = maxVal / scaled.value (if scaled.value > 0)
+            const factor = scaled.value > 0 ? maxVal / scaled.value : 1
+            unitScaleMap.set(baseUnit, { factor, unit: scaled.unit })
+        }
+
+        // Step 3: apply the common scale to all series with the same base unit
+        const pieData = rawEntries.map(entry => {
+            const scale = unitScaleMap.get(entry.unit)!
             return {
-                label,
-                value: scaled.value,
-                unit: scaled.unit,
+                label: entry.label,
+                value: entry.aggregate / scale.factor,
+                unit: scale.unit,
             }
         })
 

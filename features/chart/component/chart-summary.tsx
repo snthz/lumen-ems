@@ -2,6 +2,9 @@
 
 import { useMemo } from "react"
 import { useChartStore } from "@/features/chart/store/chart.store"
+import { useTelemetryQueryStore } from "@/features/telemetry/store/telemetry-query.store"
+import { resolveTimeRange } from "@/features/telemetry/utils/resolve-time-range"
+import { startOfDay } from "date-fns"
 import { getKeyLabel } from "@/features/telemetry/utils/telemetry-labels"
 import { getSeriesHex } from "@/features/chart/utils/series-color.utils"
 import { groupSeriesByKey } from "@/features/chart/utils/series-grouping.utils"
@@ -69,9 +72,23 @@ export function ChartSummary() {
     const series = useChartStore(state => state.series)
     const chartView = useChartStore(state => state.chartView)
     const comparisonSeries = useChartStore(state => state.comparisonSeries)
+    const comparisonDate = useChartStore(state => state.comparisonDate)
     const energyUnit = useChartStore(state => state.energyUnit)
     const visibleRangeStart = useChartStore(state => state.visibleRangeStart)
     const visibleRangeEnd = useChartStore(state => state.visibleRangeEnd)
+
+    const timeRange = useTelemetryQueryStore(state => state.timeRange)
+    const customStart = useTelemetryQueryStore(state => state.customStart)
+    const customEnd = useTelemetryQueryStore(state => state.customEnd)
+
+    const primaryRange = customStart && customEnd
+        ? { start: customStart, end: customEnd }
+        : resolveTimeRange(timeRange)
+
+    const comparisonShiftMs = useMemo(() => {
+        if (!comparisonDate) return 0
+        return primaryRange.start.getTime() - startOfDay(comparisonDate).getTime()
+    }, [comparisonDate, primaryRange.start])
 
     const ENERGY_UNITS = new Set(['Wh', 'varh', 'VAh'])
 
@@ -105,6 +122,35 @@ export function ChartSummary() {
         }
 
         if (chartView === 'pie') {
+            // For pie chart, all series with the same base unit must use the same scale
+            // so that pie percentages are meaningful.
+            // Step 1: collect all values per base unit to find the global max
+            const valuesByBaseUnit = new Map<string, number[]>()
+            for (const s of series) {
+                const vals = s.data
+                    .filter(p => p.value != null && p.value !== '')
+                    .map(p => Number(p.value))
+                    .filter(v => !isNaN(v))
+                const existing = valuesByBaseUnit.get(s.unit) ?? []
+                existing.push(...vals)
+                valuesByBaseUnit.set(s.unit, existing)
+            }
+
+            // Step 2: determine the forced energy unit per base unit using global max
+            const ENERGY_BASE = new Set(['Wh', 'varh', 'VAh'])
+            const forcedEnergyUnit = new Map<string, EnergyUnit>()
+            for (const [baseUnit, allVals] of valuesByBaseUnit) {
+                if (ENERGY_BASE.has(baseUnit) && allVals.length > 0) {
+                    const globalMax = Math.max(...allVals.map(Math.abs))
+                    if (globalMax >= 1_000_000) {
+                        forcedEnergyUnit.set(baseUnit, 'MWh')
+                    } else if (globalMax >= 1_000) {
+                        forcedEnergyUnit.set(baseUnit, 'kWh')
+                    }
+                    // else leave as auto (base unit)
+                }
+            }
+
             return series.map(s => {
                 const label = getKeyLabel(s.key)
                 const name = `${s.deviceName} | ${label}`
@@ -112,7 +158,8 @@ export function ChartSummary() {
                     .filter(p => p.value != null && p.value !== '')
                     .map(p => Number(p.value))
                     .filter(v => !isNaN(v))
-                return computeSeriesStats(name, name, s.unit, values, energyUnit)
+                const eu = forcedEnergyUnit.get(s.unit) ?? energyUnit
+                return computeSeriesStats(name, name, s.unit, values, eu)
             })
         }
 
@@ -129,6 +176,24 @@ export function ChartSummary() {
     const comparisonRows: ComparisonRow[] = useMemo(() => {
         if (chartView !== 'comparison' || stats.length === 0) return []
 
+        function filterByVisibleRange(
+            data: Array<{ ts: number; value: string | number }>,
+            shiftMs = 0
+        ) {
+            if (visibleRangeStart == null || visibleRangeEnd == null) return data
+            const timestamps = data.map(p => p.ts + shiftMs).sort((a, b) => a - b)
+            let buffer = 0
+            if (timestamps.length >= 2) {
+                buffer = (timestamps[1] - timestamps[0]) / 2
+            }
+            const start = visibleRangeStart - buffer
+            const end = visibleRangeEnd + buffer
+            return data.filter(p => {
+                const shiftedTs = p.ts + shiftMs
+                return shiftedTs >= start && shiftedTs <= end
+            })
+        }
+
         return series.map((s, i) => {
             const primaryStats = stats[i]
             const comp = comparisonSeries.find(
@@ -136,7 +201,7 @@ export function ChartSummary() {
             )
             const compStats = comp
                 ? (() => {
-                    const values = comp.data
+                    const values = filterByVisibleRange(comp.data, comparisonShiftMs)
                         .filter(p => p.value != null && p.value !== '')
                         .map(p => Number(p.value))
                         .filter(v => !isNaN(v))
@@ -145,7 +210,7 @@ export function ChartSummary() {
                 : null
             return { primary: primaryStats, comparison: compStats }
         })
-    }, [series, comparisonSeries, stats, chartView, energyUnit])
+    }, [series, comparisonSeries, stats, chartView, energyUnit, visibleRangeStart, visibleRangeEnd, comparisonShiftMs])
 
     if (stats.length === 0) return null
 

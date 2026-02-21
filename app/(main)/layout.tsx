@@ -7,6 +7,9 @@ import {AppSidebar} from "@/components/sidebar/app-sidebar";
 import {SidebarInset, SidebarProvider, SidebarTrigger} from "@/components/ui/sidebar";
 import {getCustomerGroups} from "@/lib/thingsboard/server/thingsboard.server";
 import {Toaster} from "sonner";
+import {BrandingProvider} from "@/lib/branding/branding.provider";
+import {getAllSettings} from "@/lib/db/store";
+import {toBranding} from "@/lib/branding/branding.defaults";
 import Loading from "./loading";
 
 const geistSans = Geist({
@@ -19,17 +22,24 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-    title: "Lumen EMS | Dashboard",
-    description: "Lumen EMS Dashboard",
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const settings = await getAllSettings();
+    const branding = toBranding(settings);
+    return {
+        title: `${branding.pageTitle} | Dashboard`,
+        description: `${branding.pageTitle} Dashboard`,
+    };
+}
 
 export default async function RootLayout({
                                              children,
                                          }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const {data: groups} = await getCustomerGroups()
+    const [{data: groups}, initialSettings] = await Promise.all([
+        getCustomerGroups(),
+        getAllSettings(),
+    ]);
     return (
         <html lang="en">
         <body
@@ -37,6 +47,7 @@ export default async function RootLayout({
         >
             
         <Suspense fallback={<Loading />}>
+            <BrandingProvider initial={initialSettings}>
             <TokenProvider>
                 <SidebarProvider>
                     <AppSidebar groups={groups ?? []}/>
@@ -58,6 +69,7 @@ export default async function RootLayout({
                 </SidebarProvider>
 
             </TokenProvider>
+            </BrandingProvider>
             <Toaster/>
         </Suspense>
         </body>

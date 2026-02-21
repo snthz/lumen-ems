@@ -143,6 +143,7 @@ export function ComparisonChart() {
     const comparisonEndDate = useChartStore(s => s.comparisonEndDate)
     const comparisonLoading = useChartStore(s => s.comparisonLoading)
     const setComparisonLoading = useChartStore(s => s.setComparisonLoading)
+    const setVisibleRange = useChartStore(s => s.setVisibleRange)
 
     const timeRange = useTelemetryQueryStore(s => s.timeRange)
     const customStart = useTelemetryQueryStore(s => s.customStart)
@@ -222,12 +223,23 @@ export function ComparisonChart() {
             dateAxis.tooltip.animationDuration = 500
         }
 
+        if (dateAxis) {
+            const da = dateAxis as am4charts.DateAxis
+            ;(da.events as any).on("selectionextremeschanged", () => {
+                const min = da.minZoomed
+                const max = da.maxZoomed
+                if (min != null && max != null) {
+                    setVisibleRange(min, max)
+                }
+            })
+        }
+
         chartRef.current = chart
         return () => {
             chart.dispose()
             chartRef.current = null
         }
-    }, [])
+    }, [setVisibleRange])
 
     // Render series - wait for comparison data to be ready to avoid double render
     useEffect(() => {
@@ -239,6 +251,7 @@ export function ComparisonChart() {
 
         chart.series.clear()
         chart.yAxes.clear()
+        setVisibleRange(null, null)
         while (chart.xAxes.length > 1) {
             chart.xAxes.removeIndex(chart.xAxes.length - 1).dispose()
         }
@@ -272,6 +285,7 @@ export function ComparisonChart() {
         const hasCompBars = compBars.length > 0
 
         // Create shadow value axes for comparison bars (independent stacking)
+        // Shadow axes use syncWithAxis to mirror primary axis scale exactly
         const compAxisMap = new Map<string, am4charts.ValueAxis>()
         if (hasCompBars) {
             for (const [key, primaryAxis] of axisMap) {
@@ -283,6 +297,7 @@ export function ComparisonChart() {
                 shadowAxis.renderer.line.strokeOpacity = 0
                 shadowAxis.cursorTooltipEnabled = false
                 shadowAxis.syncWithAxis = primaryAxis
+                shadowAxis.tooltip!.disabled = true
                 compAxisMap.set(key, shadowAxis)
             }
         }
@@ -305,6 +320,10 @@ export function ComparisonChart() {
 
             // Add secondary date axis at top showing comparison dates
             const compAxis = chart.xAxes.push(new am4charts.DateAxis())
+            const primaryDateAxis = chart.xAxes.getIndex(0) as am4charts.DateAxis
+            if (primaryDateAxis) {
+                compAxis.syncWithAxis = primaryDateAxis
+            }
             compAxis.renderer.opposite = true
             compAxis.renderer.labels.template.fill = am4core.color("#9ca3af")
             compAxis.renderer.labels.template.fontSize = 10
@@ -372,8 +391,10 @@ export function ComparisonChart() {
             chart.cursor.xAxis = primaryDateAxis
         }
 
+        chart.mouseWheelBehavior = "zoomX"
+
         chart.invalidateData()
-    }, [series, displayCompData, updateKey, energyUnit, compDateMs, compEndDateMs, primaryStartMs, primaryEndMs, comparisonLoading, resolution])
+    }, [series, displayCompData, updateKey, energyUnit, compDateMs, compEndDateMs, primaryStartMs, primaryEndMs, comparisonLoading, resolution, setVisibleRange])
 
     return (
         <div

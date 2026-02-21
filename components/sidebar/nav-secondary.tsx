@@ -1,4 +1,5 @@
 import * as React from "react"
+import Link from "next/link"
 import {CircleQuestionMark,  Settings} from "lucide-react"
 
 import {
@@ -18,9 +19,11 @@ export function NavSecondary({
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="sm">
-              <Settings/>
-              <span>Configuración</span>
+            <SidebarMenuButton size="sm" asChild>
+              <Link href="/settings">
+                <Settings/>
+                <span>Configuración</span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem >

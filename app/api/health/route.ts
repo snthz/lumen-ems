@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { hasDb } from "@/lib/db/postgres";
 
 export async function GET(req: NextRequest) {
     const forwardedFor = req.headers.get("x-forwarded-for");
@@ -7,5 +8,5 @@ export async function GET(req: NextRequest) {
         req.headers.get("x-real-ip") ??
         "unknown";
 
-    return NextResponse.json({ redis: "ok", ip });
+    return NextResponse.json({ database: hasDb(), ip });
 }

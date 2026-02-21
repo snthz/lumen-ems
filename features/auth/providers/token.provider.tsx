@@ -39,6 +39,7 @@ function TokenProviderInner({ children }: { children: React.ReactNode }) {
             const claims = hydrateFromToken(searchToken);
             if (!claims) return;
 
+            console.log("Hydrated session from token in URL", claims);
             setCookie("auth_token", searchToken, {
                 expires: new Date(claims.exp * 1000),
                 sameSite: "lax",
@@ -54,7 +55,8 @@ function TokenProviderInner({ children }: { children: React.ReactNode }) {
 
         const existingToken = getCookie("auth_token") as string | undefined;
         if (existingToken) {
-            hydrateFromToken(existingToken);
+            const debug = hydrateFromToken(existingToken);
+            console.log("Hydrated session from existing cookie", debug);
         }
 
     }, [searchToken, router, setCookie, setSession, clearSession, getCookie]);
