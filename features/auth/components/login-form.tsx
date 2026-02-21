@@ -109,7 +109,7 @@ export function LoginForm({
                 )}
 
                 <small className="text-center text-xs text-muted-foreground">
-                    © 2023-{new Date().getFullYear()} Lumen
+                    © 2019-{new Date().getFullYear()} Lumen
                 </small>
             </FieldGroup>
         </form>

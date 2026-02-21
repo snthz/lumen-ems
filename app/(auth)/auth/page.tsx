@@ -13,7 +13,7 @@ export default function LoginPage() {
             <div className="grid min-h-svh lg:grid-cols-2 ">
                 <div className="flex flex-col gap-4 p-6 md:p-10">
                     <div className="flex  gap-2 justify-start">
-                        <Image src={branding.loginLogoUrl} alt="logo" width={300} height={100} className="w-1/2 md:w-1/3" unoptimized={isUploadedLogo} />
+                        <Image src={branding.loginLogoUrl} alt="logo" width={300} height={100} className="h-12 w-auto" unoptimized={isUploadedLogo} />
                     </div>
                     <div className="flex flex-1 items-center justify-center">
                         <div className="w-full max-w-xs">

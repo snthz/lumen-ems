@@ -33,7 +33,7 @@ export function AppSidebar({ groups, ...props }: AppSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/">
-                <div className="flex aspect-square size-10 items-center justify-center rounded-lg overflow-hidden">
+                <div className="flex aspect-square size-10 items-center justify-center rounded-lg overflow-hidden border bg-neutral-100">
                   <Image src={branding.sidebarLogoUrl} alt={`${branding.appName} Logo`} width={40} height={40} className="size-10 object-contain" unoptimized={branding.sidebarLogoUrl.startsWith("/api/")} />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
