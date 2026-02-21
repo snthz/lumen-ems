@@ -21,7 +21,3 @@ export function decodeJwt(token: string): UserJwtClaims {
     }
 }
 
-export function jwtIsExpired(claims: UserJwtClaims): boolean {
-    const currentTime = Math.floor(Date.now() / 1000)
-    return claims.exp < currentTime
-}

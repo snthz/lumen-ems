@@ -22,7 +22,7 @@ const INTERVAL_MAP: Record<string, IntervalLimits> = {
     '1y': { eniscope: DAY, thingsboard: DAY },
 }
 
-export interface IntervalStrategy {
+interface IntervalStrategy {
     tbInterval: number | null
     tbAgg: AggregationType
     clientAgg: Exclude<AggregationType, 'NONE' | 'COUNT'> | null

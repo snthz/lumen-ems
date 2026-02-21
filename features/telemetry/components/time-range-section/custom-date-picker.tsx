@@ -140,10 +140,10 @@ export function CustomDatePicker({
 
                             <div className="p-3 border-t flex gap-4">
                                 <div className="flex-1">
-                                    <label className="text-xs text-muted-foreground mb-1 block">Desde</label>
+                                    <label htmlFor="from-hour" className="text-xs text-muted-foreground mb-1 block">Desde</label>
                                     <div className="flex gap-1">
                                         <Select value={fromTime.hour} onValueChange={(v) => setFromTime(prev => ({ ...prev, hour: v }))}>
-                                            <SelectTrigger className="w-16 h-8 text-xs">
+                                            <SelectTrigger id="from-hour" className="w-16 h-8 text-xs">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>
@@ -171,10 +171,10 @@ export function CustomDatePicker({
                                 </div>
                                 
                                 <div className="flex-1">
-                                    <label className="text-xs text-muted-foreground mb-1 block">Hasta</label>
+                                    <label htmlFor="to-hour" className="text-xs text-muted-foreground mb-1 block">Hasta</label>
                                     <div className="flex gap-1">
                                         <Select value={toTime.hour} onValueChange={(v) => setToTime(prev => ({ ...prev, hour: v }))}>
-                                            <SelectTrigger className="w-16 h-8 text-xs">
+                                            <SelectTrigger id="to-hour" className="w-16 h-8 text-xs">
                                                 <SelectValue />
                                             </SelectTrigger>
                                             <SelectContent>

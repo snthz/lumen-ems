@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState } from "react"
 import { format, addDays, differenceInDays, startOfDay, eachDayOfInterval } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar as CalendarIcon, Loader2 } from "lucide-react"
@@ -14,7 +14,8 @@ import { resolveTimeRange } from "@/features/telemetry/utils/resolve-time-range"
 export function ComparisonDatePicker() {
     const comparisonPickerOpen = useChartStore(s => s.comparisonPickerOpen)
     const setComparisonPickerOpen = useChartStore(s => s.setComparisonPickerOpen)
-    const [open, setOpen] = useState(false)
+    const [localOpen, setLocalOpen] = useState(false)
+    const open = localOpen || comparisonPickerOpen
     const [pendingFrom, setPendingFrom] = useState<Date | null>(null)
 
     const comparisonDate = useChartStore(s => s.comparisonDate)
@@ -32,16 +33,20 @@ export function ComparisonDatePicker() {
     const primaryDays = differenceInDays(primaryRange.end, primaryRange.start) + 1
     const isSingleDay = primaryDays <= 1
 
-    // Compute the active range to highlight in the calendar
     const activeFrom = pendingFrom ?? (open ? comparisonDate : null)
     const activeEnd = activeFrom ? addDays(activeFrom, primaryDays - 1) : null
+
+    function closePopover() {
+        setLocalOpen(false)
+        setComparisonPickerOpen(false)
+    }
 
     function handleSelect(date: Date | undefined) {
         if (!date) return
 
         if (isSingleDay) {
             setComparisonRange(date, date)
-            setOpen(false)
+            closePopover()
             return
         }
 
@@ -53,30 +58,22 @@ export function ComparisonDatePicker() {
         const autoEnd = addDays(pendingFrom, primaryDays - 1)
         setComparisonRange(pendingFrom, autoEnd)
         setPendingFrom(null)
-        setOpen(false)
+        closePopover()
     }
 
     function handleClear() {
         setPendingFrom(null)
         setComparisonRange(null, null)
-        setOpen(false)
+        closePopover()
     }
 
     function handleOpenChange(isOpen: boolean) {
-        setOpen(isOpen)
+        setLocalOpen(isOpen)
         if (!isOpen) {
             setPendingFrom(null)
             setComparisonPickerOpen(false)
         }
     }
-
-    // Auto-open when switching to comparison view
-    useEffect(() => {
-        if (comparisonPickerOpen) {
-            setOpen(true)
-            setComparisonPickerOpen(false)
-        }
-    }, [comparisonPickerOpen, setComparisonPickerOpen])
 
     const pendingEnd = pendingFrom ? addDays(pendingFrom, primaryDays - 1) : null
 
@@ -84,24 +81,21 @@ export function ComparisonDatePicker() {
         ? `${format(comparisonDate, "dd MMM", { locale: es })} - ${format(comparisonEndDate, "dd MMM yyyy", { locale: es })}`
         : "Comparar"
 
-    // Build modifiers for visual range highlight
     const rangeModifiers = activeFrom && activeEnd && !isSingleDay ? {
         compRange: { from: activeFrom, to: activeEnd },
         compStart: activeFrom,
         compEnd: activeEnd,
     } : {}
 
-    // Highlight the current/primary period on the calendar
-    const primaryModifiers = useMemo(() => {
-        const from = startOfDay(primaryRange.start)
-        const to = startOfDay(primaryRange.end)
-        const days = eachDayOfInterval({ start: from, end: to })
-        return {
-            primaryRange: days,
-            primaryStart: from,
-            primaryEnd: to,
-        }
-    }, [primaryRange.start.getTime(), primaryRange.end.getTime()])
+    const primaryStartTime = primaryRange.start.getTime()
+    const primaryEndTime = primaryRange.end.getTime()
+    const primaryModifiersFrom = startOfDay(new Date(primaryStartTime))
+    const primaryModifiersTo = startOfDay(new Date(primaryEndTime))
+    const primaryModifiers = {
+        primaryRange: eachDayOfInterval({ start: primaryModifiersFrom, end: primaryModifiersTo }),
+        primaryStart: primaryModifiersFrom,
+        primaryEnd: primaryModifiersTo,
+    }
 
     return (
         <Popover open={open} onOpenChange={handleOpenChange}>

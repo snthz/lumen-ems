@@ -1,6 +1,8 @@
 "use client"
 
 import * as React from "react"
+import Image from "next/image"
+import Link from "next/link"
 import { NavMain } from "@/components/sidebar/nav-main"
 import { NavSecondary } from "@/components/sidebar/nav-secondary"
 import { NavUser } from "@/components/sidebar/nav-user"
@@ -25,15 +27,15 @@ export function AppSidebar({ groups, ...props }: AppSidebarProps) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <Link href="/">
                 <div className="bg-blue-400 text-sidebar-primary-foreground flex aspect-square size-10 items-center justify-center rounded-lg">
-                  <img src="/brand/lumen-logo.svg" alt="Lumen Logo" className="size-10"/>
+                  <Image src="/brand/lumen-logo.svg" alt="Lumen Logo" width={40} height={40} className="size-10" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">Lumen</span>
                   <span className="truncate text-xs">EMS</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

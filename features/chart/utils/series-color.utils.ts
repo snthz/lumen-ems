@@ -1,4 +1,4 @@
-export const PALETTE = [
+const PALETTE = [
     "#D7476E", // vibrant red / ct0
     "#5E6FB6", // vibrant indigo / ct1
     "#4AB5A5", // vibrant teal / ct2
@@ -63,7 +63,7 @@ export function getSeriesHex(key: string): string {
     return colorMap.get(key)!
 }
 
-export function resetSeriesColors(): void {
+function resetSeriesColors(): void {
     colorMap.clear()
     colorIndex = 0
 }

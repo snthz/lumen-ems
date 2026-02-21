@@ -15,6 +15,9 @@ import {
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
 
+const RTL_BUTTON_NEXT = String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`
+const RTL_BUTTON_PREVIOUS = String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`
+
 function Calendar({
   className,
   classNames,
@@ -34,8 +37,8 @@ function Calendar({
       showOutsideDays={showOutsideDays}
       className={cn(
         "bg-background group/calendar p-3 [--cell-size:--spacing(8)] [[data-slot=card-content]_&]:bg-transparent [[data-slot=popover-content]_&]:bg-transparent",
-        String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
-        String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
+        RTL_BUTTON_NEXT,
+        RTL_BUTTON_PREVIOUS,
         className
       )}
       captionLayout={captionLayout}

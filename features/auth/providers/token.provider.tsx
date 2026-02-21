@@ -1,11 +1,11 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { decodeJwt } from "@/lib/auth/jwt";
 import { useGetCookie, useSetCookie } from "cookies-next";
 import { useSessionStore } from "@/lib/auth/store/session.store";
 
-export function TokenProvider({ children }: { children: React.ReactNode }) {
+function TokenProviderInner({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const searchToken = searchParams.get("token");
@@ -60,4 +60,12 @@ export function TokenProvider({ children }: { children: React.ReactNode }) {
     }, [searchToken, router, setCookie, setSession, clearSession, getCookie]);
 
     return <>{children}</>;
+}
+
+export function TokenProvider({ children }: { children: React.ReactNode }) {
+    return (
+        <Suspense>
+            <TokenProviderInner>{children}</TokenProviderInner>
+        </Suspense>
+    );
 }

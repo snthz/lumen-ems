@@ -1,6 +1,6 @@
 import {AggregationType} from "@/features/telemetry/telemetry.types";
 
-export type EntityType = 'CUSTOMER' | 'TENANT';
+type EntityType = 'CUSTOMER' | 'TENANT';
 
 export interface EntityId {
     entityType: EntityType;

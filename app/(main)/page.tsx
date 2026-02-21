@@ -1,3 +1,5 @@
+export const metadata = { title: 'Lumen EMS', description: 'Energy Management System' }
+
 export default function Home() {
   return (
     <div >

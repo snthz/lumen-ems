@@ -60,9 +60,8 @@ export function FilterContent() {
                 description: error instanceof Error ? error.message : 'Ocurrió un error inesperado',
                 duration: 4000,
             })
-        } finally {
-            setLoading(false)
         }
+        setLoading(false)
     }
 
     React.useEffect(() => {

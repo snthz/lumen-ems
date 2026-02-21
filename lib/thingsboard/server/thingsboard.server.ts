@@ -36,17 +36,6 @@ async function fetchCustomersByGroupId(groupId: string, token: string): Promise<
     return (json.data ?? []) as TbCustomersResponse;
 }
 
-export async function getCustomersByEntityGroup(): ApiResponse<TbCustomersResponse> {
-    const cookieStore = await cookies()
-    const entityGroupId = env.EMS_INDUSTRIES_GROUP_ID
-    const token = getAuthToken(cookieStore)
-    const customers = await fetchCustomersByGroupId(entityGroupId, token)
-    return {
-        success: true,
-        data: customers,
-    }
-}
-
 export async function getCustomerGroups(): ApiResponse<CustomerGroupsResponse> {
     const cookieStore = await cookies()
     const token = getAuthToken(cookieStore)

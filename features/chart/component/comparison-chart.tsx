@@ -165,10 +165,7 @@ export function ComparisonChart() {
 
     // Fetch comparison data when comparison range or primary data changes
     useEffect(() => {
-        if (!compDateMs || !compEndDateMs) {
-            setCompData([])
-            return
-        }
+        if (!compDateMs || !compEndDateMs) return
 
         const compStart = startOfDay(new Date(compDateMs))
         const compEnd = endOfDay(new Date(compEndDateMs))
@@ -194,10 +191,12 @@ export function ComparisonChart() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [compDateMs, compEndDateMs, primaryStartMs, primaryEndMs, updateKey])
 
-    // Sync local compData to store for summary
+    const displayCompData = compDateMs && compEndDateMs ? compData : []
+
+    // Sync local displayCompData to store for summary
     useEffect(() => {
-        useChartStore.getState().setComparisonSeries(compData)
-    }, [compData])
+        useChartStore.getState().setComparisonSeries(displayCompData)
+    }, [displayCompData])
 
     // Create chart on mount
     useLayoutEffect(() => {
@@ -247,7 +246,7 @@ export function ComparisonChart() {
         if (series.length === 0) return
 
         // Merge both datasets for consistent axis scaling
-        const allSeries = [...series, ...compData]
+        const allSeries = [...series, ...displayCompData]
         const sorted = sortSeries(allSeries)
         const axisDefs = buildAxisDefinitions(sorted, energyUnit)
         const axisMap = buildValueAxesByAxisKey(chart, axisDefs, sorted)
@@ -258,12 +257,12 @@ export function ComparisonChart() {
         let compLines: any[] = []
         let shiftOffset = 0
 
-        if (compData.length > 0 && compDateMs && compEndDateMs) {
+        if (displayCompData.length > 0 && compDateMs && compEndDateMs) {
             const compStart = startOfDay(new Date(compDateMs))
             shiftOffset = primaryStartMs - compStart.getTime()
 
             compSorted = sorted.filter(s =>
-                compData.some(cs => cs.deviceId === s.deviceId && cs.key === s.key && cs.data === s.data)
+                displayCompData.some(cs => cs.deviceId === s.deviceId && cs.key === s.key && cs.data === s.data)
             )
             const split = splitByChartType(compSorted)
             compBars = split.bars
@@ -297,7 +296,7 @@ export function ComparisonChart() {
         primaryLines.forEach(s => addPrimarySeries(chart, axisMap, s, false, resolution))
 
         // Render comparison series (shifted)
-        if (compData.length > 0 && compDateMs && compEndDateMs) {
+        if (displayCompData.length > 0 && compDateMs && compEndDateMs) {
             const compStart = startOfDay(new Date(compDateMs))
             const compEnd = endOfDay(new Date(compEndDateMs))
 
@@ -374,7 +373,7 @@ export function ComparisonChart() {
         }
 
         chart.invalidateData()
-    }, [series, compData, updateKey, energyUnit, compDateMs, compEndDateMs, primaryStartMs, primaryEndMs, comparisonLoading, resolution])
+    }, [series, displayCompData, updateKey, energyUnit, compDateMs, compEndDateMs, primaryStartMs, primaryEndMs, comparisonLoading, resolution])
 
     return (
         <div

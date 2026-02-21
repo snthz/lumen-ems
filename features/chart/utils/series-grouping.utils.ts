@@ -1,7 +1,7 @@
 import { TelemetrySeriesResult } from "@/features/telemetry/telemetry.types"
 import { getKeyLabel } from "@/features/telemetry/utils/telemetry-labels"
 
-export interface GroupedSeries {
+interface GroupedSeries {
     key: string
     label: string
     unit: string

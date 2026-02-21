@@ -73,22 +73,21 @@ export function ChartSummary() {
     const visibleRangeStart = useChartStore(state => state.visibleRangeStart)
     const visibleRangeEnd = useChartStore(state => state.visibleRangeEnd)
 
-    const filterByRange = (data: Array<{ ts: number; value: string | number }>) => {
-        if (visibleRangeStart == null || visibleRangeEnd == null) return data
-        // Add buffer of half the smallest interval to avoid cutting off edge points
-        const timestamps = data.map(p => p.ts).sort((a, b) => a - b)
-        let buffer = 0
-        if (timestamps.length >= 2) {
-            buffer = (timestamps[1] - timestamps[0]) / 2
-        }
-        const start = visibleRangeStart - buffer
-        const end = visibleRangeEnd + buffer
-        return data.filter(p => p.ts >= start && p.ts <= end)
-    }
-
     const ENERGY_UNITS = new Set(['Wh', 'varh', 'VAh'])
 
     const stats: SeriesStats[] = useMemo(() => {
+        function filterByRange(data: Array<{ ts: number; value: string | number }>) {
+            if (visibleRangeStart == null || visibleRangeEnd == null) return data
+            const timestamps = data.map(p => p.ts).sort((a, b) => a - b)
+            let buffer = 0
+            if (timestamps.length >= 2) {
+                buffer = (timestamps[1] - timestamps[0]) / 2
+            }
+            const start = visibleRangeStart - buffer
+            const end = visibleRangeEnd + buffer
+            return data.filter(p => p.ts >= start && p.ts <= end)
+        }
+
         if (series.length === 0) return []
 
         if (chartView === 'series' || chartView === 'comparison') {
@@ -106,7 +105,6 @@ export function ChartSummary() {
         }
 
         if (chartView === 'pie') {
-            // Pie chart: one entry per series (per device), matching the pie slices
             return series.map(s => {
                 const label = getKeyLabel(s.key)
                 const name = `${s.deviceName} | ${label}`
@@ -180,8 +178,8 @@ export function ChartSummary() {
                         </tr>
                     </thead>
                     <tbody>
-                        {comparisonRows.map((row, i) => (
-                            <tr key={i} className="border-b border-neutral-100 hover:bg-neutral-50">
+                        {comparisonRows.map((row) => (
+                            <tr key={row.primary.name} className="border-b border-neutral-100 hover:bg-neutral-50">
                                 <td className="py-2 px-2">
                                     <div className="flex items-center gap-2">
                                         <span
@@ -228,8 +226,8 @@ export function ChartSummary() {
                     </tr>
                 </thead>
                 <tbody>
-                    {stats.map((stat, i) => (
-                        <tr key={i} className="border-b border-neutral-100 hover:bg-neutral-50">
+                    {stats.map((stat) => (
+                        <tr key={stat.name} className="border-b border-neutral-100 hover:bg-neutral-50">
                             <td className="py-2 px-3">
                                 <div className="flex items-center gap-2">
                                     <span

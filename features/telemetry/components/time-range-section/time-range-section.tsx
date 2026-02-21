@@ -42,9 +42,8 @@ export function TimeRangeSection() {
             toast.error('Error al actualizar', {
                 description: error instanceof Error ? error.message : 'Ocurrió un error inesperado',
             })
-        } finally {
-            setLoading(false)
         }
+        setLoading(false)
     }
 
     function handleQuickSelect(value: TimeRangeKey) {

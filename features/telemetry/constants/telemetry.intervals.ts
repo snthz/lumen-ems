@@ -1,6 +1,6 @@
 import {TimeRangeKey} from "@/features/telemetry/telemetry.types";
 
-export const RESOLUTION_OPTIONS = [
+const RESOLUTION_OPTIONS = [
     { value: 120, label: '2 min' },
     { value: 900, label: '15 min' },
     { value: 1800, label: '30 min' },
