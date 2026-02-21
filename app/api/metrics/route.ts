@@ -63,6 +63,8 @@ export async function PUT(req: Request) {
         // Return the merged result
         return NextResponse.json(mergeWithDefaults(body))
     } catch (err) {
-        return NextResponse.json({ error: "Failed to save metrics" }, { status: 500 })
+        const message = err instanceof Error ? err.message : String(err)
+        console.error("Failed to save metrics:", message)
+        return NextResponse.json({ error: "Failed to save metrics", detail: message }, { status: 500 })
     }
 }

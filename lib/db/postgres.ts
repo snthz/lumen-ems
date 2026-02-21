@@ -15,13 +15,17 @@ const isBuilding = process.env.NEXT_PHASE === "phase-production-build"
     || process.env.__NEXT_BUILD === "1"
 
 /** Get the raw postgres.js instance (null when DATABASE_URL is unset). */
+/** True when running on a serverless platform (Vercel). */
+const isServerless = !!process.env.VERCEL
+
 export function getDb(): postgres.Sql | null {
     if (!process.env.DATABASE_URL) return null
     if (!sql) {
         sql = postgres(process.env.DATABASE_URL, {
-            max: isBuilding ? 1 : 10,
-            idle_timeout: isBuilding ? 1 : 20,
+            max: isBuilding ? 1 : isServerless ? 2 : 10,
+            idle_timeout: isBuilding ? 1 : isServerless ? 10 : 20,
             connect_timeout: 10,
+            ssl: 'prefer',
             onclose: isBuilding ? () => { sql = null; migrated = null } : undefined,
         })
 

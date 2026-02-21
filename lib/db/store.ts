@@ -51,9 +51,27 @@ export async function setSetting(key: string, value: string): Promise<void> {
 }
 
 export async function setSettings(entries: Record<string, string>): Promise<void> {
-    for (const [k, v] of Object.entries(entries)) {
-        await setSetting(k, v)
+    const pairs = Object.entries(entries)
+    if (pairs.length === 0) return
+
+    const sql = await ensureDb()
+    if (sql) {
+        // Batch upsert in a single query
+        const rows = pairs.map(([k, v]) => ({ key: k, value: v, updated_at: new Date() }))
+        await sql`
+            INSERT INTO settings ${sql(rows, 'key', 'value', 'updated_at')}
+            ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = EXCLUDED.updated_at
+        `
+        return
     }
+
+    // Fallback: JSON file
+    const all = await getAllSettings()
+    for (const [k, v] of pairs) {
+        all[k] = v
+    }
+    await mkdir(DATA_DIR, { recursive: true })
+    await writeFile(SETTINGS_FILE, JSON.stringify(all, null, 2))
 }
 
 export async function saveFile(

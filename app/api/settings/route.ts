@@ -38,7 +38,9 @@ export async function PUT(req: NextRequest) {
         const updated = await getAllSettings()
         return NextResponse.json(updated)
     } catch (err) {
-        console.error("Failed to save settings:", err)
-        return NextResponse.json({ error: "Failed to save" }, { status: 500 })
+        const message = err instanceof Error ? err.message : String(err)
+        const stack = err instanceof Error ? err.stack : undefined
+        console.error("Failed to save settings:", message, stack)
+        return NextResponse.json({ error: "Failed to save", detail: message }, { status: 500 })
     }
 }

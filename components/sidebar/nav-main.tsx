@@ -63,6 +63,7 @@ function CustomerGroupItem({group}: { group: CustomerGroupsResponse[number] }) {
                             <CustomerButton
                                 key={customer.id.id}
                                 customer={customer}
+                                groupLabel={group.label}
                             />
                         ))}
                     </SidebarMenu>

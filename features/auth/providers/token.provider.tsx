@@ -55,8 +55,8 @@ function TokenProviderInner({ children }: { children: React.ReactNode }) {
 
         const existingToken = getCookie("auth_token") as string | undefined;
         if (existingToken) {
-            const debug = hydrateFromToken(existingToken);
-            console.log("Hydrated session from existing cookie", debug);
+            hydrateFromToken(existingToken);
+            
         }
 
     }, [searchToken, router, setCookie, setSession, clearSession, getCookie]);

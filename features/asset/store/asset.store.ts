@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { TbRelation } from '@/lib/thingsboard/thingsboard.types'
 import { useDeviceStore } from '@/features/devices/store/device.store'
+import { toast } from 'sonner'
 
 type SelectedAsset = TbRelation & {
     parentId: string
@@ -12,10 +13,11 @@ interface AssetState {
     selectedAssets: Record<string, SelectedAsset>
     loadingAssets: Record<string, boolean>
     processedAssets: Set<string>
+    activeGroupLabel: string | null
 
     isAssetSelected: (assetId: string) => boolean
-    toggleAssetSelected: (relation: TbRelation) => void
-    setAssetSelected: (relation: TbRelation) => void
+    toggleAssetSelected: (relation: TbRelation, groupLabel?: string) => void
+    setAssetSelected: (relation: TbRelation, groupLabel?: string) => void
     clearAssetsSelected: () => void
 }
 
@@ -23,10 +25,11 @@ export const useAssetStore = create<AssetState>((set, get) => ({
     selectedAssets: {},
     loadingAssets: {},
     processedAssets: new Set(),
+    activeGroupLabel: null,
 
     isAssetSelected: assetId => assetId in get().selectedAssets,
 
-    toggleAssetSelected: (relation) => {
+    toggleAssetSelected: (relation, groupLabel) => {
         const assetId = relation.to.id
         const isSelected = get().isAssetSelected(assetId)
 
@@ -40,17 +43,35 @@ export const useAssetStore = create<AssetState>((set, get) => ({
                 const newProcessed = new Set(state.processedAssets)
                 newProcessed.delete(assetId)
 
+                const hasRemaining = Object.keys(next).length > 0
+
                 return {
                     selectedAssets: next,
-                    processedAssets: newProcessed
+                    processedAssets: newProcessed,
+                    activeGroupLabel: hasRemaining ? state.activeGroupLabel : null,
                 }
             })
         } else {
-            get().setAssetSelected(relation)
+            // Check cross-group restriction
+            const { activeGroupLabel: current, selectedAssets } = get()
+            if (groupLabel && current && current !== groupLabel && Object.keys(selectedAssets).length > 0) {
+                toast.warning(
+                    `Solo puedes seleccionar sitios de un grupo a la vez. Actualmente tienes sitios seleccionados de "${current}".`,
+                    {
+                        duration: 6000,
+                        action: {
+                            label: 'Entendido',
+                            onClick: () => {},
+                        },
+                    }
+                )
+                return
+            }
+            get().setAssetSelected(relation, groupLabel)
         }
     },
 
-    setAssetSelected: (relation) => {
+    setAssetSelected: (relation, groupLabel) => {
         const assetId = relation.to.id
 
         if (get().processedAssets.has(assetId)) {
@@ -73,7 +94,8 @@ export const useAssetStore = create<AssetState>((set, get) => ({
                     ...state.selectedAssets,
                     [assetId]: selectedAsset,
                 },
-                processedAssets: new Set(state.processedAssets).add(assetId)
+                processedAssets: new Set(state.processedAssets).add(assetId),
+                activeGroupLabel: groupLabel ?? state.activeGroupLabel,
             }))
 
             const deviceRelations = relation.children?.filter(
@@ -106,7 +128,7 @@ export const useAssetStore = create<AssetState>((set, get) => ({
     },
 
     clearAssetsSelected: () => {
-        set({ selectedAssets: {}, loadingAssets: {}, processedAssets: new Set() })
+        set({ selectedAssets: {}, loadingAssets: {}, processedAssets: new Set(), activeGroupLabel: null })
         useDeviceStore.getState().clearAllDevices()
     },
 }))

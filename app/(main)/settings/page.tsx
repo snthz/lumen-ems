@@ -37,6 +37,7 @@ import {
     Pencil,
     Check,
     CircleHelp,
+    Search,
 } from "lucide-react"
 import type {
     TelemetryGroup,
@@ -716,6 +717,7 @@ function MetricsTabContent({
     setAddingMetric: (v: boolean) => void
 }) {
     const [activeGroup, setActiveGroup] = useState<MetricGroupTag>("industria")
+    const [searchQuery, setSearchQuery] = useState("")
 
     const toggleEnabled = useCallback(
         (id: string) => {
@@ -750,11 +752,20 @@ function MetricsTabContent({
         [metrics, onChange, setAddingMetric]
     )
 
-    // Filter metrics for current group tab
-    const filteredMetrics = useMemo(
-        () => metrics.filter((m) => m.groups?.includes(activeGroup)),
-        [metrics, activeGroup]
-    )
+    // Filter metrics for current group tab + search
+    const filteredMetrics = useMemo(() => {
+        let filtered = metrics.filter((m) => m.groups?.includes(activeGroup))
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase()
+            filtered = filtered.filter(
+                (m) =>
+                    m.label.toLowerCase().includes(q) ||
+                    m.keys.toLowerCase().includes(q) ||
+                    m.id.toLowerCase().includes(q)
+            )
+        }
+        return filtered
+    }, [metrics, activeGroup, searchQuery])
 
     const counts = useMemo(() => {
         const c: Record<string, number> = {}
@@ -780,6 +791,17 @@ function MetricsTabContent({
                     Conecta una base de datos para configurar las métricas.
                 </div>
             )}
+
+            {/* Search */}
+            <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                <Input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Buscar métrica por nombre o clave…"
+                    className="pl-8 h-8 text-sm"
+                />
+            </div>
 
             {/* Sub-tabs for groups */}
             <div className="flex items-center gap-1 border-b">
@@ -840,7 +862,9 @@ function MetricsTabContent({
 
             {filteredMetrics.length === 0 && !addingMetric && (
                 <div className="text-sm text-muted-foreground text-center py-8">
-                    No hay métricas en el grupo {GROUP_TAG_LABELS[activeGroup]}.
+                    {searchQuery.trim()
+                        ? `No se encontraron métricas para "${searchQuery}".`
+                        : `No hay métricas en el grupo ${GROUP_TAG_LABELS[activeGroup]}.`}
                 </div>
             )}
         </div>

@@ -23,8 +23,10 @@ import { AssetTreeItem } from '@/features/asset/components/asset-tree-item'
 
 export function CustomerButton({
                                    customer,
+                                   groupLabel,
                                }: {
     customer: TbCustomerDto
+    groupLabel?: string
 }) {
     const [isOpen, setIsOpen] = React.useState(false)
     const [relations, setRelations] = React.useState<TbRelation[] | null>(null)
@@ -83,6 +85,7 @@ export function CustomerButton({
                             <AssetTreeItem
                                 key={`${rel.from.id}-${rel.to.id}`}
                                 relation={rel}
+                                groupLabel={groupLabel}
                             />
                         ))}
 

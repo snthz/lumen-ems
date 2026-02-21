@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Spinner } from '@/components/ui/spinner'
 
-export function AssetTreeItem({ relation }: { relation: TbRelation }) {
+export function AssetTreeItem({ relation, groupLabel }: { relation: TbRelation; groupLabel?: string }) {
     const selectedAssets = useAssetStore(state => state.selectedAssets)
     const loadingAssets = useAssetStore(state => state.loadingAssets)
     const toggleAssetSelected = useAssetStore(state => state.toggleAssetSelected)
@@ -39,7 +39,7 @@ export function AssetTreeItem({ relation }: { relation: TbRelation }) {
 
     function handleSelect(e: React.MouseEvent) {
         e.stopPropagation()
-        toggleAssetSelected(relation)
+        toggleAssetSelected(relation, groupLabel)
     }
 
     return (
@@ -115,6 +115,7 @@ export function AssetTreeItem({ relation }: { relation: TbRelation }) {
                                 <AssetTreeItem
                                     key={`${child.from.id}-${child.to.id}`}
                                     relation={child}
+                                    groupLabel={groupLabel}
                                 />
                             ))}
                         </SidebarMenuSub>
