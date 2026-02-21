@@ -281,7 +281,7 @@ const CATEGORY_OPTIONS: { value: MetricCategory; label: string }[] = [
 const GROUP_TAG_LABELS: Record<MetricGroupTag, string> = {
     industria: "Industria",
     facturacion: "Facturación",
-    multisite: "Multisite",
+    multisite: "Multisitio",
 }
 
 // ─── New Metric Form ──────────────────────────────────────

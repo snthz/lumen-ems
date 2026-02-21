@@ -99,7 +99,6 @@ export function LoginForm({
                     <Button
                         type="submit"
                         disabled={loading}
-                        className="bg-blue-400 hover:bg-blue-400/80 "
                     >
                         {loading ? "Ingresando..." : "Continuar"}
                         <ArrowRight/>

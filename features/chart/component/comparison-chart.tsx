@@ -73,15 +73,12 @@ function addPrimarySeries(
 function addComparisonSeries(
     chart: am4charts.XYChart,
     axisMap: Map<string, am4charts.ValueAxis>,
-    compAxisMap: Map<string, am4charts.ValueAxis>,
     s: any,
     shiftOffset: number,
-    resolution?: number
+    resolution?: number,
+    isFirstBar?: boolean
 ) {
-    // Bars use shadow axis for independent stacking; lines use regular axis
-    const axis = s.chartType === "bar"
-        ? compAxisMap.get(s._resolvedAxisKey)
-        : axisMap.get(s._resolvedAxisKey)
+    const axis = axisMap.get(s._resolvedAxisKey)
     if (!axis) return
 
     const amSeries = s.chartType === "bar"
@@ -107,7 +104,8 @@ function addComparisonSeries(
     }
 
     if (amSeries instanceof am4charts.ColumnSeries) {
-        amSeries.stacked = true
+        // First comparison bar breaks the stacking chain from primary bars
+        if (isFirstBar) amSeries.stacked = false
         amSeries.clustered = false
         amSeries.columns.template.width = am4core.percent(45)
         amSeries.columns.template.fillOpacity = 0.35
@@ -284,24 +282,6 @@ export function ComparisonChart() {
 
         const hasCompBars = compBars.length > 0
 
-        // Create shadow value axes for comparison bars (independent stacking)
-        // Shadow axes use syncWithAxis to mirror primary axis scale exactly
-        const compAxisMap = new Map<string, am4charts.ValueAxis>()
-        if (hasCompBars) {
-            for (const [key, primaryAxis] of axisMap) {
-                const shadowAxis = chart.yAxes.push(new am4charts.ValueAxis())
-                shadowAxis.renderer.grid.template.disabled = true
-                shadowAxis.renderer.labels.template.disabled = true
-                shadowAxis.renderer.baseGrid.disabled = true
-                shadowAxis.renderer.inside = true
-                shadowAxis.renderer.line.strokeOpacity = 0
-                shadowAxis.cursorTooltipEnabled = false
-                shadowAxis.syncWithAxis = primaryAxis
-                shadowAxis.tooltip!.disabled = true
-                compAxisMap.set(key, shadowAxis)
-            }
-        }
-
         // Render primary series
         const primarySorted = sorted.filter(s =>
             series.some(ps => ps.deviceId === s.deviceId && ps.key === s.key && ps.data === s.data)
@@ -315,8 +295,8 @@ export function ComparisonChart() {
             const compStart = startOfDay(new Date(compDateMs))
             const compEnd = endOfDay(new Date(compEndDateMs))
 
-            compBars.forEach(s => addComparisonSeries(chart, axisMap, compAxisMap, s, shiftOffset, resolution))
-            compLines.forEach(s => addComparisonSeries(chart, axisMap, compAxisMap, s, shiftOffset, resolution))
+            compBars.forEach((s, i) => addComparisonSeries(chart, axisMap, s, shiftOffset, resolution, i === 0))
+            compLines.forEach(s => addComparisonSeries(chart, axisMap, s, shiftOffset, resolution))
 
             // Add secondary date axis at top showing comparison dates
             const compAxis = chart.xAxes.push(new am4charts.DateAxis())

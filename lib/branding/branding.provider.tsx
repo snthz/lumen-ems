@@ -26,6 +26,20 @@ function hexToOklch(hex: string): string | null {
     return `oklch(${L.toFixed(3)} ${C.toFixed(3)} ${H < 0 ? H + 360 : H})`
 }
 
+// ─── Perceived brightness (W3C formula) ────────────────
+// Returns true if the color is light enough to need dark text on top.
+// Uses YIQ brightness with threshold 150 (0–255 scale).
+function hexIsLight(hex: string): boolean {
+    const m = hex.match(/^#?([0-9a-f]{6})$/i)
+    if (!m) return false
+    const r = parseInt(m[1].slice(0, 2), 16)
+    const g = parseInt(m[1].slice(2, 4), 16)
+    const b = parseInt(m[1].slice(4, 6), 16)
+    // Perceived brightness: 0.299R + 0.587G + 0.114B
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000
+    return brightness > 150
+}
+
 interface BrandingContextValue {
     branding: BrandingSettings
     loading: boolean
@@ -72,12 +86,18 @@ export function BrandingProvider({ children, initial }: { children: React.ReactN
     useEffect(() => {
         const root = document.documentElement
 
-        // Primary color → --primary, --sidebar-primary
+        // Primary color → --primary, --sidebar-primary, --primary-foreground, --ring
         if (branding.primaryColor) {
             const oklch = hexToOklch(branding.primaryColor)
             if (oklch) {
                 root.style.setProperty("--primary", oklch)
                 root.style.setProperty("--sidebar-primary", oklch)
+                // Derive foreground: white for dark primaries, dark for light primaries
+                const fg = hexIsLight(branding.primaryColor) ? "oklch(0.205 0 0)" : "oklch(0.985 0 0)"
+                root.style.setProperty("--primary-foreground", fg)
+                root.style.setProperty("--sidebar-primary-foreground", fg)
+                // Ring color matches primary for consistent focus states
+                root.style.setProperty("--ring", oklch)
             }
         }
 
@@ -86,6 +106,9 @@ export function BrandingProvider({ children, initial }: { children: React.ReactN
             const oklch = hexToOklch(branding.accentColor)
             if (oklch) {
                 root.style.setProperty("--accent", oklch)
+                // Derive accent foreground
+                const fg = hexIsLight(branding.accentColor) ? "oklch(0.205 0 0)" : "oklch(0.985 0 0)"
+                root.style.setProperty("--accent-foreground", fg)
             }
         }
 
