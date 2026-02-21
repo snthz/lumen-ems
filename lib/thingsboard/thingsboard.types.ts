@@ -69,7 +69,6 @@ export type TbRelationTypeGroup =
 
 export interface TbRelationAdditionalInfo {
     name?: string,
-    logo?: string,
     default?: boolean,
     hasDevices?: boolean
 }

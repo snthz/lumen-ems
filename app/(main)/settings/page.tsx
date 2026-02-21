@@ -15,6 +15,8 @@ import {
 import { toast } from "sonner"
 import { useBranding } from "@/lib/branding/branding.provider"
 import { DEFAULT_BRANDING } from "@/lib/branding/branding.defaults"
+import { useSessionStore } from "@/lib/auth/store/session.store"
+import { useRouter } from "next/navigation"
 import {
     Save,
     Upload,
@@ -231,6 +233,9 @@ function ImageUploadCard({
 
 export default function SettingsPage() {
     const { refresh } = useBranding()
+    const router = useRouter()
+    const user = useSessionStore((s) => s.user)
+    const isTenantAdmin = user?.scopes?.includes("TENANT_ADMIN")
     const [brandForm, setBrandForm] = useState<BrandForm | null>(null)
     const [generalForm, setGeneralForm] = useState<GeneralForm | null>(null)
     const [initialBrand, setInitialBrand] = useState<BrandForm | null>(null)
@@ -366,6 +371,19 @@ export default function SettingsPage() {
                 <div className="animate-pulse space-y-4">
                     <div className="h-8 bg-muted rounded w-48" />
                     <div className="h-4 bg-muted rounded w-96" />
+                </div>
+            </div>
+        )
+    }
+
+    if (user && !isTenantAdmin) {
+        return (
+            <div className="flex flex-1 items-center justify-center p-6">
+                <div className="text-center space-y-2">
+                    <h2 className="text-lg font-semibold">Acceso restringido</h2>
+                    <p className="text-sm text-muted-foreground">
+                        Solo los administradores pueden acceder a la configuración.
+                    </p>
                 </div>
             </div>
         )
