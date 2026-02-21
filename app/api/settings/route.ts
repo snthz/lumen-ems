@@ -1,13 +1,23 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getAllSettings, setSettings } from "@/lib/db/store"
 
+/** Env vars that act as fallbacks for DB settings */
+function getEnvDefaults(): Record<string, string> {
+    return {
+        "config.tbApi": process.env.TB_API || "",
+        "config.industriesGroupId": process.env.EMS_INDUSTRIES_GROUP_ID || "",
+        "config.billingGroupId": process.env.EMS_BILLING_GROUP_ID || "",
+        "config.multisiteGroupId": process.env.EMS_MULTISITE_GROUP_ID || "",
+    }
+}
+
 export async function GET() {
     try {
         const settings = await getAllSettings()
-        return NextResponse.json(settings)
+        return NextResponse.json({ settings, envDefaults: getEnvDefaults() })
     } catch (err) {
         console.error("Failed to load settings:", err)
-        return NextResponse.json({}, { status: 500 })
+        return NextResponse.json({ settings: {}, envDefaults: getEnvDefaults() }, { status: 500 })
     }
 }
 

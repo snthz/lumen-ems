@@ -11,7 +11,7 @@ export async function GET(
         return new NextResponse("Not found", { status: 404 })
     }
 
-    return new NextResponse(file.data, {
+    return new NextResponse(new Uint8Array(file.data), {
         headers: {
             "Content-Type": file.mimeType,
             "Content-Disposition": `inline; filename="${file.filename}"`,

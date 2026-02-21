@@ -53,12 +53,9 @@ export default async function RootLayout({
                     <AppSidebar groups={groups ?? []}/>
                     <SidebarInset>
                         <header className="flex shrink-0 items-center gap-2 border-b">
-                            <div className=" flex items-center justify-between gap-2 px-4">
-                                <div className={"flex items-center justify-center gap-4"}>
-                                    <div className={"py-3 pr-2 border-r"}>
-                                        <SidebarTrigger className="-ml-1 cursor-pointer"/>
-                                    </div>
-                                    <span className={"text-sm"}>Grafica</span>
+                            <div className="flex items-center gap-2 px-4">
+                                <div className="py-3 pr-2 border-r">
+                                    <SidebarTrigger className="-ml-1 cursor-pointer"/>
                                 </div>
                             </div>
                         </header>

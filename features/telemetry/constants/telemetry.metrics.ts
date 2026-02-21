@@ -1,4 +1,6 @@
-import {TelemetryGroup} from "@/features/telemetry/telemetry.types";
+import {TelemetryGroup, MetricGroupTag} from "@/features/telemetry/telemetry.types";
+
+const ALL_GROUPS: MetricGroupTag[] = ['industria', 'facturacion', 'multisite']
 
 export const TELEMETRY_GROUPS: TelemetryGroup[] = [
     // ───────── ACTIVE POWER ─────────
@@ -11,6 +13,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'POWER',
         chartType: 'line',
         agg: 'AVG',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
     {
         id: 'phase_power',
@@ -21,6 +26,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'POWER',
         chartType: 'line',
         agg: 'AVG',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
 
     // ───────── REACTIVE POWER ─────────
@@ -33,6 +41,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'REACTIVE_POWER',
         chartType: 'line',
         agg: 'AVG',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
     {
         id: 'phase_reactive_power',
@@ -43,6 +54,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'REACTIVE_POWER',
         chartType: 'line',
         agg: 'AVG',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
 
     // ───────── APPARENT POWER ─────────
@@ -55,6 +69,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'APPARENT_POWER',
         chartType: 'line',
         agg: 'AVG',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
     {
         id: 'phase_apparent_power',
@@ -65,6 +82,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'APPARENT_POWER',
         chartType: 'line',
         agg: 'AVG',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
 
     // ───────── VOLTAGE ─────────
@@ -78,6 +98,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         chartType: 'line',
         agg: 'AVG',
         favorite: true,
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
     {
         id: 'phase_voltage_ll',
@@ -88,6 +111,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'VOLTAGE',
         chartType: 'line',
         agg: 'AVG',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
     {
         id: 'system_voltage',
@@ -98,6 +124,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'VOLTAGE',
         chartType: 'line',
         agg: 'AVG',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
 
     // ───────── CURRENT ─────────
@@ -111,6 +140,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         chartType: 'line',
         agg: 'AVG',
         favorite: true,
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
     {
         id: 'neutral_current',
@@ -121,6 +153,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'CURRENT',
         chartType: 'line',
         agg: 'AVG',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
     {
         id: 'system_current',
@@ -131,6 +166,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'CURRENT',
         chartType: 'line',
         agg: 'AVG',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
 
     // ───────── FREQUENCY ─────────
@@ -143,6 +181,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'FREQUENCY',
         chartType: 'line',
         agg: 'AVG',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
 
     // ───────── POWER FACTOR ─────────
@@ -155,6 +196,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'POWER_FACTOR',
         chartType: 'line',
         agg: 'AVG',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
     {
         id: 'power_factor_phase',
@@ -165,6 +209,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'POWER_FACTOR',
         chartType: 'line',
         agg: 'AVG',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
 
     // ───────── ACTIVE ENERGY (DERIVADA TUYA) ─────────
@@ -178,6 +225,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         chartType: 'bar',
         agg: 'SUM',
         favorite: true,
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
     {
         id: 'phase_energy',
@@ -188,6 +238,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'ENERGY',
         chartType: 'bar',
         agg: 'SUM',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
 
     // ───────── EXPORT ENERGY ─────────
@@ -200,6 +253,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'ENERGY_EXPORT',
         chartType: 'bar',
         agg: 'SUM',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
     {
         id: 'phase_energy_export',
@@ -210,6 +266,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'ENERGY_EXPORT',
         chartType: 'bar',
         agg: 'SUM',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
 
     // ───────── REACTIVE ENERGY ─────────
@@ -222,6 +281,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'REACTIVE_ENERGY',
         chartType: 'bar',
         agg: 'SUM',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
     {
         id: 'phase_reactive_energy',
@@ -232,6 +294,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'REACTIVE_ENERGY',
         chartType: 'bar',
         agg: 'SUM',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
 
     // ───────── APPARENT ENERGY ─────────
@@ -244,6 +309,9 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'APPARENT_ENERGY',
         chartType: 'bar',
         agg: 'SUM',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
     {
         id: 'phase_apparent_energy',
@@ -254,5 +322,8 @@ export const TELEMETRY_GROUPS: TelemetryGroup[] = [
         category: 'APPARENT_ENERGY',
         chartType: 'bar',
         agg: 'SUM',
+        enabled: true,
+        groups: [...ALL_GROUPS],
+        isDefault: true,
     },
 ]

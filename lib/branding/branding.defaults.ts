@@ -6,8 +6,8 @@ export const DEFAULT_BRANDING = {
     "brand.pageTitle": "Lumen EMS",
 
     // Colors
-    "brand.primaryColor": "#3b82f6",
-    "brand.accentColor": "#f43f5e",
+    "brand.primaryColor": "#3888ff",
+    "brand.accentColor": "#f0f0f0",
 
     // Images — relative paths to public/ defaults
     "brand.sidebarLogoUrl": "/brand/lumen-logo.svg",

@@ -1,4 +1,4 @@
-import { getDb, hasDb } from "./postgres"
+import { ensureDb, hasDb } from "./postgres"
 import { readFile, writeFile, mkdir } from "fs/promises"
 import { join } from "path"
 import { existsSync } from "fs"
@@ -6,13 +6,11 @@ import { existsSync } from "fs"
 const DATA_DIR = process.env.DATA_DIR || "/data"
 const SETTINGS_FILE = join(DATA_DIR, "settings.json")
 
-// ─── Settings ────────────────────────────────────────────
-
 export type SettingsMap = Record<string, string>
 
 export async function getAllSettings(): Promise<SettingsMap> {
-    if (hasDb()) {
-        const sql = getDb()!
+    const sql = await ensureDb()
+    if (sql) {
         const rows = await sql`SELECT key, value FROM settings`
         const map: SettingsMap = {}
         for (const r of rows) map[r.key] = r.value
@@ -35,8 +33,8 @@ export async function getSetting(key: string): Promise<string | null> {
 }
 
 export async function setSetting(key: string, value: string): Promise<void> {
-    if (hasDb()) {
-        const sql = getDb()!
+    const sql = await ensureDb()
+    if (sql) {
         await sql`
             INSERT INTO settings (key, value, updated_at)
             VALUES (${key}, ${value}, now())
@@ -58,16 +56,14 @@ export async function setSettings(entries: Record<string, string>): Promise<void
     }
 }
 
-// ─── File storage ────────────────────────────────────────
-
 export async function saveFile(
     id: string,
     filename: string,
     mimeType: string,
     data: Buffer
 ): Promise<void> {
-    if (hasDb()) {
-        const sql = getDb()!
+    const sql = await ensureDb()
+    if (sql) {
         await sql`
             INSERT INTO uploaded_files (id, filename, mime_type, data, created_at)
             VALUES (${id}, ${filename}, ${mimeType}, ${data}, now())
@@ -81,14 +77,14 @@ export async function saveFile(
     const dir = join(DATA_DIR, "uploads")
     await mkdir(dir, { recursive: true })
     await writeFile(join(dir, id), data)
-    // Save metadata
+
     const metaPath = join(dir, `${id}.meta.json`)
     await writeFile(metaPath, JSON.stringify({ filename, mimeType }))
 }
 
 export async function getFile(id: string): Promise<{ filename: string; mimeType: string; data: Buffer } | null> {
-    if (hasDb()) {
-        const sql = getDb()!
+    const sql = await ensureDb()
+    if (sql) {
         const rows = await sql`SELECT filename, mime_type, data FROM uploaded_files WHERE id = ${id}`
         if (rows.length === 0) return null
         return {
@@ -98,7 +94,6 @@ export async function getFile(id: string): Promise<{ filename: string; mimeType:
         }
     }
 
-    // Fallback: file system
     const dir = join(DATA_DIR, "uploads")
     const filePath = join(dir, id)
     const metaPath = join(dir, `${id}.meta.json`)
@@ -112,8 +107,8 @@ export async function getFile(id: string): Promise<{ filename: string; mimeType:
 }
 
 export async function deleteFile(id: string): Promise<void> {
-    if (hasDb()) {
-        const sql = getDb()!
+    const sql = await ensureDb()
+    if (sql) {
         await sql`DELETE FROM uploaded_files WHERE id = ${id}`
         return
     }

@@ -1,25 +1,41 @@
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/ui/button'
 import { TELEMETRY_GROUPS } from '@/features/telemetry/constants/telemetry.metrics'
 import { useTelemetryQueryStore } from '@/features/telemetry/store/telemetry-query.store'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import { ChevronDown } from 'lucide-react'
+import type { TelemetryGroup } from '@/features/telemetry/telemetry.types'
 
 export function MetricsSection({ defaultOpen = true }: { defaultOpen?: boolean }) {
     const phaseScope = useTelemetryQueryStore(state => state.phaseScope)
     const metricKeys = useTelemetryQueryStore(state => state.metricKeys)
     const setMetricKeys = useTelemetryQueryStore(state => state.setMetricKeys)
 
-    const metrics = TELEMETRY_GROUPS.filter(m => m.phaseScope === phaseScope)
+    // Fetch dynamic metrics config (enabled only); fallback to hardcoded defaults
+    const [allMetrics, setAllMetrics] = useState<TelemetryGroup[]>(TELEMETRY_GROUPS)
+
+    useEffect(() => {
+        fetch('/api/metrics')
+            .then(r => r.json())
+            .then((data: TelemetryGroup[]) => {
+                if (Array.isArray(data) && data.length > 0) {
+                    // Only keep enabled metrics
+                    setAllMetrics(data.filter(m => m.enabled !== false))
+                }
+            })
+            .catch(() => { /* keep defaults */ })
+    }, [])
+
+    const metrics = allMetrics.filter(m => m.phaseScope === phaseScope)
     const allKeys = metrics.map(m => m.keys)
     const allSelected = allKeys.length > 0 && allKeys.every(k => metricKeys.includes(k))
     const hasSelection = metricKeys.length > 0
 
     function toggleMetric(metricId: string) {
-        const metric = TELEMETRY_GROUPS.find(m => m.id === metricId)
+        const metric = allMetrics.find(m => m.id === metricId)
         if (!metric) return
 
         const exists = metricKeys.includes(metric.keys)
@@ -46,7 +62,7 @@ export function MetricsSection({ defaultOpen = true }: { defaultOpen?: boolean }
 
         // If no metrics were selected in the previous scope, select favorites
         if (metricKeys.length === 0) {
-            const favorites = TELEMETRY_GROUPS
+            const favorites = allMetrics
                 .filter(m => m.phaseScope === phaseScope && m.favorite)
                 .map(m => m.keys)
             setMetricKeys(favorites)
@@ -56,7 +72,7 @@ export function MetricsSection({ defaultOpen = true }: { defaultOpen?: boolean }
         // Map selected categories from old scope to new scope
         const selectedCategories = new Set<string>()
         for (const key of metricKeys) {
-            const group = TELEMETRY_GROUPS.find(
+            const group = allMetrics.find(
                 m => m.keys === key && m.phaseScope === prevScope
             )
             if (group) selectedCategories.add(group.category)
@@ -64,21 +80,21 @@ export function MetricsSection({ defaultOpen = true }: { defaultOpen?: boolean }
 
         if (selectedCategories.size === 0) {
             // Keys didn't match old scope — fall back to favorites
-            const favorites = TELEMETRY_GROUPS
+            const favorites = allMetrics
                 .filter(m => m.phaseScope === phaseScope && m.favorite)
                 .map(m => m.keys)
             setMetricKeys(favorites)
             return
         }
 
-        const newKeys = TELEMETRY_GROUPS
+        const newKeys = allMetrics
             .filter(m => m.phaseScope === phaseScope && selectedCategories.has(m.category))
             .map(m => m.keys)
 
-        setMetricKeys(newKeys.length > 0 ? newKeys : TELEMETRY_GROUPS
+        setMetricKeys(newKeys.length > 0 ? newKeys : allMetrics
             .filter(m => m.phaseScope === phaseScope && m.favorite)
             .map(m => m.keys))
-    }, [phaseScope, setMetricKeys])
+    }, [phaseScope, setMetricKeys, allMetrics])
 
     return (
         <Collapsible defaultOpen={defaultOpen} className="space-y-3">

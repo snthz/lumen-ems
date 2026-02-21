@@ -10,11 +10,14 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { LayoutDashboard } from "lucide-react"
 import type {CustomerGroupsResponse} from "@/lib/thingsboard/server/thingsboard.server";
 import { useBranding } from "@/lib/branding/branding.provider"
 
@@ -30,8 +33,8 @@ export function AppSidebar({ groups, ...props }: AppSidebarProps) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/">
-                <div className="bg-blue-400 text-sidebar-primary-foreground flex aspect-square size-10 items-center justify-center rounded-lg">
-                  <Image src={branding.sidebarLogoUrl} alt={`${branding.appName} Logo`} width={40} height={40} className="size-10" unoptimized={branding.sidebarLogoUrl.startsWith("/api/")} />
+                <div className="flex aspect-square size-10 items-center justify-center rounded-lg overflow-hidden">
+                  <Image src={branding.sidebarLogoUrl} alt={`${branding.appName} Logo`} width={40} height={40} className="size-10 object-contain" unoptimized={branding.sidebarLogoUrl.startsWith("/api/")} />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{branding.appName}</span>
@@ -43,8 +46,21 @@ export function AppSidebar({ groups, ...props }: AppSidebarProps) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton size="sm" asChild>
+                  <Link href="/dashboard">
+                    <LayoutDashboard className="size-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
         <NavMain groups={groups} />
-        {/*<NavProjects projects={data.projects} />*/}
         <NavSecondary className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

@@ -19,6 +19,10 @@ export type AggregationType = 'AVG' | 'SUM' | 'MIN' | 'MAX' | 'COUNT' | 'NONE'
 
 export type TimeRangeKey = '1d' | '2d' | '3d' | '1w' | '2w' | '1m' | '2m' | '3m' | '6m' | '1y'
 
+export type MetricGroupTag = 'industria' | 'facturacion' | 'multisite'
+
+export const ALL_METRIC_GROUP_TAGS: MetricGroupTag[] = ['industria', 'facturacion', 'multisite']
+
 export interface TelemetryGroup {
     id: string
     label: string
@@ -29,6 +33,12 @@ export interface TelemetryGroup {
     chartType: ChartType
     favorite?: boolean
     agg: Exclude<AggregationType, 'NONE' | 'COUNT'>
+    /** Whether this metric is enabled (default true) */
+    enabled?: boolean
+    /** Which customer groups this metric belongs to */
+    groups?: MetricGroupTag[]
+    /** Whether this is a default (built-in) metric vs. custom */
+    isDefault?: boolean
 }
 
 export interface IntervalStrategy {

@@ -1,6 +1,7 @@
 import { resolveTimeRange } from '@/features/telemetry/utils/resolve-time-range'
 import {
     BuiltTelemetryQuery,
+    TelemetryGroup,
     TelemetryQueryState,
     TelemetrySeriesQuery,
 } from '@/features/telemetry/telemetry.types'
@@ -19,9 +20,16 @@ function getDynamicTimeRangeKey(durationSeconds: number): string {
     return '1y'
 }
 
+/**
+ * Build a telemetry query.
+ * @param query    Store state (devices, metricKeys, resolution, timeRange, etc.)
+ * @param availableMetrics  Dynamic metric definitions. Falls back to TELEMETRY_GROUPS.
+ */
 export function buildTelemetryQuery(
-    query: TelemetryQueryState & { customStart?: Date | null; customEnd?: Date | null }
+    query: TelemetryQueryState & { customStart?: Date | null; customEnd?: Date | null },
+    availableMetrics?: TelemetryGroup[],
 ): BuiltTelemetryQuery {
+    const metricsSource = availableMetrics ?? TELEMETRY_GROUPS
     const { start, end } = resolveTimeRange(query.timeRange, query.customStart, query.customEnd)
     const durationSeconds = Math.floor((end.getTime() - start.getTime()) / 1000)
 
@@ -29,7 +37,7 @@ export function buildTelemetryQuery(
         ? getDynamicTimeRangeKey(durationSeconds)
         : query.timeRange
 
-    const selectedGroups = TELEMETRY_GROUPS.filter(g =>
+    const selectedGroups = metricsSource.filter(g =>
         query.metricKeys.includes(g.keys)
     )
 

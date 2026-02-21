@@ -1,9 +1,10 @@
 "use server";
-import {env} from "@/lib/config/env";
+import {resolveConfig} from "@/lib/config/resolve";
 
 export async function loginUser(username: string, password: string): Promise<{ token: string }> {
+    const cfg = await resolveConfig()
 
-    const response = await fetch(`${env.TB_API}/api/auth/login`, {
+    const response = await fetch(`${cfg.tbApi}/api/auth/login`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

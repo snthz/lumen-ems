@@ -1,4 +1,4 @@
-import {env} from "@/lib/config/env";
+import {resolveConfig} from "@/lib/config/resolve";
 import {getAuthToken} from "@/lib/utils";
 import {cookies} from "next/headers";
 import {ApiResponse} from "@/lib/services/types";
@@ -18,8 +18,8 @@ export interface CustomerGroup {
 
 export type CustomerGroupsResponse = CustomerGroup[];
 
-async function fetchCustomersByGroupId(groupId: string, token: string): Promise<TbCustomersResponse> {
-    const response = await fetch(`${env.TB_API}/api/entityGroup/${groupId}/customers?pageSize=1000&page=0&sortOrder=DESC`, {
+async function fetchCustomersByGroupId(groupId: string, token: string, tbApi: string): Promise<TbCustomersResponse> {
+    const response = await fetch(`${tbApi}/api/entityGroup/${groupId}/customers?pageSize=1000&page=0&sortOrder=DESC`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -39,18 +39,19 @@ async function fetchCustomersByGroupId(groupId: string, token: string): Promise<
 export async function getCustomerGroups(): ApiResponse<CustomerGroupsResponse> {
     const cookieStore = await cookies()
     const token = getAuthToken(cookieStore)
+    const cfg = await resolveConfig()
 
     const groupDefinitions = [
-        { label: "Industrias", groupId: env.EMS_INDUSTRIES_GROUP_ID },
-        { label: "Multisitio", groupId: env.EMS_MULTISITE_GROUP_ID },
-        { label: "Facturación", groupId: env.EMS_BILLING_GROUP_ID },
+        { label: "Industrias", groupId: cfg.industriesGroupId },
+        { label: "Multisitio", groupId: cfg.multisiteGroupId },
+        { label: "Facturación", groupId: cfg.billingGroupId },
     ]
 
     const groups = await Promise.all(
         groupDefinitions.map(async (def) => ({
             label: def.label,
             groupId: def.groupId,
-            customers: await fetchCustomersByGroupId(def.groupId, token),
+            customers: await fetchCustomersByGroupId(def.groupId, token, cfg.tbApi),
         }))
     )
 
@@ -77,9 +78,10 @@ export async function fetchAssetsRelationsRecursive(
     visited.add(key)
 
     const cookieStore = await cookies()
+    const cfg = await resolveConfig()
 
     const res = await fetch(
-        `${env.TB_API}/api/relations/info?fromId=${fromId}&fromType=${fromType}`,
+        `${cfg.tbApi}/api/relations/info?fromId=${fromId}&fromType=${fromType}`,
         {
             headers: {
                 'Content-Type': 'application/json',
@@ -116,6 +118,7 @@ export async function fetchTelemetryTimeseries(
     params: TelemetryQueryParams
 ): Promise<TelemetryTimeseriesResponse> {
     const cookieStore = await cookies()
+    const cfg = await resolveConfig()
 
     const query = new URLSearchParams({
         keys: params.keys,
@@ -146,7 +149,7 @@ export async function fetchTelemetryTimeseries(
         )
     }
 
-    const url = `${env.TB_API}/api/plugins/telemetry/${params.entityType}/${params.entityId}/values/timeseries?${query.toString()}`
+    const url = `${cfg.tbApi}/api/plugins/telemetry/${params.entityType}/${params.entityId}/values/timeseries?${query.toString()}`
     const res = await fetch(url, {
         headers: {
             'Content-Type': 'application/json',
