@@ -36,6 +36,7 @@ import {
     PowerOff,
     Pencil,
     Check,
+    CircleHelp,
 } from "lucide-react"
 import type {
     TelemetryGroup,
@@ -53,8 +54,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 
-// ─── Types ──────────────────────────────────────────────
 
 interface BrandForm {
     "brand.appName": string
@@ -82,7 +84,26 @@ const DEFAULT_GENERAL: GeneralForm = {
     "config.multisiteGroupId": "",
 }
 
-// ─── Color Picker Input ──────────────────────────────────
+const DEFAULT_HELP_MARKDOWN = `# Centro de Ayuda
+
+## Contacto de Soporte
+
+Para cualquier consulta o problema técnico, contacta a nuestro equipo de soporte:
+
+- **Email:** support@lumenenergysolutions.com
+
+## Preguntas Frecuentes
+
+### ¿Cómo accedo a mis datos de consumo?
+Desde el panel principal puedes visualizar los datos de consumo energético en tiempo real.
+
+### ¿Cómo cambio mi contraseña?
+Contacta al administrador del sistema para solicitar un cambio de contraseña.
+
+### ¿Necesitas ayuda adicional?
+No dudes en escribirnos al correo de soporte. Nuestro equipo estará encantado de ayudarte.
+`
+
 
 function ColorPickerInput({
     label,
@@ -128,7 +149,7 @@ function ColorPickerInput({
     )
 }
 
-// ─── Image Upload Card ───────────────────────────────────
+
 
 function ImageUploadCard({
     label,
@@ -262,7 +283,6 @@ function ImageUploadCard({
     )
 }
 
-// ─── Category labels (readable) ───────────────────────────
 
 const CATEGORY_OPTIONS: { value: MetricCategory; label: string }[] = [
     { value: "POWER", label: "Potencia activa" },
@@ -284,7 +304,6 @@ const GROUP_TAG_LABELS: Record<MetricGroupTag, string> = {
     multisite: "Multisitio",
 }
 
-// ─── New Metric Form ──────────────────────────────────────
 
 const EMPTY_NEW_METRIC: Omit<TelemetryGroup, "id"> = {
     label: "",
@@ -467,7 +486,7 @@ function NewMetricForm({
     )
 }
 
-// ─── Metrics Tab Content ──────────────────────────────────
+
 
 function MetricRow({
     m,
@@ -828,7 +847,23 @@ function MetricsTabContent({
     )
 }
 
-// ─── Main Page ───────────────────────────────────────────
+
+function HelpMarkdownPreview({ content }: { content: string }) {
+    if (!content.trim()) {
+        return (
+            <p className="text-sm text-muted-foreground italic">
+                Sin contenido. Escribe algo en el editor para ver la vista previa.
+            </p>
+        )
+    }
+    return (
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {content}
+        </ReactMarkdown>
+    )
+}
+
+
 
 export default function SettingsPage() {
     const { refresh } = useBranding()
@@ -845,6 +880,8 @@ export default function SettingsPage() {
     const [initialMetrics, setInitialMetrics] = useState<TelemetryGroup[] | null>(null)
     const [addingMetric, setAddingMetric] = useState(false)
     const [envDefaults, setEnvDefaults] = useState<Record<string, string>>({})
+    const [helpMarkdown, setHelpMarkdown] = useState<string>("")
+    const [initialHelpMarkdown, setInitialHelpMarkdown] = useState<string>("")
 
     // Load
     useEffect(() => {
@@ -896,6 +933,9 @@ export default function SettingsPage() {
                 setHasDbState(health.database === true)
                 setMetricsForm(Array.isArray(metrics) ? metrics : [])
                 setInitialMetrics(Array.isArray(metrics) ? metrics : [])
+                const helpContent = raw["help.markdown"] || DEFAULT_HELP_MARKDOWN
+                setHelpMarkdown(helpContent)
+                setInitialHelpMarkdown(helpContent)
             })
             .catch(() => {
                 const brand = { ...DEFAULT_BRANDING }
@@ -906,6 +946,8 @@ export default function SettingsPage() {
                 setHasDbState(false)
                 setMetricsForm([])
                 setInitialMetrics([])
+                setHelpMarkdown(DEFAULT_HELP_MARKDOWN)
+                setInitialHelpMarkdown(DEFAULT_HELP_MARKDOWN)
             })
     }, [])
 
@@ -924,15 +966,16 @@ export default function SettingsPage() {
         return (
             JSON.stringify(brandForm) !== JSON.stringify(initialBrand) ||
             JSON.stringify(generalForm) !== JSON.stringify(initialGeneral) ||
-            JSON.stringify(metricsForm) !== JSON.stringify(initialMetrics)
+            JSON.stringify(metricsForm) !== JSON.stringify(initialMetrics) ||
+            helpMarkdown !== initialHelpMarkdown
         )
-    }, [brandForm, generalForm, initialBrand, initialGeneral, metricsForm, initialMetrics])
+    }, [brandForm, generalForm, initialBrand, initialGeneral, metricsForm, initialMetrics, helpMarkdown, initialHelpMarkdown])
 
     async function handleSave() {
         if (!brandForm || !generalForm || !metricsForm) return
         setSaving(true)
         try {
-            const payload = { ...brandForm, ...generalForm }
+            const payload = { ...brandForm, ...generalForm, "help.markdown": helpMarkdown }
             const [settingsRes, metricsRes] = await Promise.all([
                 fetch("/api/settings", {
                     method: "PUT",
@@ -952,6 +995,7 @@ export default function SettingsPage() {
             const updatedMetrics = await metricsRes.json()
             setMetricsForm(updatedMetrics)
             setInitialMetrics(updatedMetrics)
+            setInitialHelpMarkdown(helpMarkdown)
             await refresh()
             toast.success("Configuración guardada")
         } catch {
@@ -968,6 +1012,7 @@ export default function SettingsPage() {
         setGeneralForm(
             initialGeneral ? { ...initialGeneral } : { ...DEFAULT_GENERAL }
         )
+        setHelpMarkdown(initialHelpMarkdown)
     }
 
     function handleRestoreDefaults() {
@@ -1103,6 +1148,10 @@ export default function SettingsPage() {
                         <TabsTrigger value="metrics">
                             <Activity className="size-3.5 mr-1.5" />
                             Métricas
+                        </TabsTrigger>
+                        <TabsTrigger value="help">
+                            <CircleHelp className="size-3.5 mr-1.5" />
+                            Ayuda
                         </TabsTrigger>
                     </TabsList>
 
@@ -1391,6 +1440,52 @@ export default function SettingsPage() {
                             addingMetric={addingMetric}
                             setAddingMetric={setAddingMetric}
                         />
+                    </TabsContent>
+
+                    {/* ── Help Tab ────────────────────────────────── */}
+                    <TabsContent value="help" className="space-y-6 mt-4">
+                        <section className="space-y-4">
+                            <div>
+                                <h2 className="text-sm font-semibold">
+                                    Contenido de ayuda
+                                </h2>
+                                <p className="text-xs text-muted-foreground">
+                                    Escribe el contenido en formato Markdown. Este contenido se mostrará a todos los usuarios en la página de ayuda.
+                                </p>
+                            </div>
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs font-medium text-muted-foreground">
+                                        Editor Markdown
+                                    </Label>
+                                    <textarea
+                                        value={helpMarkdown}
+                                        onChange={(e) => setHelpMarkdown(e.target.value)}
+                                        disabled={hasDbState === false}
+                                        className="flex min-h-100 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 font-mono resize-y"
+                                        placeholder="# Título\n\nEscribe el contenido de ayuda aquí..."
+                                    />
+                                </div>
+                                <div className="space-y-1.5">
+                                    <Label className="text-xs font-medium text-muted-foreground">
+                                        Vista previa
+                                    </Label>
+                                    <div className="min-h-100 rounded-md border border-input bg-muted/30 px-4 py-3 overflow-auto help-markdown">
+                                        <HelpMarkdownPreview content={helpMarkdown} />
+                                    </div>
+                                </div>
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-xs"
+                                onClick={() => setHelpMarkdown(DEFAULT_HELP_MARKDOWN)}
+                                disabled={hasDbState === false}
+                            >
+                                <RotateCcw className="size-3 mr-1.5" />
+                                Restaurar texto por defecto
+                            </Button>
+                        </section>
                     </TabsContent>
                 </Tabs>
 

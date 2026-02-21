@@ -14,7 +14,6 @@ import {
     X,
 } from "lucide-react"
 
-// ─── Image helper ────────────────────────────────────────
 
 /** Onboarding images have very different dimensions. This map stores
  *  the natural width×height so Next/Image can compute aspect‑ratio and
@@ -37,7 +36,7 @@ const IMG = {
 
 type ImgKey = keyof typeof IMG
 
-// ─── Lightbox ────────────────────────────────────────────
+
 
 function Lightbox({
     src,
@@ -87,7 +86,7 @@ function Lightbox({
     )
 }
 
-// ─── Onboarding Image ────────────────────────────────────
+
 
 function OnboardingImage({ name, caption, onZoom }: { name: ImgKey; caption?: string; onZoom: (src: string, alt: string) => void }) {
     const meta = IMG[name]
@@ -133,7 +132,7 @@ function StepNumber({ n }: { n: number }) {
     )
 }
 
-// ─── Page ────────────────────────────────────────────────
+
 
 export default function OnboardingPage() {
     const user = useSessionStore((s) => s.user)

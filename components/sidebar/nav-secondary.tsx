@@ -44,9 +44,11 @@ export function NavSecondary({
             </>
           )}
           <SidebarMenuItem>
-            <SidebarMenuButton size="sm">
-              <CircleQuestionMark />
-              <span>Obtener ayuda</span>
+            <SidebarMenuButton size="sm" asChild>
+              <Link href="/help">
+                <CircleQuestionMark />
+                <span>Obtener ayuda</span>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
