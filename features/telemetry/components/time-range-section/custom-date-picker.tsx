@@ -146,12 +146,10 @@ export function CustomDatePicker({
                                             <SelectTrigger id="from-hour" className="w-16 h-8 text-xs">
                                                 <SelectValue />
                                             </SelectTrigger>
-                                            <SelectContent>
-                                                <ScrollArea className="h-48">
+                                            <SelectContent position="popper" side="bottom" className="max-h-48">
                                                     {hours.map(h => (
                                                         <SelectItem key={h} value={h}>{h}</SelectItem>
                                                     ))}
-                                                </ScrollArea>
                                             </SelectContent>
                                         </Select>
                                         <span className="self-center text-muted-foreground">:</span>
@@ -159,12 +157,10 @@ export function CustomDatePicker({
                                             <SelectTrigger className="w-16 h-8 text-xs">
                                                 <SelectValue />
                                             </SelectTrigger>
-                                            <SelectContent>
-                                                <ScrollArea className="h-48">
+                                            <SelectContent position="popper" side="bottom" className="max-h-48">
                                                     {minutes.map(m => (
                                                         <SelectItem key={m} value={m}>{m}</SelectItem>
                                                     ))}
-                                                </ScrollArea>
                                             </SelectContent>
                                         </Select>
                                     </div>
@@ -177,12 +173,10 @@ export function CustomDatePicker({
                                             <SelectTrigger id="to-hour" className="w-16 h-8 text-xs">
                                                 <SelectValue />
                                             </SelectTrigger>
-                                            <SelectContent>
-                                                <ScrollArea className="h-48">
+                                            <SelectContent position="popper" side="bottom" className="max-h-48">
                                                     {hours.map(h => (
                                                         <SelectItem key={h} value={h}>{h}</SelectItem>
                                                     ))}
-                                                </ScrollArea>
                                             </SelectContent>
                                         </Select>
                                         <span className="self-center text-muted-foreground">:</span>
@@ -190,12 +184,10 @@ export function CustomDatePicker({
                                             <SelectTrigger className="w-16 h-8 text-xs">
                                                 <SelectValue />
                                             </SelectTrigger>
-                                            <SelectContent>
-                                                <ScrollArea className="h-48">
+                                            <SelectContent position="popper" side="bottom" className="max-h-48">
                                                     {minutes.map(m => (
                                                         <SelectItem key={m} value={m}>{m}</SelectItem>
                                                     ))}
-                                                </ScrollArea>
                                             </SelectContent>
                                         </Select>
                                     </div>

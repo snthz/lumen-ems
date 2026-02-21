@@ -5,6 +5,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Label } from '@/components/ui/label'
 import { useTelemetryQueryStore } from '@/features/telemetry/store/telemetry-query.store'
 import { TimeRangeKey } from '@/features/telemetry/telemetry.types'
+import { calculateMinResolution } from '@/features/telemetry/utils/resolve-time-range'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import { ChevronDown } from 'lucide-react'
 
@@ -36,8 +37,13 @@ export function ResolutionSection({ defaultOpen = true }: { defaultOpen?: boolea
     const timeRange = useTelemetryQueryStore(state => state.timeRange)
     const resolution = useTelemetryQueryStore(state => state.resolution)
     const setResolution = useTelemetryQueryStore(state => state.setResolution)
+    const customStart = useTelemetryQueryStore(state => state.customStart)
+    const customEnd = useTelemetryQueryStore(state => state.customEnd)
 
-    const minResolution = MIN_RESOLUTION_BY_RANGE[timeRange]
+    // For custom date ranges, calculate min resolution dynamically from the actual range
+    const minResolution = customStart && customEnd
+        ? calculateMinResolution(customStart, customEnd)
+        : MIN_RESOLUTION_BY_RANGE[timeRange]
 
     React.useEffect(() => {
         if (resolution < minResolution) {
@@ -89,7 +95,7 @@ export function ResolutionSection({ defaultOpen = true }: { defaultOpen?: boolea
                 </RadioGroup>
 
                 <p className="text-xs text-neutral-400 mt-3">
-                    Mínimo para {timeRange}: {RESOLUTION_OPTIONS.find(o => o.value === minResolution)?.label}
+                    Mínimo{customStart && customEnd ? '' : ` para ${timeRange}`}: {RESOLUTION_OPTIONS.find(o => o.value === minResolution)?.label}
                 </p>
             </CollapsibleContent>
         </Collapsible>

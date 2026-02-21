@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { format, addDays, differenceInDays, startOfDay, eachDayOfInterval } from "date-fns"
+import { format, addDays, differenceInDays, differenceInHours, startOfDay, eachDayOfInterval } from "date-fns"
 import { es } from "date-fns/locale"
 import { Calendar as CalendarIcon, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -31,7 +31,9 @@ export function ComparisonDatePicker() {
         ? { start: customStart, end: customEnd }
         : resolveTimeRange(timeRange)
     const primaryDays = differenceInDays(primaryRange.end, primaryRange.start) + 1
+    const primaryHours = differenceInHours(primaryRange.end, primaryRange.start)
     const isSingleDay = primaryDays <= 1
+    const isSubDay = isSingleDay && primaryHours < 24
 
     const activeFrom = pendingFrom ?? (open ? comparisonDate : null)
     const activeEnd = activeFrom ? addDays(activeFrom, primaryDays - 1) : null
@@ -78,7 +80,9 @@ export function ComparisonDatePicker() {
     const pendingEnd = pendingFrom ? addDays(pendingFrom, primaryDays - 1) : null
 
     const label = comparisonDate && comparisonEndDate
-        ? `${format(comparisonDate, "dd MMM", { locale: es })} - ${format(comparisonEndDate, "dd MMM yyyy", { locale: es })}`
+        ? isSubDay
+            ? `${format(comparisonDate, "dd MMM yyyy", { locale: es })} ${format(primaryRange.start, "HH:mm")} - ${format(primaryRange.end, "HH:mm")}`
+            : `${format(comparisonDate, "dd MMM", { locale: es })} - ${format(comparisonEndDate, "dd MMM yyyy", { locale: es })}`
         : "Comparar"
 
     const rangeModifiers = activeFrom && activeEnd && !isSingleDay ? {
@@ -111,7 +115,10 @@ export function ComparisonDatePicker() {
             <PopoverContent className="w-auto p-0" align="end">
                 <div className="px-4 pt-3 pb-1">
                     <p className="text-xs text-muted-foreground">
-                        El rango de comparación se ajusta al rango actual ({primaryDays} {primaryDays === 1 ? 'día' : 'días'}).
+                        {isSubDay
+                            ? `El rango de comparación se ajusta al rango actual (${primaryHours}h: ${format(primaryRange.start, "HH:mm")} - ${format(primaryRange.end, "HH:mm")}).`
+                            : `El rango de comparación se ajusta al rango actual (${primaryDays} ${primaryDays === 1 ? 'día' : 'días'}).`
+                        }
                     </p>
                 </div>
                 <Calendar

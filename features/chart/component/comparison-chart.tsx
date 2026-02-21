@@ -3,7 +3,6 @@
 import { useLayoutEffect, useEffect, useRef, useState } from "react"
 import * as am4charts from "@amcharts/amcharts4/charts"
 import * as am4core from "@amcharts/amcharts4/core"
-import { startOfDay, endOfDay } from "date-fns"
 import { createXYChart } from "@/features/chart/config/chart.factory"
 import { configureDateAxis, buildValueAxesByAxisKey } from "@/features/chart/config/chart.axes"
 import { configureInteractions } from "@/features/chart/config/chart.interactions"
@@ -166,8 +165,19 @@ export function ComparisonChart() {
     useEffect(() => {
         if (!compDateMs || !compEndDateMs) return
 
-        const compStart = startOfDay(new Date(compDateMs))
-        const compEnd = endOfDay(new Date(compEndDateMs))
+        // Calculate the time-of-day offset from the primary range
+        // so comparison fetches the same time window (e.g. 00:00-05:59)
+        const primaryStartDate = new Date(primaryStartMs)
+        const primaryEndDate = new Date(primaryEndMs)
+        const startHours = primaryStartDate.getHours()
+        const startMinutes = primaryStartDate.getMinutes()
+        const endHours = primaryEndDate.getHours()
+        const endMinutes = primaryEndDate.getMinutes()
+
+        const compStart = new Date(compDateMs)
+        compStart.setHours(startHours, startMinutes, 0, 0)
+        const compEnd = new Date(compEndDateMs)
+        compEnd.setHours(endHours, endMinutes, 59, 999)
 
         let cancelled = false
         setComparisonLoading(true)
@@ -269,7 +279,9 @@ export function ComparisonChart() {
         let shiftOffset = 0
 
         if (displayCompData.length > 0 && compDateMs && compEndDateMs) {
-            const compStart = startOfDay(new Date(compDateMs))
+            const primaryStartDate = new Date(primaryStartMs)
+            const compStart = new Date(compDateMs)
+            compStart.setHours(primaryStartDate.getHours(), primaryStartDate.getMinutes(), 0, 0)
             shiftOffset = primaryStartMs - compStart.getTime()
 
             compSorted = sorted.filter(s =>
@@ -292,8 +304,12 @@ export function ComparisonChart() {
 
         // Render comparison series (shifted)
         if (displayCompData.length > 0 && compDateMs && compEndDateMs) {
-            const compStart = startOfDay(new Date(compDateMs))
-            const compEnd = endOfDay(new Date(compEndDateMs))
+            const primaryStartDate = new Date(primaryStartMs)
+            const primaryEndDate = new Date(primaryEndMs)
+            const compStart = new Date(compDateMs)
+            compStart.setHours(primaryStartDate.getHours(), primaryStartDate.getMinutes(), 0, 0)
+            const compEnd = new Date(compEndDateMs)
+            compEnd.setHours(primaryEndDate.getHours(), primaryEndDate.getMinutes(), 59, 999)
 
             compBars.forEach((s, i) => addComparisonSeries(chart, axisMap, s, shiftOffset, resolution, i === 0))
             compLines.forEach(s => addComparisonSeries(chart, axisMap, s, shiftOffset, resolution))

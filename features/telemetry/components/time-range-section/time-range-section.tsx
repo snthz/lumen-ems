@@ -6,6 +6,7 @@ import { TimeRangeKey } from '@/features/telemetry/telemetry.types'
 import { useTelemetryFetcher } from '@/features/telemetry/hooks/use-telemetry-fetcher'
 import { useChartStore } from '@/features/chart/store/chart.store'
 import { useDeviceStore } from '@/features/devices/store/device.store'
+import { useShallow } from 'zustand/react/shallow'
 import { toast } from 'sonner'
 import { CustomDatePicker } from './custom-date-picker'
 import { TIME_RANGE_OPTIONS } from "@/features/telemetry/constants/telemetry.intervals"
@@ -14,7 +15,9 @@ import { calculateMinResolution } from "@/features/telemetry/utils/resolve-time-
 export function TimeRangeSection() {
     const { timeRange, setTimeRange, setResolution, setCustomTimeRange } = useTelemetryQueryStore()
     const { run } = useTelemetryFetcher()
-    const setSeries = useChartStore(state => state.setSeries)
+    const { setSeries, setComparisonRange } = useChartStore(
+        useShallow(s => ({ setSeries: s.setSeries, setComparisonRange: s.setComparisonRange }))
+    )
     const selectedDevices = useDeviceStore(state => state.selectedDevices)
 
     const [customRange, setCustomRange] = React.useState<{
@@ -50,14 +53,22 @@ export function TimeRangeSection() {
         setCustomTimeRange(null, null)
         setTimeRange(value)
         setCustomRange({ from: undefined, to: undefined })
+        // Reset comparison to avoid resolution mismatches when switching ranges
+        setComparisonRange(null, null)
         setTimeout(() => refreshChart(undefined, undefined, value), 0)
     }
 
     async function handleApplyCustomRange(start: Date, end: Date) {
         const minResolution = calculateMinResolution(start, end)
-        setResolution(minResolution)
+        // Only bump resolution up if current value is below the minimum for this range
+        const currentResolution = useTelemetryQueryStore.getState().resolution
+        if (currentResolution < minResolution) {
+            setResolution(minResolution)
+        }
         setCustomTimeRange(start, end)
         setCustomRange({ from: start, to: end })
+        // Reset comparison to avoid resolution mismatches when switching ranges
+        setComparisonRange(null, null)
         await refreshChart(start, end)
     }
 
