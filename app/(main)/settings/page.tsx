@@ -1136,20 +1136,20 @@ export default function SettingsPage() {
 
                 {/* ── Tabs ─────────────────────────────────────── */}
                 <Tabs defaultValue="general">
-                    <TabsList>
-                        <TabsTrigger value="general">
+                    <TabsList className="bg-transparent p-0 h-auto border-b rounded-none w-full justify-start gap-0">
+                        <TabsTrigger value="general" className="rounded-none border-x-0 border-t-0 border-b-2 shadow-none border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground text-muted-foreground px-3 py-2 -mb-px focus-visible:ring-0 focus-visible:outline-none">
                             <Settings className="size-3.5 mr-1.5" />
                             General
                         </TabsTrigger>
-                        <TabsTrigger value="appearance">
+                        <TabsTrigger value="appearance" className="rounded-none border-x-0 border-t-0 border-b-2 shadow-none  border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground text-muted-foreground px-3 py-2 -mb-px focus-visible:ring-0 focus-visible:outline-none">
                             <Paintbrush className="size-3.5 mr-1.5" />
                             Apariencia
                         </TabsTrigger>
-                        <TabsTrigger value="metrics">
+                        <TabsTrigger value="metrics" className="rounded-none  border-x-0 border-t-0 border-b-2 shadow-none border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground text-muted-foreground px-3 py-2 -mb-px focus-visible:ring-0 focus-visible:outline-none">
                             <Activity className="size-3.5 mr-1.5" />
                             Métricas
                         </TabsTrigger>
-                        <TabsTrigger value="help">
+                        <TabsTrigger value="help" className="rounded-none  border-x-0 border-t-0 border-b-2 shadow-none border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:text-foreground text-muted-foreground px-3 py-2 -mb-px focus-visible:ring-0 focus-visible:outline-none">
                             <CircleHelp className="size-3.5 mr-1.5" />
                             Ayuda
                         </TabsTrigger>
