@@ -25,7 +25,7 @@ export function getDb(): postgres.Sql | null {
             max: isBuilding ? 1 : isServerless ? 2 : 10,
             idle_timeout: isBuilding ? 1 : isServerless ? 10 : 20,
             connect_timeout: 10,
-            ssl: 'prefer',
+            ssl: 'require',
             onclose: isBuilding ? () => { sql = null; migrated = null } : undefined,
         })
 
@@ -62,7 +62,10 @@ export async function ensureDb(): Promise<postgres.Sql | null> {
     if (isBuilding) return null
 
     const db = getDb()
-    if (!db) return null
+    if (!db) {
+        console.warn("[db] DATABASE_URL not set, skipping DB")
+        return null
+    }
 
     if (!migrated) {
         migrated = runAutoMigrations(db)
@@ -71,8 +74,9 @@ export async function ensureDb(): Promise<postgres.Sql | null> {
         await migrated
         return db
     } catch (err) {
-        // DB unreachable (e.g. during Vercel build) — fall back to file storage
-        console.warn("[db] Connection failed, falling back to file storage:", (err as Error).message)
+        const msg = err instanceof Error ? err.message : String(err)
+        const stack = err instanceof Error ? err.stack : ''
+        console.error(`[db] Connection/migration failed: ${msg}\n${stack}`)
         sql = null
         migrated = null
         return null
