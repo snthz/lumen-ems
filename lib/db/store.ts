@@ -3,7 +3,7 @@ import { readFile, writeFile, mkdir } from "fs/promises"
 import { join } from "path"
 import { existsSync } from "fs"
 
-const DATA_DIR = process.env.DATA_DIR || "/data"
+const DATA_DIR = process.env.DATA_DIR || (process.env.VERCEL ? "/tmp/data" : "/data")
 const SETTINGS_FILE = join(DATA_DIR, "settings.json")
 
 export type SettingsMap = Record<string, string>
