@@ -15,7 +15,7 @@ export async function GET(
         headers: {
             "Content-Type": file.mimeType,
             "Content-Disposition": `inline; filename="${file.filename}"`,
-            "Cache-Control": "public, max-age=31536000, immutable",
+            "Cache-Control": "no-cache, no-store, must-revalidate",
         },
     })
 }

@@ -201,7 +201,8 @@ function ImageUploadCard({
                 throw new Error(err.error || "Upload failed")
             }
             const { id } = await res.json()
-            onChange(settingKey, `/api/files/${id}`)
+            // Cache-bust so the browser/Next.js Image fetches the new file
+            onChange(settingKey, `/api/files/${id}?t=${Date.now()}`)
             toast.success("Imagen subida")
         } catch (err: any) {
             toast.error(err.message || "Error al subir imagen")
@@ -271,14 +272,6 @@ function ImageUploadCard({
                     <ImageIcon className="size-5 text-muted-foreground/50" />
                 </div>
             )}
-
-            <Input
-                value={value}
-                onChange={(e) => onChange(settingKey, e.target.value)}
-                placeholder="URL o sube una imagen"
-                disabled={disabled}
-                className="text-xs h-7"
-            />
 
             <input
                 ref={inputRef}
