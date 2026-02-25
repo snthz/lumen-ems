@@ -55,6 +55,17 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { TELEMETRY_GROUPS } from "@/features/telemetry/constants/telemetry.metrics"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 
@@ -906,6 +917,8 @@ export default function SettingsPage() {
     const [envDefaults, setEnvDefaults] = useState<Record<string, string>>({})
     const [helpMarkdown, setHelpMarkdown] = useState<string>("")
     const [initialHelpMarkdown, setInitialHelpMarkdown] = useState<string>("")
+    const [showDiscardDialog, setShowDiscardDialog] = useState(false)
+    const [showRestoreDefaultsDialog, setShowRestoreDefaultsDialog] = useState(false)
 
     // Load
     useEffect(() => {
@@ -1036,12 +1049,23 @@ export default function SettingsPage() {
         setGeneralForm(
             initialGeneral ? { ...initialGeneral } : { ...DEFAULT_GENERAL }
         )
+        setMetricsForm(
+            initialMetrics ? [...initialMetrics] : []
+        )
         setHelpMarkdown(initialHelpMarkdown)
+        setAddingMetric(false)
+        setShowDiscardDialog(false)
     }
 
     function handleRestoreDefaults() {
         setBrandForm({ ...DEFAULT_BRANDING })
         setGeneralForm({ ...DEFAULT_GENERAL })
+        // Reset metrics to built-in defaults (all enabled, default groups)
+        const defaultMetrics = TELEMETRY_GROUPS.map((m) => ({ ...m, isDefault: true }))
+        setMetricsForm(defaultMetrics)
+        setHelpMarkdown(DEFAULT_HELP_MARKDOWN)
+        setAddingMetric(false)
+        setShowRestoreDefaultsDialog(false)
     }
 
     async function handleRunMigrations() {
@@ -1091,7 +1115,7 @@ export default function SettingsPage() {
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={handleReset}
+                                onClick={() => setShowDiscardDialog(true)}
                             >
                                 Descartar
                             </Button>
@@ -1122,7 +1146,7 @@ export default function SettingsPage() {
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={handleRestoreDefaults}
+                        onClick={() => setShowRestoreDefaultsDialog(true)}
                         disabled={hasDbState === false}
                         className="text-xs"
                     >
@@ -1516,6 +1540,56 @@ export default function SettingsPage() {
                 {/* spacer for scroll past sticky bar */}
                 <div className="h-8" />
             </div>
+
+            {/* ── Discard changes confirmation modal ──────── */}
+            <AlertDialog open={showDiscardDialog} onOpenChange={setShowDiscardDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Descartar cambios</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Se perderán todos los cambios que no hayas guardado, incluyendo
+                            modificaciones en la configuración general, apariencia, métricas
+                            y contenido de ayuda. Esta acción no se puede deshacer.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleReset}>
+                            Descartar cambios
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* ── Restore defaults confirmation modal ─────── */}
+            <AlertDialog open={showRestoreDefaultsDialog} onOpenChange={setShowRestoreDefaultsDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Restablecer valores por defecto</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Se reemplazará toda la configuración actual con los valores
+                            originales del sistema. Esto incluye:
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <ul className="text-sm text-muted-foreground list-disc pl-6 space-y-1">
+                        <li>Nombre, subtítulo y colores de la marca</li>
+                        <li>Logos e imágenes de la plataforma</li>
+                        <li>Configuración general (API, grupos de entidades)</li>
+                        <li>Métricas de telemetría (se restaurarán las métricas por defecto y se eliminarán las personalizadas)</li>
+                        <li>Contenido de la página de ayuda</li>
+                    </ul>
+                    <p className="text-sm text-muted-foreground">
+                        Los cambios no se guardarán automáticamente. Tendrás que hacer clic en
+                        &quot;Guardar cambios&quot; para aplicarlos.
+                    </p>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleRestoreDefaults}>
+                            Restablecer valores
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     )
 }
