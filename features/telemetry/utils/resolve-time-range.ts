@@ -85,7 +85,7 @@ export function calculateMinResolution(from: Date, to: Date): number {
     if (diffDays <= 2) return 60
     if (diffDays <= 3) return 600
     if (diffDays <= 14) return 900
-    if (diffDays <= 30) return 900
+    if (diffDays <= 31) return 900
     if (diffDays <= 90) return 1800
     if (diffDays <= 180) return 86400
     return 86400

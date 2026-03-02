@@ -94,11 +94,12 @@ function addComparisonSeries(
     amSeries.name = compName
     amSeries.stroke = color
     amSeries.fill = color
-    amSeries.strokeOpacity = 0.5
+    amSeries.strokeOpacity = 0.8
     amSeries.fillOpacity = 0.35
 
     if (amSeries instanceof am4charts.LineSeries) {
-        amSeries.strokeDasharray = "6,3"
+        amSeries.strokeDasharray = "8,4"
+        amSeries.strokeWidth = 2
         amSeries.fillOpacity = 0
     }
 
