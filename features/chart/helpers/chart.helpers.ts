@@ -175,7 +175,7 @@ export function addSeriesToChart(
     series.yAxis = axis
     series.zIndex = s.chartType === "line" ? 10 : 1
     const name = `${s.deviceName} | ${getKeyLabel(s.key)}`
-    const hex = getSeriesColor(name)
+    const hex = getSeriesColor(name, s.chartType)
     const color = am4core.color(hex)
     series.name = name
     series.stroke = color

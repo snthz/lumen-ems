@@ -14,7 +14,7 @@ function getDynamicTimeRangeKey(durationSeconds: number): string {
     if (days <= 2) return '1d'
     if (days <= 3) return '3d'
     if (days <= 14) return '1w'
-    if (days <= 30) return '1m'
+    if (days <= 31) return '1m'
     if (days <= 90) return '3m'
     if (days <= 180) return '6m'
     return '1y'

@@ -27,7 +27,7 @@ const MIN_RESOLUTION_BY_RANGE: Record<TimeRangeKey, number> = {
     '1w': 900,
     '2w': 900,
     '1m': 900,
-    '2m': 1800,
+    '2m': 900,
     '3m': 1800,
     '6m': 86400,
     '1y': 86400,

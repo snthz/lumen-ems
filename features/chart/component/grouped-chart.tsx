@@ -91,7 +91,7 @@ export function GroupedChartView() {
 
             const groupInfo = grouped.find(g => g.key === s.key)!
             const name = groupInfo.label
-            const color = am4core.color(getSeriesColor(name))
+            const color = am4core.color(getSeriesColor(name, s.chartType))
             amSeries.name = name
             amSeries.stroke = color
             amSeries.fill = color

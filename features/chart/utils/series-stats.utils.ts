@@ -1,6 +1,7 @@
 export interface SeriesStats {
     name: string
     colorKey: string
+    chartType: 'bar' | 'line'
     unit: string
     total: number | null
     max: number
@@ -46,10 +47,11 @@ export function computeSeriesStats(
     colorKey: string,
     unit: string,
     values: number[],
-    energyUnit: EnergyUnit = 'auto'
+    energyUnit: EnergyUnit = 'auto',
+    chartType: 'bar' | 'line' = 'bar'
 ): SeriesStats {
     if (values.length === 0) {
-        return { name, colorKey, unit, total: null, max: 0, min: 0, avg: 0, count: 0 }
+        return { name, colorKey, chartType, unit, total: null, max: 0, min: 0, avg: 0, count: 0 }
     }
 
     const isEnergy = isEnergyUnit(unit)
@@ -71,6 +73,7 @@ export function computeSeriesStats(
     return {
         name,
         colorKey,
+        chartType,
         unit: scaledUnit,
         total: isEnergy ? sum / scaleFactor : null,
         max: max / scaleFactor,

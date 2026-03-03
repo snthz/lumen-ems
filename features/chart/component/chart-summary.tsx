@@ -6,7 +6,7 @@ import { useTelemetryQueryStore } from "@/features/telemetry/store/telemetry-que
 import { resolveTimeRange } from "@/features/telemetry/utils/resolve-time-range"
 import { startOfDay } from "date-fns"
 import { getKeyLabel } from "@/features/telemetry/utils/telemetry-labels"
-import { getSeriesHex } from "@/features/chart/utils/series-color.utils"
+import { getSeriesHex, type ChartType } from "@/features/chart/utils/series-color.utils"
 import { groupSeriesByKey } from "@/features/chart/utils/series-grouping.utils"
 import {
     computeSeriesStats,
@@ -117,7 +117,7 @@ export function ChartSummary() {
                     .filter(p => p.value != null && p.value !== '')
                     .map(p => Number(p.value))
                     .filter(v => !isNaN(v))
-                return computeSeriesStats(name, name, s.unit, values, energyUnit)
+                return computeSeriesStats(name, name, s.unit, values, energyUnit, s.chartType as 'bar' | 'line')
             })
         }
 
@@ -159,7 +159,7 @@ export function ChartSummary() {
                     .map(p => Number(p.value))
                     .filter(v => !isNaN(v))
                 const eu = forcedEnergyUnit.get(s.unit) ?? energyUnit
-                return computeSeriesStats(name, name, s.unit, values, eu)
+                return computeSeriesStats(name, name, s.unit, values, eu, s.chartType as 'bar' | 'line')
             })
         }
 
@@ -169,7 +169,7 @@ export function ChartSummary() {
             const colorKey = g.label
             const name = g.label
             const values = g.data.map(p => p.value).filter(v => !isNaN(v))
-            return computeSeriesStats(name, colorKey, g.unit, values, energyUnit)
+            return computeSeriesStats(name, colorKey, g.unit, values, energyUnit, g.chartType)
         })
     }, [series, chartView, energyUnit, visibleRangeStart, visibleRangeEnd])
 
@@ -205,7 +205,7 @@ export function ChartSummary() {
                         .filter(p => p.value != null && p.value !== '')
                         .map(p => Number(p.value))
                         .filter(v => !isNaN(v))
-                    return computeSeriesStats(primaryStats.name, primaryStats.name, comp.unit, values, energyUnit)
+                    return computeSeriesStats(primaryStats.name, primaryStats.name, comp.unit, values, energyUnit, s.chartType as 'bar' | 'line')
                 })()
                 : null
             return { primary: primaryStats, comparison: compStats }
@@ -249,7 +249,7 @@ export function ChartSummary() {
                                     <div className="flex items-center gap-2">
                                         <span
                                             className="inline-block w-3 h-3 rounded-full shrink-0"
-                                            style={{ backgroundColor: getSeriesHex(row.primary.colorKey) }}
+                                            style={{ backgroundColor: getSeriesHex(row.primary.colorKey, row.primary.chartType) }}
                                         />
                                         <span className="truncate max-w-50" title={row.primary.name}>
                                             {row.primary.name} <span className="text-neutral-400">({row.primary.unit})</span>
@@ -297,7 +297,7 @@ export function ChartSummary() {
                                 <div className="flex items-center gap-2">
                                     <span
                                         className="inline-block w-3 h-3 rounded-full shrink-0"
-                                        style={{ backgroundColor: getSeriesHex(stat.colorKey) }}
+                                        style={{ backgroundColor: getSeriesHex(stat.colorKey, stat.chartType) }}
                                     />
                                     <span className="truncate max-w-[240px]" title={stat.name}>
                                         {stat.name} <span className="text-neutral-400">({stat.unit})</span>

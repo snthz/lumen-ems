@@ -39,7 +39,7 @@ function addPrimarySeries(
     amSeries.zIndex = s.chartType === "line" ? 10 : 1
 
     const name = `${s.deviceName} | ${getKeyLabel(s.key)}`
-    const color = am4core.color(getSeriesColor(name))
+    const color = am4core.color(getSeriesColor(name, s.chartType))
     amSeries.name = name
     amSeries.stroke = color
     amSeries.fill = color
@@ -89,7 +89,7 @@ function addComparisonSeries(
 
     const primaryName = `${s.deviceName} | ${getKeyLabel(s.key)}`
     const compName = `${s.deviceName} | ${getKeyLabel(s.key)} (comp.)`
-    const color = am4core.color(getSeriesColor(primaryName))
+    const color = am4core.color(getSeriesColor(primaryName, s.chartType))
 
     amSeries.name = compName
     amSeries.stroke = color
