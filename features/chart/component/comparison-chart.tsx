@@ -12,7 +12,7 @@ import { useTelemetryQueryStore } from "@/features/telemetry/store/telemetry-que
 import { useTelemetryFetcher } from "@/features/telemetry/hooks/use-telemetry-fetcher"
 import { resolveTimeRange } from "@/features/telemetry/utils/resolve-time-range"
 import { getKeyLabel } from "@/features/telemetry/utils/telemetry-labels"
-import { getSeriesColor } from "@/features/chart/utils/series-color.utils"
+import { getSeriesColor, getComparisonColor } from "@/features/chart/utils/series-color.utils"
 import {
     sortSeries,
     splitByChartType,
@@ -89,7 +89,7 @@ function addComparisonSeries(
 
     const primaryName = `${s.deviceName} | ${getKeyLabel(s.key)}`
     const compName = `${s.deviceName} | ${getKeyLabel(s.key)} (comp.)`
-    const color = am4core.color(getSeriesColor(primaryName, s.chartType))
+    const color = am4core.color(getComparisonColor(primaryName, s.chartType))
 
     amSeries.name = compName
     amSeries.stroke = color

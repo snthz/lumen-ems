@@ -54,7 +54,7 @@ export default function Page() {
                                     <ExportButton />
                                     <TimeRangeSection />
                                 </div>
-                                <p className="hidden lg:block text-[10px] text-neutral-400 mt-1 truncate">
+                                <p className="hidden lg:block text-sm font-semibold text-neutral-500 mt-1 truncate">
                                     {dateRangeText} &middot; {formatResolution(resolution)} &middot; {phaseScope}
                                 </p>
                             </div>

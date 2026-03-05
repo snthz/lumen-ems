@@ -55,6 +55,7 @@ export function CustomDatePicker({
 
         let end = setHours(customRange.to, parseInt(toTime.hour))
         end = setMinutes(end, parseInt(toTime.minute))
+        end.setSeconds(59, 999)
 
         onApply(start, end)
         setOpen(false)
