@@ -8,7 +8,6 @@ import { configureDateAxis } from "@/features/chart/config/chart.axes"
 import { buildValueAxesByAxisKey } from "@/features/chart/config/chart.axes"
 import { configureInteractions } from "@/features/chart/config/chart.interactions"
 import { useChartStore } from "@/features/chart/store/chart.store"
-import { useTelemetryQueryStore } from "@/features/telemetry/store/telemetry-query.store"
 
 import {
     sortSeries,
@@ -22,8 +21,8 @@ export function Chart() {
     const series = useChartStore(state => state.series)
     const updateKey = useChartStore(state => state.updateKey)
     const energyUnit = useChartStore(state => state.energyUnit)
+    const resolution = useChartStore(state => state.committedResolution)
     const setVisibleRange = useChartStore(state => state.setVisibleRange)
-    const resolution = useTelemetryQueryStore(state => state.resolution)
 
     useLayoutEffect(() => {
         const chart = createXYChart("chartdiv")

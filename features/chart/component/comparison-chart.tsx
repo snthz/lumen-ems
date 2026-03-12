@@ -146,7 +146,7 @@ export function ComparisonChart() {
     const timeRange = useTelemetryQueryStore(s => s.timeRange)
     const customStart = useTelemetryQueryStore(s => s.customStart)
     const customEnd = useTelemetryQueryStore(s => s.customEnd)
-    const resolution = useTelemetryQueryStore(s => s.resolution)
+    const resolution = useChartStore(s => s.committedResolution)
 
     const { run } = useTelemetryFetcher()
 

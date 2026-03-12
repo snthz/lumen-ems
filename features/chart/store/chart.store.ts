@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { TelemetrySeriesResult } from "@/features/telemetry/telemetry.types"
+import { useTelemetryQueryStore } from "@/features/telemetry/store/telemetry-query.store"
 
 export type ChartView = 'series' | 'pie' | 'grouped' | 'comparison'
 export type EnergyUnit = 'auto' | 'kWh' | 'MWh'
@@ -7,6 +8,7 @@ export type EnergyUnit = 'auto' | 'kWh' | 'MWh'
 interface ChartState {
     series: TelemetrySeriesResult[]
     updateKey: number
+    committedResolution: number
     chartView: ChartView
     energyUnit: EnergyUnit
     comparisonDate: Date | null
@@ -32,6 +34,7 @@ interface ChartState {
 export const useChartStore = create<ChartState>(set => ({
     series: [],
     updateKey: 0,
+    committedResolution: 3600,
     chartView: 'series',
     energyUnit: 'auto',
     comparisonDate: null,
@@ -42,9 +45,11 @@ export const useChartStore = create<ChartState>(set => ({
     visibleRangeStart: null,
     visibleRangeEnd: null,
     setSeries: series => {
+        const resolution = useTelemetryQueryStore.getState().resolution
         set(state => ({
             series: [...series],
-            updateKey: state.updateKey + 1
+            updateKey: state.updateKey + 1,
+            committedResolution: resolution,
         }))
     },
     setChartView: chartView => set(state => ({
@@ -65,7 +70,7 @@ export const useChartStore = create<ChartState>(set => ({
     setComparisonPickerOpen: comparisonPickerOpen => set({ comparisonPickerOpen }),
     setVisibleRange: (start, end) => set({ visibleRangeStart: start, visibleRangeEnd: end }),
     clear: () => set({
-        series: [], updateKey: 0, chartView: 'series', energyUnit: 'auto',
+        series: [], updateKey: 0, committedResolution: 3600, chartView: 'series', energyUnit: 'auto',
         comparisonDate: null, comparisonEndDate: null, comparisonSeries: [], comparisonLoading: false,
         comparisonPickerOpen: false,
         visibleRangeStart: null,
