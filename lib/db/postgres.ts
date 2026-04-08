@@ -26,6 +26,8 @@ export function getDb(): postgres.Sql | null {
             idle_timeout: isBuilding ? 1 : isServerless ? 10 : 20,
             connect_timeout: 10,
             ssl: 'require',
+            // Transaction pooler (PgBouncer) does not support prepared statements
+            prepare: false,
             onclose: isBuilding ? () => { sql = null; migrated = null } : undefined,
         })
 
