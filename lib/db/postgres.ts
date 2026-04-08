@@ -22,7 +22,7 @@ export function getDb(): postgres.Sql | null {
     if (!process.env.DATABASE_URL) return null
     if (!sql) {
         sql = postgres(process.env.DATABASE_URL, {
-            max: isBuilding ? 1 : isServerless ? 2 : 10,
+            max: isBuilding ? 1 : isServerless ? 1 : 10,
             idle_timeout: isBuilding ? 1 : isServerless ? 10 : 20,
             connect_timeout: 10,
             ssl: 'require',
