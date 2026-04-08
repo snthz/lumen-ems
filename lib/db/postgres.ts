@@ -59,6 +59,8 @@ export async function closeDb() {
  * Safe to call repeatedly — migrations only run once per process.
  * Returns null when DATABASE_URL is not set or during next build.
  */
+const DB_TIMEOUT_MS = 8_000
+
 export async function ensureDb(): Promise<postgres.Sql | null> {
     // Skip DB during build — prerender uses empty defaults, runtime uses real DB
     if (isBuilding) return null
@@ -73,7 +75,10 @@ export async function ensureDb(): Promise<postgres.Sql | null> {
         migrated = runAutoMigrations(db)
     }
     try {
-        await migrated
+        const timeout = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error(`DB connection timed out after ${DB_TIMEOUT_MS}ms`)), DB_TIMEOUT_MS)
+        )
+        await Promise.race([migrated, timeout])
         return db
     } catch (err) {
         const msg = err instanceof Error ? err.message : String(err)
