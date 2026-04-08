@@ -63,17 +63,17 @@ export function DeviceTreeItem({
                     className="flex items-center justify-between pl-0 cursor-pointer rounded-none"
                 >
                     <SidebarMenuButton
-                        className="pl-0 flex-1 cursor-pointer rounded-none"
+                        className="pl-0 flex-1 min-w-0 cursor-pointer rounded-none"
                         onClick={handleSelect}
                     >
-                        <span className="flex items-center gap-2 w-full">
-                            <div className="w-4 h-px bg-neutral-200" />
+                        <span className="flex items-center gap-2 w-full min-w-0">
+                            <div className="w-4 h-px bg-neutral-200 shrink-0" />
                             <Checkbox
                                 checked={isSelected}
                                 tabIndex={-1}
-                                className="pointer-events-none"
+                                className="pointer-events-none shrink-0"
                             />
-                            <span className="text-xs">
+                            <span className="text-xs wrap-break-word whitespace-normal leading-tight">
                                 {relation.additionalInfo?.name ?? relation.toName}
                             </span>
                         </span>
