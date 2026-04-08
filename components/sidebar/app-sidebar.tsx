@@ -23,8 +23,9 @@ import { useBranding } from "@/lib/branding/branding.provider"
 
 interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   groups: CustomerGroupsResponse
+  groupsConfigured: boolean
 }
-export function AppSidebar({ groups, ...props }: AppSidebarProps) {
+export function AppSidebar({ groups, groupsConfigured, ...props }: AppSidebarProps) {
   const { branding } = useBranding()
   return (
     <Sidebar variant="inset" {...props}>
@@ -60,7 +61,7 @@ export function AppSidebar({ groups, ...props }: AppSidebarProps) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <NavMain groups={groups} />
+        <NavMain groups={groups} groupsConfigured={groupsConfigured} />
         <NavSecondary className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

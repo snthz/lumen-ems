@@ -18,6 +18,11 @@ export interface CustomerGroup {
 
 export type CustomerGroupsResponse = CustomerGroup[];
 
+export interface CustomerGroupsResult {
+    configured: boolean;
+    groups: CustomerGroupsResponse;
+}
+
 async function fetchCustomersByGroupId(groupId: string, token: string, tbApi: string): Promise<TbCustomersResponse> {
     const response = await fetch(`${tbApi}/api/entityGroup/${groupId}/customers?pageSize=1000&page=0&sortOrder=DESC`, {
         method: 'GET',
@@ -36,19 +41,27 @@ async function fetchCustomersByGroupId(groupId: string, token: string, tbApi: st
     return (json.data ?? []) as TbCustomersResponse;
 }
 
-export async function getCustomerGroups(): ApiResponse<CustomerGroupsResponse> {
+export async function getCustomerGroups(): ApiResponse<CustomerGroupsResult> {
     const cookieStore = await cookies()
     const token = getAuthToken(cookieStore)
     const cfg = await resolveConfig()
 
-    const groupDefinitions = [
+    const allDefinitions = [
         { label: "Industrias", groupId: cfg.industriesGroupId },
         { label: "Multisitio", groupId: cfg.multisiteGroupId },
         { label: "Facturación", groupId: cfg.billingGroupId },
     ]
 
+    // Filter out groups with missing/empty IDs to avoid bad API calls
+    const configuredDefinitions = allDefinitions.filter((def) => !!def.groupId)
+    const anyConfigured = configuredDefinitions.length > 0
+
+    if (!anyConfigured) {
+        return { success: true, data: { configured: false, groups: [] } }
+    }
+
     const groups = await Promise.all(
-        groupDefinitions.map(async (def) => ({
+        configuredDefinitions.map(async (def) => ({
             label: def.label,
             groupId: def.groupId,
             customers: await fetchCustomersByGroupId(def.groupId, token, cfg.tbApi),
@@ -60,7 +73,7 @@ export async function getCustomerGroups(): ApiResponse<CustomerGroupsResponse> {
 
     return {
         success: true,
-        data: accessibleGroups,
+        data: { configured: true, groups: accessibleGroups },
     }
 }
 

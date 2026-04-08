@@ -36,7 +36,7 @@ export default async function RootLayout({
                                          }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const [{data: groups}, initialSettings] = await Promise.all([
+    const [{data: groupsData}, initialSettings] = await Promise.all([
         getCustomerGroups(),
         getAllSettings(),
     ]);
@@ -45,12 +45,12 @@ export default async function RootLayout({
         <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
-            
+
         <Suspense fallback={<Loading />}>
             <BrandingProvider initial={initialSettings}>
             <TokenProvider>
                 <SidebarProvider>
-                    <AppSidebar groups={groups ?? []}/>
+                    <AppSidebar groups={groupsData?.groups ?? []} groupsConfigured={groupsData?.configured ?? false}/>
                     <SidebarInset>
                         <header className="flex shrink-0 items-center gap-2 border-b">
                             <div className="flex items-center gap-2 px-4">

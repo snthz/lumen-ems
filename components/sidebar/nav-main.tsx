@@ -19,16 +19,22 @@ import type {CustomerGroupsResponse} from "@/lib/thingsboard/server/thingsboard.
 
 export function NavMain({
                             groups,
+                            groupsConfigured,
                         }: {
     groups: CustomerGroupsResponse
+    groupsConfigured: boolean
 }) {
     return (
         <SidebarGroup>
             <SidebarGroupLabel>Grupos</SidebarGroupLabel>
             <SidebarMenu>
-                {groups.map((group) => (
-                    <CustomerGroupItem key={group.groupId} group={group}/>
-                ))}
+                {!groupsConfigured ? (
+                    <p className="px-2 py-1 text-xs text-neutral-400">Grupos no configurados</p>
+                ) : (
+                    groups.map((group) => (
+                        <CustomerGroupItem key={group.groupId} group={group}/>
+                    ))
+                )}
             </SidebarMenu>
         </SidebarGroup>
     )

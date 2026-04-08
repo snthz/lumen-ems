@@ -90,8 +90,6 @@ export function ChartSummary() {
         return primaryRange.start.getTime() - startOfDay(comparisonDate).getTime()
     }, [comparisonDate, primaryRange.start])
 
-    const ENERGY_UNITS = new Set(['Wh', 'varh', 'VAh'])
-
     const stats: SeriesStats[] = useMemo(() => {
         function filterByRange(data: Array<{ ts: number; value: string | number }>) {
             if (visibleRangeStart == null || visibleRangeEnd == null) return data
@@ -124,31 +122,29 @@ export function ChartSummary() {
         if (chartView === 'pie') {
             // For pie chart, all series with the same base unit must use the same scale
             // so that pie percentages are meaningful.
-            // Step 1: collect all values per base unit to find the global max
-            const valuesByBaseUnit = new Map<string, number[]>()
+            // Scale is determined from the max total sum across series (not individual data point max),
+            // because the summary displays totals for energy metrics.
+            const ENERGY_BASE = new Set(['Wh', 'varh', 'VAh'])
+            const maxSumByBaseUnit = new Map<string, number>()
             for (const s of series) {
-                const vals = s.data
+                if (!ENERGY_BASE.has(s.unit)) continue
+                const sum = s.data
                     .filter(p => p.value != null && p.value !== '')
                     .map(p => Number(p.value))
                     .filter(v => !isNaN(v))
-                const existing = valuesByBaseUnit.get(s.unit) ?? []
-                existing.push(...vals)
-                valuesByBaseUnit.set(s.unit, existing)
+                    .reduce((a, b) => a + b, 0)
+                const prev = maxSumByBaseUnit.get(s.unit) ?? 0
+                if (Math.abs(sum) > prev) maxSumByBaseUnit.set(s.unit, Math.abs(sum))
             }
 
-            // Step 2: determine the forced energy unit per base unit using global max
-            const ENERGY_BASE = new Set(['Wh', 'varh', 'VAh'])
             const forcedEnergyUnit = new Map<string, EnergyUnit>()
-            for (const [baseUnit, allVals] of valuesByBaseUnit) {
-                if (ENERGY_BASE.has(baseUnit) && allVals.length > 0) {
-                    const globalMax = Math.max(...allVals.map(Math.abs))
-                    if (globalMax >= 1_000_000) {
-                        forcedEnergyUnit.set(baseUnit, 'MWh')
-                    } else if (globalMax >= 1_000) {
-                        forcedEnergyUnit.set(baseUnit, 'kWh')
-                    }
-                    // else leave as auto (base unit)
+            for (const [baseUnit, maxSum] of maxSumByBaseUnit) {
+                if (maxSum >= 1_000_000) {
+                    forcedEnergyUnit.set(baseUnit, 'MWh')
+                } else if (maxSum >= 1_000) {
+                    forcedEnergyUnit.set(baseUnit, 'kWh')
                 }
+                // else: leave as auto (base unit)
             }
 
             return series.map(s => {
@@ -158,7 +154,8 @@ export function ChartSummary() {
                     .filter(p => p.value != null && p.value !== '')
                     .map(p => Number(p.value))
                     .filter(v => !isNaN(v))
-                const eu = forcedEnergyUnit.get(s.unit) ?? energyUnit
+                // Respect manual selection; auto-detection only applies when unit is 'auto'
+                const eu = energyUnit !== 'auto' ? energyUnit : (forcedEnergyUnit.get(s.unit) ?? 'auto')
                 return computeSeriesStats(name, name, s.unit, values, eu, s.chartType as 'bar' | 'line')
             })
         }
