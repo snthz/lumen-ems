@@ -337,6 +337,16 @@ export function ComparisonChart() {
             }
         }
 
+        // Auto-scale Y axes when toggling series via legend
+        chart.series.each(s => {
+            s.events.on("hidden", () => {
+                chart.yAxes.each(axis => axis.invalidateDataRange())
+            })
+            s.events.on("shown", () => {
+                chart.yAxes.each(axis => axis.invalidateDataRange())
+            })
+        })
+
         // Scrollbar - only primary series
         const scrollbar = chart.scrollbarX as am4charts.XYChartScrollbar
         if (scrollbar) {
