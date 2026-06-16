@@ -108,7 +108,9 @@ export function FilterContent() {
                 )}
             </div>
 
-            <DevicesHierarchy />
+            <div className="overflow-x-auto">
+                <DevicesHierarchy />
+            </div>
             <TelemetryMetrics />
         </div>
     )

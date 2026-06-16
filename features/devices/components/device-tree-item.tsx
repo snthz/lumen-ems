@@ -107,7 +107,7 @@ export function DeviceTreeItem({
 
                 {hasChildren && (
                     <CollapsibleContent>
-                        <SidebarMenuSub className="mx-0 pl-2 pr-0 border-l-0">
+                        <SidebarMenuSub className="mx-0 pl-8 pr-0 border-l-0">
                             {deviceChildren.map((child, index) => (
                                 <DeviceTreeItem
                                     key={`${child.from.id}-${child.to.id}`}

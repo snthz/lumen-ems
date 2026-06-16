@@ -50,7 +50,7 @@ export function AssetDevicesGroup({
                 </CollapsibleTrigger>
 
                 <CollapsibleContent>
-                    <SidebarMenuSub className="mx-0 pl-2 pr-0 border-l-0">
+                    <SidebarMenuSub className="mx-0 pl-10 pr-0 border-l-0">
                         {relations.map((rel, index) => (
                             <DeviceTreeItem
                                 key={`${rel.from.id}-${rel.to.id}`}

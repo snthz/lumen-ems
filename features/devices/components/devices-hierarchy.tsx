@@ -76,7 +76,7 @@ export function DevicesHierarchy({ defaultOpen = true }: { defaultOpen?: boolean
                     No hay dispositivos asociados a los activos seleccionados.
                 </div>
             ) : (
-                <SidebarMenuSub className="mx-0 pl-2 pr-0 py-2 border-l-0">
+                <SidebarMenuSub className="mx-0 pl-2 pr-0 py-2 border-l-0 min-w-max">
                     {assetEntries
                         .map(asset => ({
                             asset,
