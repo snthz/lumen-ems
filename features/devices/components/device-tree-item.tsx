@@ -21,11 +21,13 @@ import { Checkbox } from "@/components/ui/checkbox"
 export function DeviceTreeItem({
                                    relation,
                                    assetId,
-                                   assetName
+                                   assetName,
+                                   isLast = false,
                                }: {
     relation: TbRelation
     assetId: string
     assetName: string
+    isLast?: boolean
 }) {
     const deviceChildren =
         relation.children?.filter(
@@ -56,8 +58,13 @@ export function DeviceTreeItem({
         toggleDevice(device)
     }
 
+    const branchLine = clsx(
+        "before:absolute before:left-0 before:-top-1 before:w-px before:bg-neutral-200 before:content-['']",
+        isLast ? "before:h-5" : "before:bottom-0"
+    )
+
     return (
-        <SidebarMenuSubItem className="pl-0">
+        <SidebarMenuSubItem className={clsx("pl-0", branchLine)}>
             <Collapsible open={open} onOpenChange={setOpen}>
                 <div
                     className="flex items-center justify-between pl-0 cursor-pointer rounded-none"
@@ -100,13 +107,14 @@ export function DeviceTreeItem({
 
                 {hasChildren && (
                     <CollapsibleContent>
-                        <SidebarMenuSub className="pl-0">
-                            {deviceChildren.map(child => (
+                        <SidebarMenuSub className="mx-0 pl-2 pr-0 border-l-0">
+                            {deviceChildren.map((child, index) => (
                                 <DeviceTreeItem
                                     key={`${child.from.id}-${child.to.id}`}
                                     relation={child}
                                     assetId={assetId}
                                     assetName={assetName}
+                                    isLast={index === deviceChildren.length - 1}
                                 />
                             ))}
                         </SidebarMenuSub>

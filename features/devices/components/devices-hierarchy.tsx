@@ -76,23 +76,24 @@ export function DevicesHierarchy({ defaultOpen = true }: { defaultOpen?: boolean
                     No hay dispositivos asociados a los activos seleccionados.
                 </div>
             ) : (
-                <SidebarMenuSub className="pl-0 py-2">
-                    {assetEntries.map(asset => {
-                        const deviceRelations =
-                            asset.children?.filter(
-                                rel => rel.to.entityType === 'DEVICE'
-                            ) ?? []
-
-                        if (deviceRelations.length === 0) return null
-
-                        return (
+                <SidebarMenuSub className="mx-0 pl-2 pr-0 py-2 border-l-0">
+                    {assetEntries
+                        .map(asset => ({
+                            asset,
+                            deviceRelations:
+                                asset.children?.filter(
+                                    rel => rel.to.entityType === 'DEVICE'
+                                ) ?? [],
+                        }))
+                        .filter(({ deviceRelations }) => deviceRelations.length > 0)
+                        .map(({ asset, deviceRelations }, index, groups) => (
                             <AssetDevicesGroup
                                 key={asset.to.id}
                                 assetName={asset.toName ?? 'Asset'}
                                 relations={deviceRelations}
+                                isLast={index === groups.length - 1}
                             />
-                        )
-                    })}
+                        ))}
                 </SidebarMenuSub>
             )}
             </CollapsibleContent>

@@ -18,14 +18,21 @@ import {DeviceTreeItem} from "@/features/devices/components/device-tree-item";
 export function AssetDevicesGroup({
                                       assetName,
                                       relations,
+                                      isLast = false,
                                   }: {
     assetName: string
     relations: TbRelation[]
+    isLast?: boolean
 }) {
     const [open, setOpen] = React.useState(true)
 
+    const branchLine = [
+        "before:absolute before:left-0 before:-top-1 before:w-px before:bg-neutral-200 before:content-['']",
+        isLast ? "before:h-5" : "before:bottom-0",
+    ].join(" ")
+
     return (
-        <SidebarMenuSubItem className="pl-0">
+        <SidebarMenuSubItem className={`pl-0 ${branchLine}`}>
             <Collapsible open={open} onOpenChange={setOpen}>
                 <CollapsibleTrigger asChild>
                     <SidebarMenuButton className="pl-0 font-medium rounded-none cursor-pointer">
@@ -43,13 +50,14 @@ export function AssetDevicesGroup({
                 </CollapsibleTrigger>
 
                 <CollapsibleContent>
-                    <SidebarMenuSub className="pl-0">
-                        {relations.map(rel => (
+                    <SidebarMenuSub className="mx-0 pl-2 pr-0 border-l-0">
+                        {relations.map((rel, index) => (
                             <DeviceTreeItem
                                 key={`${rel.from.id}-${rel.to.id}`}
                                 relation={rel}
                                 assetName={assetName}
                                 assetId={rel.from.id}
+                                isLast={index === relations.length - 1}
                             />
                         ))}
                     </SidebarMenuSub>
