@@ -3,6 +3,7 @@ import {getAuthToken} from "@/lib/utils";
 import {cookies} from "next/headers";
 import {ApiResponse} from "@/lib/services/types";
 import {
+    TbCustomerDto,
     TbCustomersResponse,
     TbEntityType,
     TbRelation,
@@ -10,10 +11,15 @@ import {
     TelemetryTimeseriesResponse
 } from "@/lib/thingsboard/thingsboard.types";
 
+export interface CustomerWithRelations {
+    customer: TbCustomerDto;
+    relations: TbRelation[];
+}
+
 export interface CustomerGroup {
     label: string;
     groupId: string;
-    customers: TbCustomersResponse;
+    customers: CustomerWithRelations[];
 }
 
 export type CustomerGroupsResponse = CustomerGroup[];
@@ -61,14 +67,27 @@ export async function getCustomerGroups(): ApiResponse<CustomerGroupsResult> {
     }
 
     const groups = await Promise.all(
-        configuredDefinitions.map(async (def) => ({
-            label: def.label,
-            groupId: def.groupId,
-            customers: await fetchCustomersByGroupId(def.groupId, token, cfg.tbApi),
-        }))
+        configuredDefinitions.map(async (def) => {
+            const rawCustomers = await fetchCustomersByGroupId(def.groupId, token, cfg.tbApi)
+
+            // Pre-fetch relations server-side and filter out customers with no children
+            const customersWithRelations = await Promise.all(
+                rawCustomers.map(async (customer) => {
+                    const visited = new Set<string>()
+                    const relations = await fetchAssetsRelationsRecursive(customer.id.id, 'CUSTOMER', visited)
+                    return { customer, relations }
+                })
+            )
+
+            return {
+                label: def.label,
+                groupId: def.groupId,
+                customers: customersWithRelations.filter((c) => c.relations.length > 0),
+            }
+        })
     )
 
-    // Only return groups where the user has permission (non-empty customer list)
+    // Only return groups with at least one accessible customer
     const accessibleGroups = groups.filter((g) => g.customers.length > 0)
 
     return {

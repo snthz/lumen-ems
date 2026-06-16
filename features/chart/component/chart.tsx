@@ -91,6 +91,16 @@ export function Chart() {
         bars.forEach(s => addSeriesToChart(chart, axisMap, s, resolution))
         lines.forEach(s => addSeriesToChart(chart, axisMap, s, resolution))
 
+        // Auto-scale Y axes when toggling series via legend
+        chart.series.each(s => {
+            s.events.on("hidden", () => {
+                chart.yAxes.each(axis => axis.invalidateDataRange())
+            })
+            s.events.on("shown", () => {
+                chart.yAxes.each(axis => axis.invalidateDataRange())
+            })
+        })
+
         const scrollbar = chart.scrollbarX as am4charts.XYChartScrollbar
         if (scrollbar) {
             scrollbar.series.clear()

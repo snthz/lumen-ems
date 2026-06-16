@@ -15,7 +15,7 @@ import {
     CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import {CustomerButton} from "@/features/customer/components/customer-button"
-import type {CustomerGroupsResponse} from "@/lib/thingsboard/server/thingsboard.server"
+import type {CustomerGroupsResponse, CustomerWithRelations} from "@/lib/thingsboard/server/thingsboard.server"
 
 export function NavMain({
                             groups,
@@ -44,7 +44,7 @@ function CustomerGroupItem({group}: { group: CustomerGroupsResponse[number] }) {
     const [isOpen, setIsOpen] = React.useState(false)
 
     const sorted = [...group.customers].sort((a, b) =>
-        a.title.localeCompare(b.title)
+        a.customer.title.localeCompare(b.customer.title)
     )
 
     return (
@@ -65,10 +65,11 @@ function CustomerGroupItem({group}: { group: CustomerGroupsResponse[number] }) {
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                     <SidebarMenu className="pl-2">
-                        {sorted.map((customer) => (
+                        {sorted.map((item) => (
                             <CustomerButton
-                                key={customer.id.id}
-                                customer={customer}
+                                key={item.customer.id.id}
+                                customer={item.customer}
+                                initialRelations={item.relations}
                                 groupLabel={group.label}
                             />
                         ))}
