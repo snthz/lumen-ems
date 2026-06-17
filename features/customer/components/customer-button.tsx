@@ -39,8 +39,8 @@ export function CustomerButton({
                         className="cursor-pointer rounded-none"
                     >
                         <div className="flex items-center gap-2 w-full">
-                            <div className="size-6 bg-neutral-200 rounded-md flex items-center justify-center">
-                                <span className="uppercase text-xs">
+                            <div className="size-6 bg-primary/10 text-primary rounded-md flex items-center justify-center">
+                                <span className="uppercase text-xs font-medium">
                                     {customer.title.charAt(0)}
                                 </span>
                             </div>

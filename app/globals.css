@@ -245,3 +245,15 @@
   font-weight: 600;
   background: var(--muted);
 }
+
+/* Neutralize the browser autofill background/text so inputs stay clean. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--foreground);
+  -webkit-background-clip: text;
+  box-shadow: 0 0 0 1000px transparent inset;
+  caret-color: var(--foreground);
+  transition: background-color 99999s ease-in-out 0s;
+}
