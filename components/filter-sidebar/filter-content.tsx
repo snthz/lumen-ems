@@ -6,14 +6,24 @@ import { Button } from '@/components/ui/button'
 import { RefreshCcw } from 'lucide-react'
 import { TelemetryMetrics } from '@/features/telemetry/components/telemetry-metrics'
 import { useTelemetryFetcher } from "@/features/telemetry/hooks/use-telemetry-fetcher"
-import { useChartStore } from "@/features/chart/store/chart.store"
+import { useChartStore, computeQuerySignature } from "@/features/chart/store/chart.store"
 import { useDeviceStore } from "@/features/devices/store/device.store"
 import { useTelemetryQueryStore } from "@/features/telemetry/store/telemetry-query.store"
+import { TelemetrySeriesResult } from "@/features/telemetry/telemetry.types"
 import { toast } from "sonner"
 import { useSidebar } from "@/components/ui/sidebar"
 
+// Keep bar series before line series, matching buildTelemetryQuery's ordering.
+function sortSeries(series: TelemetrySeriesResult[]): TelemetrySeriesResult[] {
+    return [...series].sort((a, b) => {
+        if (a.chartType === 'bar' && b.chartType !== 'bar') return -1
+        if (a.chartType !== 'bar' && b.chartType === 'bar') return 1
+        return 0
+    })
+}
+
 export function FilterContent() {
-    const { run } = useTelemetryFetcher()
+    const { run, runForKeys } = useTelemetryFetcher()
     const { setOpen, isMobile, setOpenMobile } = useSidebar()
     const [loading, setLoading] = React.useState(false)
     const [hasAutoLoaded, setHasAutoLoaded] = React.useState(false)
@@ -51,7 +61,32 @@ export function FilterContent() {
 
         setLoading(true)
         try {
-            const result = await run()
+            const chart = useChartStore.getState()
+            const samePeriod =
+                chart.signature !== null &&
+                chart.signature === computeQuerySignature() &&
+                chart.series.length > 0
+
+            // A metric group is already loaded when every one of its sub-keys
+            // (e.g. "P1,P2,P3") is present in the current series.
+            const isGroupLoaded = (groupKeys: string) =>
+                groupKeys.split(',').every(sub => chart.series.some(s => s.key === sub))
+            const newGroups = metricKeys.filter(g => !isGroupLoaded(g))
+
+            let result: TelemetrySeriesResult[]
+            if (samePeriod && newGroups.length > 0) {
+                // Same period: only fetch the newly added groups, keep the rest
+                // (and drop any deselected groups) — avoids reloading everything.
+                const kept = chart.series.filter(s =>
+                    metricKeys.some(g => g.split(',').includes(s.key))
+                )
+                const added = await runForKeys(newGroups)
+                result = sortSeries([...kept, ...added])
+            } else {
+                // Period/resolution/devices changed, or a plain refresh: full fetch.
+                result = await run()
+            }
+
             setSeries(result)
             if (isMobile) { setOpenMobile(false) } else { setOpen(false) }
         } catch (error) {

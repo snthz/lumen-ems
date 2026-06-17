@@ -31,5 +31,23 @@ export function useTelemetryFetcher() {
         return await fetchTelemetryAction(built) as TelemetrySeriesResult[]
     }
 
-    return { run }
+    /**
+     * Fetch only the given metric groups for the current period/resolution.
+     * Used to incrementally load a newly added key without refetching the rest.
+     */
+    async function runForKeys(metricKeys: string[]): Promise<TelemetrySeriesResult[]> {
+        if (selectedDevices.length === 0) {
+            throw new Error('No devices selected')
+        }
+
+        const built = buildTelemetryQuery({
+            ...query,
+            devices: selectedDevices,
+            metricKeys,
+        })
+
+        return await fetchTelemetryAction(built) as TelemetrySeriesResult[]
+    }
+
+    return { run, runForKeys }
 }

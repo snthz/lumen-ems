@@ -27,7 +27,7 @@ const INTERVAL_MAP: Record<string, IntervalLimits> = {
     '1w': { eniscope: 15 * MINUTE, thingsboard: 30 * MINUTE },
     '2w': { eniscope: 15 * MINUTE, thingsboard: 30 * MINUTE },
     '1m': { eniscope: 15 * MINUTE, thingsboard: 2 * HOUR },
-    '2m': { eniscope: 30 * MINUTE, thingsboard: 2 * HOUR },
+    '2m': { eniscope: 15 * MINUTE, thingsboard: 2 * HOUR },
     '3m': { eniscope: 30 * MINUTE, thingsboard: 2 * HOUR },
     '6m': { eniscope: DAY, thingsboard: 10 * HOUR },
     '1y': { eniscope: DAY, thingsboard: DAY },

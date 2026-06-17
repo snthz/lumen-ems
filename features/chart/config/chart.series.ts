@@ -21,14 +21,8 @@ export function createLineSeries(
         series.tooltip.pointerOrientation = "vertical"
     }
 
-    if (resolution && resolution >= 3600) {
-        const bullet = series.bullets.push(new am4charts.CircleBullet())
-        bullet.circle.radius = 2
-        bullet.circle.strokeWidth = 1
-        series.connect = true
-    } else {
-        series.connect = false
-    }
+    // No point bullets on line series — clean lines only.
+    series.connect = Boolean(resolution && resolution >= 3600)
 
     return series
 }

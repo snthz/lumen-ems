@@ -1,12 +1,32 @@
 import { create } from 'zustand'
 import { TelemetrySeriesResult } from "@/features/telemetry/telemetry.types"
 import { useTelemetryQueryStore } from "@/features/telemetry/store/telemetry-query.store"
+import { useDeviceStore } from "@/features/devices/store/device.store"
 
 export type ChartView = 'series' | 'pie' | 'grouped' | 'comparison'
 export type EnergyUnit = 'auto' | 'kWh' | 'MWh'
 
+/**
+ * Identity of the currently loaded dataset, excluding which metric keys are
+ * selected. When this is unchanged, adding a metric only needs to fetch the new
+ * key instead of refetching every series (see FilterContent.handleRefresh).
+ */
+export function computeQuerySignature(): string {
+    const q = useTelemetryQueryStore.getState()
+    const devices = useDeviceStore.getState().selectedDevices
+    return JSON.stringify({
+        devices: devices.map(d => d.id).sort(),
+        timeRange: q.timeRange,
+        customStart: q.customStart?.getTime() ?? null,
+        customEnd: q.customEnd?.getTime() ?? null,
+        resolution: q.resolution,
+        phaseScope: q.phaseScope,
+    })
+}
+
 interface ChartState {
     series: TelemetrySeriesResult[]
+    signature: string | null
     updateKey: number
     committedResolution: number
     chartView: ChartView
@@ -33,6 +53,7 @@ interface ChartState {
 
 export const useChartStore = create<ChartState>(set => ({
     series: [],
+    signature: null,
     updateKey: 0,
     committedResolution: 3600,
     chartView: 'series',
@@ -48,6 +69,7 @@ export const useChartStore = create<ChartState>(set => ({
         const resolution = useTelemetryQueryStore.getState().resolution
         set(state => ({
             series: [...series],
+            signature: computeQuerySignature(),
             updateKey: state.updateKey + 1,
             committedResolution: resolution,
         }))
@@ -70,7 +92,7 @@ export const useChartStore = create<ChartState>(set => ({
     setComparisonPickerOpen: comparisonPickerOpen => set({ comparisonPickerOpen }),
     setVisibleRange: (start, end) => set({ visibleRangeStart: start, visibleRangeEnd: end }),
     clear: () => set({
-        series: [], updateKey: 0, committedResolution: 3600, chartView: 'series', energyUnit: 'auto',
+        series: [], signature: null, updateKey: 0, committedResolution: 3600, chartView: 'series', energyUnit: 'auto',
         comparisonDate: null, comparisonEndDate: null, comparisonSeries: [], comparisonLoading: false,
         comparisonPickerOpen: false,
         visibleRangeStart: null,
