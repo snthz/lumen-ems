@@ -125,8 +125,9 @@ export async function fetchAssetsRelationsRecursive(
         }
     )
     if (!res.ok) {
+        const body = await res.text().catch(() => '')
         throw new Error(
-            `Error fetching relations for ${fromType}:${fromId}`
+            `Error fetching relations for ${fromType}:${fromId}: ${res.status}${body ? ` - ${body}` : ''}`
         )
     }
 
@@ -146,7 +147,62 @@ export async function fetchAssetsRelationsRecursive(
     return result
 }
 
+/**
+ * ThingsBoard rejects an aggregated query whose (timeRange / interval) exceeds
+ * ~700 buckets ("Incorrect TsKvQuery. Number of intervals is too high"). To keep
+ * the requested resolution we split such queries into time chunks instead of
+ * coarsening the interval. Empirically 700 is the hard limit (700 ok, 701 fails).
+ */
+const MAX_BUCKETS_PER_REQUEST = 700
+
 export async function fetchTelemetryTimeseries(
+    params: TelemetryQueryParams
+): Promise<TelemetryTimeseriesResponse> {
+    // Only aggregated queries are bucket-limited; raw (agg=NONE) queries are
+    // bounded by `limit` instead, so they never need chunking.
+    const isAggregated =
+        params.interval !== undefined &&
+        params.agg !== undefined &&
+        params.agg !== 'NONE'
+
+    if (!isAggregated) {
+        return fetchTelemetryRange(params)
+    }
+
+    const intervalMs = params.interval as number
+    const buckets = Math.ceil((params.endTs - params.startTs) / intervalMs)
+
+    if (buckets <= MAX_BUCKETS_PER_REQUEST) {
+        return fetchTelemetryRange(params)
+    }
+
+    // Split into chunks of <= MAX_BUCKETS_PER_REQUEST buckets. Each chunk spans a
+    // whole multiple of the interval, so bucket timestamps align across chunks
+    // and merge without gaps or overlaps.
+    const chunkSpan = intervalMs * MAX_BUCKETS_PER_REQUEST
+    const ranges: Array<{ startTs: number; endTs: number }> = []
+    for (let start = params.startTs; start < params.endTs; start += chunkSpan) {
+        ranges.push({ startTs: start, endTs: Math.min(start + chunkSpan, params.endTs) })
+    }
+
+    const parts = await Promise.all(
+        ranges.map((range) => fetchTelemetryRange({ ...params, ...range }))
+    )
+
+    const merged: TelemetryTimeseriesResponse = {}
+    for (const part of parts) {
+        for (const key of Object.keys(part)) {
+            ;(merged[key] ??= []).push(...part[key])
+        }
+    }
+    for (const key of Object.keys(merged)) {
+        merged[key].sort((a, b) => a.ts - b.ts)
+    }
+
+    return merged
+}
+
+async function fetchTelemetryRange(
     params: TelemetryQueryParams
 ): Promise<TelemetryTimeseriesResponse> {
     const cookieStore = await cookies()
@@ -191,8 +247,9 @@ export async function fetchTelemetryTimeseries(
     })
 
     if (!res.ok) {
+        const body = await res.text().catch(() => '')
         throw new Error(
-            `Error fetching telemetry for ${params.entityId}: ${res.statusText}`
+            `Error fetching telemetry for ${params.entityId} (key=${params.keys}): ${res.status} ${res.statusText || ''}${body ? ` - ${body}` : ''}`.trim()
         )
     }
 
