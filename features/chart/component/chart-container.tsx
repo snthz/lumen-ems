@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic"
 import { useChartStore } from "@/features/chart/store/chart.store"
 import { Skeleton } from "@/components/ui/skeleton"
+import { ChartLoadingOverlay } from "./chart-loading-overlay"
 
 function ChartSkeleton() {
     return <Skeleton className="w-full" style={{ minHeight: "600px" }} />
@@ -17,11 +18,12 @@ export function ChartContainer() {
     const chartView = useChartStore(state => state.chartView)
 
     return (
-        <div>
+        <div className="relative">
             {chartView === 'series' && <Chart />}
             {chartView === 'pie' && <PieChartView />}
             {chartView === 'grouped' && <GroupedChartView />}
             {chartView === 'comparison' && <ComparisonChart />}
+            <ChartLoadingOverlay />
         </div>
     )
 }

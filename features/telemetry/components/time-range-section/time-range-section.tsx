@@ -15,8 +15,8 @@ import { calculateMinResolution } from "@/features/telemetry/utils/resolve-time-
 export function TimeRangeSection() {
     const { timeRange, setTimeRange, setResolution, setCustomTimeRange } = useTelemetryQueryStore()
     const { run } = useTelemetryFetcher()
-    const { setSeries, setComparisonRange } = useChartStore(
-        useShallow(s => ({ setSeries: s.setSeries, setComparisonRange: s.setComparisonRange }))
+    const { setSeries, setComparisonRange, setChartLoading } = useChartStore(
+        useShallow(s => ({ setSeries: s.setSeries, setComparisonRange: s.setComparisonRange, setChartLoading: s.setLoading }))
     )
     const selectedDevices = useDeviceStore(state => state.selectedDevices)
 
@@ -37,6 +37,7 @@ export function TimeRangeSection() {
         if (selectedDevices.length === 0) return
 
         setLoading(true)
+        setChartLoading(true)
         try {
             const result = await run(overrideStart, overrideEnd, overrideTimeRange)
             setSeries(result)
@@ -47,6 +48,7 @@ export function TimeRangeSection() {
             })
         }
         setLoading(false)
+        setChartLoading(false)
     }
 
     function handleQuickSelect(value: TimeRangeKey) {

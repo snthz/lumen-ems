@@ -27,6 +27,7 @@ export function computeQuerySignature(): string {
 interface ChartState {
     series: TelemetrySeriesResult[]
     signature: string | null
+    loading: boolean
     updateKey: number
     committedResolution: number
     chartView: ChartView
@@ -39,6 +40,7 @@ interface ChartState {
     visibleRangeStart: number | null
     visibleRangeEnd: number | null
     setSeries: (series: TelemetrySeriesResult[]) => void
+    setLoading: (loading: boolean) => void
     setChartView: (view: ChartView) => void
     setEnergyUnit: (unit: EnergyUnit) => void
     setComparisonDate: (date: Date | null) => void
@@ -54,6 +56,7 @@ interface ChartState {
 export const useChartStore = create<ChartState>(set => ({
     series: [],
     signature: null,
+    loading: false,
     updateKey: 0,
     committedResolution: 3600,
     chartView: 'series',
@@ -74,6 +77,7 @@ export const useChartStore = create<ChartState>(set => ({
             committedResolution: resolution,
         }))
     },
+    setLoading: loading => set({ loading }),
     setChartView: chartView => set(state => ({
         chartView,
         comparisonPickerOpen: chartView === 'comparison' && state.chartView !== 'comparison',
@@ -92,7 +96,7 @@ export const useChartStore = create<ChartState>(set => ({
     setComparisonPickerOpen: comparisonPickerOpen => set({ comparisonPickerOpen }),
     setVisibleRange: (start, end) => set({ visibleRangeStart: start, visibleRangeEnd: end }),
     clear: () => set({
-        series: [], signature: null, updateKey: 0, committedResolution: 3600, chartView: 'series', energyUnit: 'auto',
+        series: [], signature: null, loading: false, updateKey: 0, committedResolution: 3600, chartView: 'series', energyUnit: 'auto',
         comparisonDate: null, comparisonEndDate: null, comparisonSeries: [], comparisonLoading: false,
         comparisonPickerOpen: false,
         visibleRangeStart: null,

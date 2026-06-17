@@ -25,9 +25,10 @@ function sortSeries(series: TelemetrySeriesResult[]): TelemetrySeriesResult[] {
 export function FilterContent() {
     const { run, runForKeys } = useTelemetryFetcher()
     const { setOpen, isMobile, setOpenMobile } = useSidebar()
-    const [loading, setLoading] = React.useState(false)
     const [hasAutoLoaded, setHasAutoLoaded] = React.useState(false)
 
+    const loading = useChartStore(state => state.loading)
+    const setLoading = useChartStore(state => state.setLoading)
     const setSeries = useChartStore(state => state.setSeries)
     const selectedDevices = useDeviceStore(state => state.selectedDevices)
     const { metricKeys, timeRange, resolution } = useTelemetryQueryStore()
